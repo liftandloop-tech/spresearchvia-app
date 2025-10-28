@@ -1,0 +1,93 @@
+import 'package:flutter/material.dart';
+import 'package:spresearchvia2/screens/setting/plan.row.dart';
+import 'package:spresearchvia2/screens/setting/setting.tile.dart';
+
+class SettingsScreen extends StatelessWidget {
+  const SettingsScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final List<dynamic> planDetails = [
+      877,
+      'Feb 15, 2024',
+      'VISA',
+      '**** 4532',
+    ];
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(
+          'Settings',
+          style: TextStyle(
+            color: Color(0xff11416B),
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+            fontFamily: 'Poppins',
+          ),
+        ),
+        centerTitle: true,
+      ),
+      body: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                border: Border.all(width: 1, color: Color(0xffE5E7EB)),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Premium Plan',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontFamily: 'Poppins',
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Color(0xffeaf3ec),
+                        ),
+                        child: Text('Active'),
+                      ),
+                    ],
+                  ),
+                  SizedBox(height: 5),
+                  Text('data'),
+                  SizedBox(height: 5),
+                  PlanRow(title: 'Monthly Price', value: '₹${planDetails[0]}'),
+                  PlanRow(title: 'Next Billing', value: planDetails[1]),
+                  PlanRow(
+                    title: 'Payment Method',
+                    value: '[${planDetails[2]}] ${planDetails[3]}',
+                  ),
+                ],
+              ),
+            ),
+            SizedBox(height: 20),
+            SettingTile(
+              title: 'Billing History',
+              subtitle: 'View past transactions',
+              icon: Icons.list_alt_outlined,
+              onTap: () {},
+            ),
+            SizedBox(height: 10),
+            SettingTile(
+              title: 'Payment Method',
+              subtitle: 'Update card details',
+              icon: Icons.credit_card,
+              onTap: () {},
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
