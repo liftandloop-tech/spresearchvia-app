@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:spresearchvia2/controllers/auth.controller.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/screens/auth/signup.screen.dart';
 import 'package:spresearchvia2/screens/tabs.screen.dart';
 import 'package:spresearchvia2/widgets/app_logo.dart';
@@ -13,25 +17,53 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final emailPhoneController = TextEditingController();
-  final passwordController = TextEditingController();
+  final authController = Get.put(AuthController());
+  final phoneController = TextEditingController();
+  final otpController = TextEditingController();
+
+  @override
+  void dispose() {
+    phoneController.dispose();
+    otpController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    void signIn() {
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => TabsScreen()));
+    Future<void> requestOTP() async {
+      final phone = phoneController.text.trim();
+
+      if (phone.isEmpty) {
+        Get.snackbar('Error', 'Please enter your phone number');
+        return;
+      }
+
+      await authController.sendOtp(phone);
+      // isOtpSent is automatically updated in the controller
+    }
+
+    Future<void> verifyAndLogin() async {
+      final phone = phoneController.text.trim();
+      final otp = otpController.text.trim();
+
+      if (phone.isEmpty || otp.isEmpty) {
+        Get.snackbar('Error', 'Please enter phone number and OTP');
+        return;
+      }
+
+      final success = await authController.verifyOtp(phone, otp);
+
+      if (success) {
+        Get.offAll(() => const TabsScreen());
+      }
     }
 
     void toSignUpScreen() {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => SignupScreen()),
-      );
+      Get.off(() => SignupScreen());
     }
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundWhite,
       body: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
         child: SingleChildScrollView(
@@ -41,43 +73,43 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(height: 100),
               SizedBox(height: 100, width: double.maxFinite, child: AppLogo()),
               SizedBox(height: 20),
-              Text(
-                "Welcome Back",
-                style: TextStyle(
-                  color: Color(0xff11416B),
-                  fontSize: 24,
-                  fontWeight: FontWeight.w500,
-                  fontFamily: "Poppins",
-                ),
-              ),
+              Text("Welcome Back", style: AppStyles.welcomeText),
               Text(
                 "Sign in to access your portfolio",
-                style: TextStyle(
-                  color: Colors.black,
-                  fontSize: 16,
-                  fontFamily: "Poppins",
-                ),
+                style: AppStyles.bodyLarge,
               ),
               SizedBox(height: 40),
               TitleField(
-                title: 'Email or Phone',
-                hint: 'Enter your email or phone',
-                controller: emailPhoneController,
-                icon: Icons.email_outlined,
+                title: 'Phone Number',
+                hint: 'Enter your phone number',
+                controller: phoneController,
+                icon: Icons.phone_outlined,
               ),
               SizedBox(height: 20),
-              TitleField(
-                title: 'OTP',
-                hint: 'Enter OTP',
-                controller: passwordController,
-                icon: Icons.visibility_off_outlined,
-                isPasswordField: true,
+              Obx(
+                () => Visibility(
+                  visible: authController.isOtpSent.value,
+                  child: TitleField(
+                    title: 'OTP',
+                    hint: 'Enter OTP',
+                    controller: otpController,
+                    icon: Icons.lock_outline,
+                  ),
+                ),
               ),
               SizedBox(height: 50),
-              Button(
-                title: 'Sign In',
-                onTap: signIn,
-                buttonType: ButtonType.green,
+              Obx(
+                () => Button(
+                  title: authController.isOtpSent.value
+                      ? 'Verify & Sign In'
+                      : 'Request OTP',
+                  onTap: authController.isLoading.value
+                      ? null
+                      : (authController.isOtpSent.value
+                            ? verifyAndLogin
+                            : requestOTP),
+                  buttonType: ButtonType.green,
+                ),
               ),
               SizedBox(height: 10),
               GestureDetector(
@@ -89,21 +121,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     children: [
                       Text(
                         "Don't have an account? ",
-                        style: TextStyle(
-                          color: Colors.black,
-                          fontSize: 14,
-                          fontFamily: "Poppins",
-                        ),
+                        style: AppStyles.bodyMedium,
                       ),
-                      Text(
-                        "Sign Up",
-                        style: TextStyle(
-                          color: Color(0xff11416B),
-                          fontSize: 14,
-                          fontFamily: "Poppins",
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
+                      Text("Sign Up", style: AppStyles.link),
                     ],
                   ),
                 ),
@@ -128,14 +148,10 @@ class DataProtection extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.shield_outlined, color: Color(0xff6B7280)),
+          Icon(Icons.shield_outlined, color: AppTheme.textGrey),
           Text(
             " Your data is protected with bank-level security",
-            style: TextStyle(
-              color: Color(0xff6B7280),
-              fontSize: 12,
-              fontFamily: "Poppins",
-            ),
+            style: AppStyles.caption,
           ),
         ],
       ),

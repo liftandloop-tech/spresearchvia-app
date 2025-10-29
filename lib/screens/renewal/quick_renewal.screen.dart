@@ -46,27 +46,28 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               ExpiryWarningCard(
-                daysRemaining: dummyUser.daysRemaining,
+                daysRemaining: dummyUser.daysRemaining ?? 0,
                 message: 'Renew now to continue accessing premium research',
               ),
               SizedBox(height: 24),
               SectionHeader(title: 'Current Plan'),
               SizedBox(height: 12),
               CurrentPlanCard(
-                planName: dummyUser.planName,
+                planName: dummyUser.planName ?? 'Premium Plan',
                 description: 'Full access to all reports',
                 price:
-                    '\$${dummyUser.planAmount}/${dummyUser.planValidity.split(' ')[0].toLowerCase()}',
-                validity: dummyUser.planValidity,
-                expiryDate:
-                    '${dummyUser.subscriptionExpiryDate.month}/${dummyUser.subscriptionExpiryDate.day}/${dummyUser.subscriptionExpiryDate.year}',
+                    '\$${dummyUser.planAmount}/${dummyUser.planValidity?.split(' ')[0].toLowerCase() ?? 'month'}',
+                validity: dummyUser.planValidity ?? 'N/A',
+                expiryDate: dummyUser.subscriptionExpiryDate != null
+                    ? '${dummyUser.subscriptionExpiryDate!.month}/${dummyUser.subscriptionExpiryDate!.day}/${dummyUser.subscriptionExpiryDate!.year}'
+                    : 'N/A',
               ),
               SizedBox(height: 24),
               SectionHeader(title: 'Payment Method'),
               SizedBox(height: 12),
               PaymentMethodCard(
-                cardType: dummyUser.cardType,
-                cardNumber: dummyUser.cardNumber,
+                cardType: dummyUser.cardType ?? 'Card',
+                cardNumber: dummyUser.cardNumber ?? '**** **** **** ****',
                 expiryDate: 'Expires 12/27',
               ),
               SizedBox(height: 24),
@@ -74,7 +75,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
               SizedBox(height: 12),
               ChangePlanButton(onPressed: () {}),
               SizedBox(height: 24),
-              BenefitsSection(benefits: dummyUser.premiumBenefits),
+              BenefitsSection(benefits: dummyUser.premiumBenefits ?? []),
               SizedBox(height: 24),
               SecurePaymentFooter(),
               SizedBox(height: 20),

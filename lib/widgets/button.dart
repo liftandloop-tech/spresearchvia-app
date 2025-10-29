@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/theme/app_styles.dart';
 
 enum ButtonType { green, blue, blueBorder, greyBorder }
 
@@ -20,11 +22,6 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const blueColor = Color(0xFF11416B);
-    const greenColor = Color(0xFF2C7F38);
-    const greyBorderColor = Color(0xFFE5E7EB);
-    const greyTextColor = Color(0xFF000000);
-
     Color backgroundColor;
     Color textColor;
     Color iconColor;
@@ -32,31 +29,35 @@ class Button extends StatelessWidget {
 
     switch (buttonType) {
       case ButtonType.green:
-        backgroundColor = onTap != null ? greenColor : Colors.grey.shade400;
-        textColor = Colors.white;
-        iconColor = Colors.white;
+        backgroundColor = onTap != null
+            ? AppTheme.buttonGreen
+            : AppTheme.buttonDisabled;
+        textColor = AppTheme.textWhite;
+        iconColor = AppTheme.textWhite;
         borderColor = null;
         break;
 
       case ButtonType.blue:
-        backgroundColor = onTap != null ? blueColor : Colors.grey.shade400;
-        textColor = Colors.white;
-        iconColor = Colors.white;
+        backgroundColor = onTap != null
+            ? AppTheme.buttonBlue
+            : AppTheme.buttonDisabled;
+        textColor = AppTheme.textWhite;
+        iconColor = AppTheme.textWhite;
         borderColor = null;
         break;
 
       case ButtonType.blueBorder:
-        backgroundColor = Colors.white;
-        textColor = blueColor;
-        iconColor = blueColor;
-        borderColor = blueColor;
+        backgroundColor = AppTheme.backgroundWhite;
+        textColor = AppTheme.primaryBlue;
+        iconColor = AppTheme.primaryBlue;
+        borderColor = AppTheme.primaryBlue;
         break;
 
       case ButtonType.greyBorder:
-        backgroundColor = Colors.white;
-        textColor = greyTextColor;
-        iconColor = greyTextColor;
-        borderColor = greyBorderColor;
+        backgroundColor = AppTheme.backgroundWhite;
+        textColor = AppTheme.textBlack;
+        iconColor = AppTheme.textBlack;
+        borderColor = AppTheme.borderGrey;
         break;
     }
 
@@ -72,13 +73,13 @@ class Button extends StatelessWidget {
               : null,
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppTheme.shadowMedium,
               blurRadius: 10,
               spreadRadius: 0,
               offset: const Offset(0, 5),
             ),
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppTheme.shadowMedium,
               blurRadius: 3,
               spreadRadius: 0,
               offset: const Offset(0, 2),
@@ -92,14 +93,7 @@ class Button extends StatelessWidget {
               Icon(icon, color: iconColor, size: 20),
               const SizedBox(width: 8),
             ],
-            Text(
-              title,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.w500,
-              ).copyWith(color: textColor),
-            ),
+            Text(title, style: AppStyles.button.copyWith(color: textColor)),
             if (iconRight != null) ...[
               const SizedBox(width: 8),
               Icon(iconRight, color: iconColor, size: 20),

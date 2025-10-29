@@ -1,4 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:spresearchvia2/controllers/kyc.controller.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/screens/kyc/aadhar_verification_screen.dart';
 import 'package:spresearchvia2/widgets/button.dart';
 import 'package:spresearchvia2/widgets/kyc_step_indicator.dart';
@@ -14,19 +20,50 @@ class PanVerificationScreen extends StatefulWidget {
 }
 
 class _PanVerificationScreenState extends State<PanVerificationScreen> {
+  final kycController = Get.put(KycController());
   final TextEditingController _panController = TextEditingController();
   String? _selectedFileName;
+  File? _selectedFile;
 
-  void _pickFile() {
-    setState(() {
-      _selectedFileName = 'PAN_Card.pdf';
-    });
+  Future<void> _pickFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _selectedFile = File(result.files.single.path!);
+          _selectedFileName = result.files.single.name;
+        });
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick file: $e');
+    }
   }
 
-  void _submitVerification() {
-    Navigator.of(context).push(
-      MaterialPageRoute(builder: (context) => const AadharVerificationScreen()),
+  Future<void> _submitVerification() async {
+    final panNumber = _panController.text.trim();
+
+    if (panNumber.isEmpty) {
+      Get.snackbar('Error', 'Please enter PAN number');
+      return;
+    }
+
+    if (_selectedFile == null) {
+      Get.snackbar('Error', 'Please select PAN card file');
+      return;
+    }
+
+    final success = await kycController.uploadPanCard(
+      panFile: _selectedFile!,
+      panNumber: panNumber,
     );
+
+    if (success) {
+      Get.to(() => const AadharVerificationScreen());
+    }
   }
 
   @override
@@ -38,23 +75,15 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xff11416B)),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlue),
+          onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'KYC Verification',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xff11416B),
-          ),
-        ),
+        title: Text('KYC Verification', style: AppStyles.appBarTitle),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -77,35 +106,22 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xffEFF6FF),
+                        color: AppTheme.backgroundLightBlue,
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.credit_card_outlined,
-                        color: Color(0xff11416B),
+                        color: AppTheme.primaryBlue,
                         size: 30,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'PAN Verification',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xff11416B),
-                      ),
-                    ),
+                    Text('PAN Verification', style: AppStyles.heading2),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Please provide your PAN details for\nidentity verification',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12,
-                        color: Color(0xff6B7280),
-                        height: 1.5,
-                      ),
+                      style: AppStyles.bodySmall.copyWith(height: 1.5),
                     ),
                     const SizedBox(height: 32),
                     TitleField(
@@ -131,10 +147,10 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.backgroundWhite,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppTheme.shadowLight,
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -142,10 +158,14 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
               ),
               child: Column(
                 children: [
-                  Button(
-                    title: 'Submit for Verification',
-                    onTap: _submitVerification,
-                    buttonType: ButtonType.green,
+                  Obx(
+                    () => Button(
+                      title: 'Submit for Verification',
+                      onTap: kycController.isLoading.value
+                          ? null
+                          : _submitVerification,
+                      buttonType: ButtonType.green,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const DataProtectionFooter(),

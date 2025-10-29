@@ -76,9 +76,9 @@ class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
       ),
       body: ListView.builder(
         padding: EdgeInsets.all(16),
-        itemCount: dummyUser.subscriptionHistory.length,
+        itemCount: dummyUser.subscriptionHistory?.length ?? 0,
         itemBuilder: (context, index) {
-          final subscription = dummyUser.subscriptionHistory[index];
+          final subscription = dummyUser.subscriptionHistory![index];
           return SubscriptionCard(
             paymentDate: subscription.paymentDate,
             amountPaid: subscription.amountPaid,

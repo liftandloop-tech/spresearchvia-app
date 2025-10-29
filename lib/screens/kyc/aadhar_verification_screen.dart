@@ -1,4 +1,10 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:spresearchvia2/controllers/kyc.controller.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/screens/kyc/digio_connect_screen.dart';
 import 'package:spresearchvia2/widgets/button.dart';
 import 'package:spresearchvia2/widgets/kyc_step_indicator.dart';
@@ -15,54 +21,96 @@ class AadharVerificationScreen extends StatefulWidget {
 }
 
 class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
-  final TextEditingController _panController = TextEditingController();
+  final kycController = Get.find<KycController>();
+  final TextEditingController _aadharController = TextEditingController();
   String? _selectedAadharFrontName;
   String? _selectedAadharBackName;
+  File? _frontFile;
+  File? _backFile;
 
-  void _pickFrontFile() {
-    setState(() {
-      _selectedAadharFrontName = 'aadhar_front.png';
-    });
+  Future<void> _pickFrontFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _frontFile = File(result.files.single.path!);
+          _selectedAadharFrontName = result.files.single.name;
+        });
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick file: $e');
+    }
   }
 
-  void _pickBackFile() {
-    setState(() {
-      _selectedAadharBackName = 'aadhar_back.png';
-    });
+  Future<void> _pickBackFile() async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.custom,
+        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
+      );
+
+      if (result != null && result.files.single.path != null) {
+        setState(() {
+          _backFile = File(result.files.single.path!);
+          _selectedAadharBackName = result.files.single.name;
+        });
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to pick file: $e');
+    }
   }
 
-  void _submitVerification() {
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (context) => const DigioConnectScreen()));
+  Future<void> _submitVerification() async {
+    final aadharNumber = _aadharController.text.trim();
+
+    if (aadharNumber.isEmpty) {
+      Get.snackbar('Error', 'Please enter Aadhar number');
+      return;
+    }
+
+    if (aadharNumber.length != 12) {
+      Get.snackbar('Error', 'Aadhar number must be 12 digits');
+      return;
+    }
+
+    if (_frontFile == null || _backFile == null) {
+      Get.snackbar('Error', 'Please select both front and back images');
+      return;
+    }
+
+    final success = await kycController.uploadAadharCard(
+      frontFile: _frontFile!,
+      backFile: _backFile!,
+      aadharNumber: aadharNumber,
+    );
+
+    if (success) {
+      Get.to(() => const DigioConnectScreen());
+    }
   }
 
   @override
   void dispose() {
-    _panController.dispose();
+    _aadharController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Color(0xff11416B)),
-          onPressed: () => Navigator.of(context).pop(),
+          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlue),
+          onPressed: () => Get.back(),
         ),
-        title: const Text(
-          'KYC Verification',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: Color(0xff11416B),
-          ),
-        ),
+        title: Text('KYC Verification', style: AppStyles.appBarTitle),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -85,41 +133,28 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xffEFF6FF),
+                        color: AppTheme.backgroundLightBlue,
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.credit_card_outlined,
-                        color: Color(0xff11416B),
+                        color: AppTheme.primaryBlue,
                         size: 30,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    const Text(
-                      'Aadhar Verification',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: Color(0xff11416B),
-                      ),
-                    ),
+                    Text('Aadhar Verification', style: AppStyles.heading2),
                     const SizedBox(height: 8),
-                    const Text(
+                    Text(
                       'Please provide your Aadhar details for\nidentity verification',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 12,
-                        color: Color(0xff6B7280),
-                        height: 1.5,
-                      ),
+                      style: AppStyles.bodySmall.copyWith(height: 1.5),
                     ),
                     const SizedBox(height: 32),
                     TitleField(
                       title: 'Aadhar Number',
                       hint: 'Enter 12-digit Aadhar number',
-                      controller: _panController,
+                      controller: _aadharController,
                       icon: Icons.credit_card,
                     ),
                     const SizedBox(height: 24),
@@ -149,10 +184,10 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: AppTheme.backgroundWhite,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.05),
+                    color: AppTheme.shadowLight,
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   ),
@@ -160,10 +195,14 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
               ),
               child: Column(
                 children: [
-                  Button(
-                    title: 'Submit for Verification',
-                    onTap: _submitVerification,
-                    buttonType: ButtonType.green,
+                  Obx(
+                    () => Button(
+                      title: 'Submit for Verification',
+                      onTap: kycController.isLoading.value
+                          ? null
+                          : _submitVerification,
+                      buttonType: ButtonType.green,
+                    ),
                   ),
                   const SizedBox(height: 8),
                   const DataProtectionFooter(),

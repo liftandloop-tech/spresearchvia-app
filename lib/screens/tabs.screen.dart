@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/screens/dashboard/dashboard.screen.dart';
 import 'package:spresearchvia2/screens/profile/profile.screen.dart';
 import 'package:spresearchvia2/screens/research/research_reports.screen.dart';
@@ -26,14 +28,14 @@ class _TabsScreenState extends State<TabsScreen> {
       body: screens[currentScreenIndex],
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: AppTheme.backgroundWhite,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
+              color: AppTheme.shadowMedium,
               blurRadius: 10,
               offset: Offset(0, -3),
             ),
@@ -53,19 +55,11 @@ class _TabsScreenState extends State<TabsScreen> {
               currentIndex: currentScreenIndex,
               onTap: (index) => setState(() => currentScreenIndex = index),
               type: BottomNavigationBarType.fixed,
-              backgroundColor: Colors.white,
-              selectedItemColor: Color(0xff2C7F38),
-              unselectedItemColor: Color(0xff9CA3AF),
-              selectedLabelStyle: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-              unselectedLabelStyle: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w400,
-              ),
+              backgroundColor: AppTheme.backgroundWhite,
+              selectedItemColor: AppTheme.primaryGreen,
+              unselectedItemColor: AppTheme.iconGrey,
+              selectedLabelStyle: AppStyles.tabLabel,
+              unselectedLabelStyle: AppStyles.tabLabelInactive,
               showSelectedLabels: true,
               showUnselectedLabels: true,
               enableFeedback: false,
@@ -134,7 +128,7 @@ class BottomNavbarIcon extends StatelessWidget {
   Widget build(BuildContext context) {
     return ColorFiltered(
       colorFilter: ColorFilter.mode(
-        isSelected ? Color(0xff2C7F38) : Color(0xff9CA3AF),
+        isSelected ? AppTheme.primaryGreen : AppTheme.iconGrey,
         BlendMode.srcIn,
       ),
       child: Image.asset(iconPath, width: 24, height: 24),
