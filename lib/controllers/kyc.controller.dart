@@ -1,6 +1,9 @@
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
+import 'package:spresearchvia2/core/utils/file_validator.dart';
+import 'package:spresearchvia2/core/utils/validators.dart';
+import 'package:path/path.dart' as path;
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
@@ -32,15 +35,26 @@ class KycController extends GetxController {
         return false;
       }
 
+      final panValidation = Validators.validatePAN(panNumber);
+      if (panValidation != null) {
+        Get.snackbar('Error', panValidation);
+        return false;
+      }
+
+      final fileValidation = FileValidator.validateDocumentFile(panFile);
+      if (fileValidation != null) {
+        Get.snackbar('Error', fileValidation);
+        return false;
+      }
+
       isLoading.value = true;
 
-      // Create form data
       final formData = dio.FormData.fromMap({
         'file': await dio.MultipartFile.fromFile(
           panFile.path,
-          filename: panFile.path.split('/').last,
+          filename: path.basename(panFile.path),
         ),
-        'panNumber': panNumber,
+        'panNumber': panNumber.toUpperCase(),
       });
 
       final response = await _apiClient.uploadFile(
@@ -82,21 +96,36 @@ class KycController extends GetxController {
         return false;
       }
 
+      final aadharValidation = Validators.validateAadhar(aadharNumber);
+      if (aadharValidation != null) {
+        Get.snackbar('Error', aadharValidation);
+        return false;
+      }
+
+      final frontFileValidation = FileValidator.validateDocumentFile(frontFile);
+      if (frontFileValidation != null) {
+        Get.snackbar('Error', 'Front image: $frontFileValidation');
+        return false;
+      }
+
+      final backFileValidation = FileValidator.validateDocumentFile(backFile);
+      if (backFileValidation != null) {
+        Get.snackbar('Error', 'Back image: $backFileValidation');
+        return false;
+      }
+
       isLoading.value = true;
 
-      // Create form data with multiple files
       final formData = dio.FormData.fromMap({
-        'files': [
-          await dio.MultipartFile.fromFile(
-            frontFile.path,
-            filename: 'aadhar_front_${frontFile.path.split('/').last}',
-          ),
-          await dio.MultipartFile.fromFile(
-            backFile.path,
-            filename: 'aadhar_back_${backFile.path.split('/').last}',
-          ),
-        ],
-        'aadhaarNumber': aadharNumber,
+        'frontFile': await dio.MultipartFile.fromFile(
+          frontFile.path,
+          filename: 'aadhar_front_${path.basename(frontFile.path)}',
+        ),
+        'backFile': await dio.MultipartFile.fromFile(
+          backFile.path,
+          filename: 'aadhar_back_${path.basename(backFile.path)}',
+        ),
+        'aadhaarNumber': Validators.cleanAadhar(aadharNumber),
       });
 
       final response = await _apiClient.uploadFile(

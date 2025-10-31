@@ -2,6 +2,8 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
 import 'package:spresearchvia2/core/models/user.dart';
+import 'package:spresearchvia2/core/utils/file_validator.dart';
+import 'package:path/path.dart' as path;
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
@@ -102,13 +104,18 @@ class UserController extends GetxController {
         return false;
       }
 
+      final validationError = FileValidator.validateImageFile(imageFile);
+      if (validationError != null) {
+        Get.snackbar('Error', validationError);
+        return false;
+      }
+
       isLoading.value = true;
 
-      // Create form data
       final formData = dio.FormData.fromMap({
         'file': await dio.MultipartFile.fromFile(
           imageFile.path,
-          filename: imageFile.path.split('/').last,
+          filename: path.basename(imageFile.path),
         ),
       });
 
@@ -126,7 +133,6 @@ class UserController extends GetxController {
             profileImage: imageUrl,
           );
 
-          // Update storage
           final userData = currentUser.value!.toJson();
           await _storage.saveUserData(userData);
         }

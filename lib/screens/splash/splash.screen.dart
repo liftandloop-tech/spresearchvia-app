@@ -26,9 +26,11 @@ class _SplashScreenState extends State<SplashScreen>
     )..repeat();
 
     Future.delayed(const Duration(seconds: 2), () {
-      Navigator.of(context).pushReplacement(
-        MaterialPageRoute(builder: (context) => const LoginScreen()),
-      );
+      if (mounted) {
+        Navigator.of(context).pushReplacement(
+          MaterialPageRoute(builder: (context) => const LoginScreen()),
+        );
+      }
     });
   }
 
@@ -44,74 +46,87 @@ class _SplashScreenState extends State<SplashScreen>
       backgroundColor: Colors.white,
       body: Stack(
         children: [
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  const Spacer(flex: 2),
-                  AppLogo(),
-                  const SizedBox(height: 16),
-                  Container(
-                    width: 64,
-                    height: 4,
-                    decoration: BoxDecoration(
-                      color: const Color(0xff11416B),
-                      borderRadius: BorderRadius.circular(100),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  const Text(
-                    'Your Trusted Market\nResearch Partner',
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff374151),
-                      height: 1.4,
-                    ),
-                  ),
-                  const SizedBox(height: 48),
-                  Row(
+          SingleChildScrollView(
+            child: ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: MediaQuery.of(context).size.height,
+              ),
+              child: IntrinsicHeight(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 24),
+                  child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      InfoItem(icon: Icons.shield_outlined, title: 'Secure'),
-                      const SizedBox(width: 32),
-                      InfoItem(icon: Icons.flash_on_outlined, title: 'Fast'),
-                      const SizedBox(width: 32),
-                      InfoItem(
-                        icon: Icons.analytics_outlined,
-                        title: 'Accurate',
+                      const Spacer(flex: 2),
+                      AppLogo(),
+                      const SizedBox(height: 16),
+                      Container(
+                        width: 64,
+                        height: 4,
+                        decoration: BoxDecoration(
+                          color: const Color(0xff11416B),
+                          borderRadius: BorderRadius.circular(100),
+                        ),
                       ),
+                      const SizedBox(height: 24),
+                      const Text(
+                        'Your Trusted Market\nResearch Partner',
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 18,
+                          fontWeight: FontWeight.w500,
+                          color: Color(0xff374151),
+                          height: 1.4,
+                        ),
+                      ),
+                      const SizedBox(height: 48),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          InfoItem(
+                            icon: Icons.shield_outlined,
+                            title: 'Secure',
+                          ),
+                          const SizedBox(width: 32),
+                          InfoItem(
+                            icon: Icons.flash_on_outlined,
+                            title: 'Fast',
+                          ),
+                          const SizedBox(width: 32),
+                          InfoItem(
+                            icon: Icons.analytics_outlined,
+                            title: 'Accurate',
+                          ),
+                        ],
+                      ),
+                      const Spacer(flex: 2),
+                      AnimatedLoadingDots(controller: _controller),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Loading your dashboard...',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff9CA3AF),
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      const Text(
+                        'Version 2.1.0',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 12,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff9CA3AF),
+                        ),
+                      ),
+                      const SizedBox(height: 40),
                     ],
                   ),
-                  const Spacer(flex: 2),
-                  AnimatedLoadingDots(controller: _controller),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Loading your dashboard...',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff9CA3AF),
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-                  const Text(
-                    'Version 2.1.0',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 12,
-                      fontWeight: FontWeight.w400,
-                      color: Color(0xff9CA3AF),
-                    ),
-                  ),
-                  const SizedBox(height: 40),
-                ],
+                ),
               ),
             ),
           ),

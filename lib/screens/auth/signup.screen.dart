@@ -4,6 +4,8 @@ import 'package:spresearchvia2/controllers/auth.controller.dart';
 import 'package:spresearchvia2/core/models/user.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/theme/app_styles.dart';
+import 'package:spresearchvia2/core/utils/validators.dart';
+import 'package:spresearchvia2/core/utils/input_formatters.dart';
 import 'package:spresearchvia2/screens/kyc/kyc_intro.dart';
 import 'package:spresearchvia2/screens/auth/login.screen.dart';
 import 'package:spresearchvia2/widgets/state_selector.dart';
@@ -20,9 +22,8 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  final authController = Get.put(AuthController());
+  final authController = Get.find<AuthController>();
 
-  // Personal Information Controllers
   final firstNameController = TextEditingController();
   final middleNameController = TextEditingController();
   final lastNameController = TextEditingController();
@@ -39,7 +40,6 @@ class _SignupScreenState extends State<SignupScreen> {
   // Contact Controllers
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
-  final otpController = TextEditingController();
 
   bool termsCheck = false;
 
@@ -56,16 +56,7 @@ class _SignupScreenState extends State<SignupScreen> {
     pincodeController.dispose();
     phoneController.dispose();
     emailController.dispose();
-    otpController.dispose();
     super.dispose();
-  }
-
-  Future<void> requestOTP() async {
-    // Validate required fields
-    if (!_validateFields()) return;
-
-    final phone = phoneController.text.trim();
-    await authController.sendOtp(phone);
   }
 
   Future<void> signup() async {
@@ -77,14 +68,7 @@ class _SignupScreenState extends State<SignupScreen> {
     }
 
     final phone = phoneController.text.trim();
-    final otp = otpController.text.trim();
 
-    if (otp.isEmpty) {
-      Get.snackbar('Error', 'Please enter OTP');
-      return;
-    }
-
-    // Create personal information
     final personalInfo = PersonalInformation(
       firstName: firstNameController.text.trim(),
       middleName: middleNameController.text.trim(),
@@ -92,7 +76,6 @@ class _SignupScreenState extends State<SignupScreen> {
       fatherName: fatherNameController.text.trim(),
     );
 
-    // Create address details
     final addressDetails = AddressDetails(
       houseNo: houseNoController.text.trim(),
       streetAddress: streetAddressController.text.trim(),
@@ -102,12 +85,6 @@ class _SignupScreenState extends State<SignupScreen> {
       state: selectedState,
     );
 
-    // First verify OTP
-    final otpVerified = await authController.verifyOtp(phone, otp);
-
-    if (!otpVerified) return;
-
-    // Then create user with full details
     final success = await authController.createUser(
       fullName: '${firstNameController.text} ${lastNameController.text}',
       email: emailController.text.trim(),
@@ -123,46 +100,81 @@ class _SignupScreenState extends State<SignupScreen> {
   }
 
   bool _validateFields() {
-    if (firstNameController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter first name');
+    final firstName = firstNameController.text.trim();
+    final lastName = lastNameController.text.trim();
+    final fatherName = fatherNameController.text.trim();
+    final houseNo = houseNoController.text.trim();
+    final streetAddress = streetAddressController.text.trim();
+    final area = areaController.text.trim();
+    final pincode = pincodeController.text.trim();
+    final phone = phoneController.text.trim();
+    final email = emailController.text.trim();
+
+    final nameValidation = Validators.validateName(
+      firstName,
+      fieldName: 'First name',
+    );
+    if (nameValidation != null) {
+      Get.snackbar('Error', nameValidation);
       return false;
     }
-    if (lastNameController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter last name');
+
+    final lastNameValidation = Validators.validateName(
+      lastName,
+      fieldName: 'Last name',
+    );
+    if (lastNameValidation != null) {
+      Get.snackbar('Error', lastNameValidation);
       return false;
     }
-    if (fatherNameController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter father\'s name');
+
+    final fatherNameValidation = Validators.validateName(
+      fatherName,
+      fieldName: "Father's name",
+    );
+    if (fatherNameValidation != null) {
+      Get.snackbar('Error', fatherNameValidation);
       return false;
     }
-    if (houseNoController.text.trim().isEmpty) {
+
+    if (houseNo.isEmpty) {
       Get.snackbar('Error', 'Please enter house number');
       return false;
     }
-    if (streetAddressController.text.trim().isEmpty) {
+
+    if (streetAddress.isEmpty) {
       Get.snackbar('Error', 'Please enter street address');
       return false;
     }
-    if (areaController.text.trim().isEmpty) {
+
+    if (area.isEmpty) {
       Get.snackbar('Error', 'Please enter area');
       return false;
     }
-    if (pincodeController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter pincode');
+
+    final pincodeValidation = Validators.validatePincode(pincode);
+    if (pincodeValidation != null) {
+      Get.snackbar('Error', pincodeValidation);
       return false;
     }
+
     if (selectedState == null) {
       Get.snackbar('Error', 'Please select state');
       return false;
     }
-    if (phoneController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter mobile number');
+
+    final phoneValidation = Validators.validatePhone(phone);
+    if (phoneValidation != null) {
+      Get.snackbar('Error', phoneValidation);
       return false;
     }
-    if (emailController.text.trim().isEmpty) {
-      Get.snackbar('Error', 'Please enter email address');
+
+    final emailValidation = Validators.validateEmail(email);
+    if (emailValidation != null) {
+      Get.snackbar('Error', emailValidation);
       return false;
     }
+
     return true;
   }
 
@@ -194,24 +206,28 @@ class _SignupScreenState extends State<SignupScreen> {
                   title: 'First Name *',
                   hint: 'Enter your first name',
                   controller: firstNameController,
+                  inputFormatters: [NameInputFormatter()],
                 ),
                 SizedBox(height: 20),
                 TitleField(
                   title: 'Middle Name',
                   hint: 'Enter your middle name (optional)',
                   controller: middleNameController,
+                  inputFormatters: [NameInputFormatter()],
                 ),
                 SizedBox(height: 20),
                 TitleField(
                   title: 'Last Name *',
                   hint: 'Enter your first name',
                   controller: lastNameController,
+                  inputFormatters: [NameInputFormatter()],
                 ),
                 SizedBox(height: 20),
                 TitleField(
                   title: "Father's Name *",
                   hint: "Enter your father's name",
                   controller: fatherNameController,
+                  inputFormatters: [NameInputFormatter()],
                 ),
 
                 //
@@ -245,6 +261,9 @@ class _SignupScreenState extends State<SignupScreen> {
                   title: "Pincode *",
                   hint: "Enter pincode",
                   controller: pincodeController,
+                  inputFormatters: [PincodeInputFormatter()],
+                  keyboardType: TextInputType.number,
+                  maxLength: 6,
                 ),
                 SizedBox(height: 20),
                 StateSelector(
@@ -263,30 +282,18 @@ class _SignupScreenState extends State<SignupScreen> {
                   title: 'Mobile Number *',
                   hint: 'Enter mobile number',
                   controller: phoneController,
+                  inputFormatters: [PhoneInputFormatter()],
+                  keyboardType: TextInputType.phone,
+                  maxLength: 11,
                 ),
                 SizedBox(height: 20),
                 TitleField(
                   title: 'Email Address *',
                   hint: 'Enter email address',
                   controller: emailController,
+                  keyboardType: TextInputType.emailAddress,
                 ),
 
-                Obx(
-                  () => Visibility(
-                    visible: authController.isOtpSent.value,
-                    child: Column(
-                      children: [
-                        SizedBox(height: 30),
-                        Section(title: 'Security'),
-                        TitleField(
-                          title: 'OTP *',
-                          hint: 'Enter OTP',
-                          controller: otpController,
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
                 SizedBox(height: 10),
                 TermsCheckbox(
                   value: termsCheck,
@@ -304,21 +311,11 @@ class _SignupScreenState extends State<SignupScreen> {
                     buttonType: ButtonType.green,
                     title: authController.isLoading.value
                         ? 'Loading...'
-                        : authController.isOtpSent.value
-                        ? 'Verify & Sign Up'
-                        : 'Request OTP',
+                        : 'Sign Up',
                     icon: authController.isLoading.value
                         ? null
-                        : authController.isOtpSent.value
-                        ? Icons.person_add
-                        : Icons.password,
-                    onTap: authController.isLoading.value
-                        ? null
-                        : () {
-                            authController.isOtpSent.value
-                                ? signup()
-                                : requestOTP();
-                          },
+                        : Icons.person_add,
+                    onTap: authController.isLoading.value ? null : signup,
                   ),
                 ),
                 SizedBox(height: 10),

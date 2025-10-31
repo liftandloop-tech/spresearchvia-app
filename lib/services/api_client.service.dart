@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
+import 'package:spresearchvia2/core/config/api.config.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
 
 class ApiClient {
@@ -8,7 +9,9 @@ class ApiClient {
   ApiClient._internal() {
     _dio = Dio(
       BaseOptions(
-        baseUrl: baseUrl,
+        baseUrl: ApiConfig.baseUrl.endsWith('/')
+            ? ApiConfig.baseUrl.substring(0, ApiConfig.baseUrl.length - 1)
+            : ApiConfig.baseUrl,
         connectTimeout: const Duration(seconds: 30),
         receiveTimeout: const Duration(seconds: 30),
         sendTimeout: const Duration(seconds: 30),
@@ -30,8 +33,6 @@ class ApiClient {
 
   late Dio _dio;
   final _storage = StorageService();
-
-  static const String baseUrl = 'http://localhost:3036/api';
 
   Dio get dio => _dio;
 

@@ -1,6 +1,8 @@
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
+import 'package:path/path.dart' as path;
+import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 
@@ -166,11 +168,16 @@ class ReportController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Create form data
+      final fileValidation = FileValidator.validateDocumentFile(reportFile);
+      if (fileValidation != null) {
+        Get.snackbar('Error', fileValidation);
+        return false;
+      }
+
       final formData = dio.FormData.fromMap({
         'file': await dio.MultipartFile.fromFile(
           reportFile.path,
-          filename: reportFile.path.split('/').last,
+          filename: path.basename(reportFile.path),
         ),
         'title': title,
         'description': description,
@@ -190,7 +197,6 @@ class ReportController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
 
-        // Refresh report list
         await fetchReportList();
 
         return true;

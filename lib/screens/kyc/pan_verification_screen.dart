@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:spresearchvia2/controllers/kyc.controller.dart';
+import 'package:spresearchvia2/core/utils/validators.dart';
+import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/screens/kyc/aadhar_verification_screen.dart';
@@ -20,7 +22,7 @@ class PanVerificationScreen extends StatefulWidget {
 }
 
 class _PanVerificationScreenState extends State<PanVerificationScreen> {
-  final kycController = Get.put(KycController());
+  final kycController = Get.find<KycController>();
   final TextEditingController _panController = TextEditingController();
   String? _selectedFileName;
   File? _selectedFile;
@@ -53,6 +55,20 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
 
     if (_selectedFile == null) {
       Get.snackbar('Error', 'Please select PAN card file');
+      return;
+    }
+
+    // Validate PAN format
+    final panValidation = Validators.validatePAN(panNumber);
+    if (panValidation != null) {
+      Get.snackbar('Error', panValidation);
+      return;
+    }
+
+    // Validate selected file
+    final fileError = FileValidator.validateDocumentFile(_selectedFile!);
+    if (fileError != null) {
+      Get.snackbar('Error', fileError);
       return;
     }
 

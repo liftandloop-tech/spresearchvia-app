@@ -97,7 +97,7 @@ class KycIntroScreen extends StatelessWidget {
                   child: Container(
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     child: const Text(
-                      'Do it later',
+                      'Skip and Login',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,

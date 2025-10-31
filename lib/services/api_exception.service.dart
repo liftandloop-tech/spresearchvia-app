@@ -63,7 +63,6 @@ class ApiErrorHandler {
     final statusCode = response?.statusCode;
     final data = response?.data;
 
-    // Try to extract error message from response
     String message = 'An error occurred';
 
     if (data is Map<String, dynamic>) {
@@ -74,6 +73,14 @@ class ApiErrorHandler {
 
     switch (statusCode) {
       case 400:
+        if (message.toLowerCase().contains('already exists') ||
+            message.toLowerCase().contains('duplicate')) {
+          return ApiException(
+            message: 'This account already exists. Please try logging in.',
+            statusCode: statusCode,
+            data: data,
+          );
+        }
         return ApiException(
           message: message.isNotEmpty
               ? message
@@ -84,7 +91,7 @@ class ApiErrorHandler {
 
       case 401:
         return ApiException(
-          message: 'Unauthorized. Please login again.',
+          message: 'Session expired. Please login again.',
           statusCode: statusCode,
           data: data,
         );
@@ -99,7 +106,14 @@ class ApiErrorHandler {
 
       case 404:
         return ApiException(
-          message: 'Resource not found.',
+          message: message.isNotEmpty ? message : 'Resource not found.',
+          statusCode: statusCode,
+          data: data,
+        );
+
+      case 409:
+        return ApiException(
+          message: 'This resource already exists. Please try a different one.',
           statusCode: statusCode,
           data: data,
         );
@@ -109,6 +123,13 @@ class ApiErrorHandler {
           message: message.isNotEmpty
               ? message
               : 'Validation error. Please check your input.',
+          statusCode: statusCode,
+          data: data,
+        );
+
+      case 429:
+        return ApiException(
+          message: 'Too many requests. Please try again after some time.',
           statusCode: statusCode,
           data: data,
         );

@@ -19,7 +19,7 @@ class EditProfileScreen extends StatefulWidget {
 }
 
 class _EditProfileScreenState extends State<EditProfileScreen> {
-  final userController = Get.put(UserController());
+  final userController = Get.find<UserController>();
 
   // Controllers
   final firstNameController = TextEditingController();

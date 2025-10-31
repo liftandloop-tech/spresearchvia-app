@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/tabs.screen.dart';
+import 'package:spresearchvia2/screens/auth/login.screen.dart';
 
 import '../../widgets/button.dart';
 
@@ -8,11 +8,11 @@ class SebiComplianceCheck extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    void continueToDashboard() {
+    void continueToLogin() {
       Navigator.of(context).popUntil((route) => route.isFirst);
-      Navigator.of(
-        context,
-      ).pushReplacement(MaterialPageRoute(builder: (context) => TabsScreen()));
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const LoginScreen()),
+      );
     }
 
     return Scaffold(
@@ -83,7 +83,7 @@ class SebiComplianceCheck extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 12),
                 child: Text(
-                  'Your account has been verified and is now ready\nfor trading. Welcome to secure investing!',
+                  'Your KYC has been submitted successfully.\nPlease login to access your account.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     height: 1.5,
@@ -153,8 +153,8 @@ class SebiComplianceCheck extends StatelessWidget {
               const SizedBox(height: 24),
 
               Button(
-                title: 'Continue to Dashboard',
-                onTap: continueToDashboard,
+                title: 'Continue to Login',
+                onTap: continueToLogin,
                 buttonType: ButtonType.green,
               ),
 
@@ -163,7 +163,7 @@ class SebiComplianceCheck extends StatelessWidget {
               const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 8.0),
                 child: Text(
-                  'By continuing, you agree to our Terms of Service and\nPrivacy Policy',
+                  'Please login with your credentials to complete the verification',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontFamily: 'Poppins',

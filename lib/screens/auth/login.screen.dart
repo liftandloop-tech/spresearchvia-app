@@ -1,8 +1,11 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:spresearchvia2/controllers/auth.controller.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/theme/app_styles.dart';
+import 'package:spresearchvia2/core/utils/validators.dart';
+import 'package:spresearchvia2/core/utils/input_formatters.dart';
 import 'package:spresearchvia2/screens/auth/signup.screen.dart';
 import 'package:spresearchvia2/screens/tabs.screen.dart';
 import 'package:spresearchvia2/widgets/app_logo.dart';
@@ -17,15 +20,47 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final authController = Get.put(AuthController());
+  final authController = Get.find<AuthController>();
   final phoneController = TextEditingController();
   final otpController = TextEditingController();
+
+  Timer? _resendTimer;
+  int _resendCountdown = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    authController.resetOtpState();
+  }
 
   @override
   void dispose() {
     phoneController.dispose();
     otpController.dispose();
+    _resendTimer?.cancel();
     super.dispose();
+  }
+
+  void _startResendTimer() {
+    setState(() {
+      _resendCountdown = 90;
+    });
+
+    _resendTimer?.cancel();
+    _resendTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      if (!mounted) {
+        timer.cancel();
+        return;
+      }
+
+      setState(() {
+        if (_resendCountdown > 0) {
+          _resendCountdown--;
+        } else {
+          timer.cancel();
+        }
+      });
+    });
   }
 
   @override
@@ -33,25 +68,57 @@ class _LoginScreenState extends State<LoginScreen> {
     Future<void> requestOTP() async {
       final phone = phoneController.text.trim();
 
-      if (phone.isEmpty) {
-        Get.snackbar('Error', 'Please enter your phone number');
+      final phoneValidation = Validators.validatePhone(phone);
+      if (phoneValidation != null) {
+        Get.snackbar('Error', phoneValidation);
         return;
       }
 
-      await authController.sendOtp(phone);
-      // isOtpSent is automatically updated in the controller
+      final success = await authController.sendOtp(
+        Validators.cleanPhone(phone),
+      );
+      if (success) {
+        _startResendTimer();
+      }
+    }
+
+    Future<void> resendOTP() async {
+      final phone = phoneController.text.trim();
+
+      final phoneValidation = Validators.validatePhone(phone);
+      if (phoneValidation != null) {
+        Get.snackbar('Error', phoneValidation);
+        return;
+      }
+
+      final success = await authController.sendOtp(
+        Validators.cleanPhone(phone),
+      );
+      if (success) {
+        _startResendTimer();
+      }
     }
 
     Future<void> verifyAndLogin() async {
       final phone = phoneController.text.trim();
       final otp = otpController.text.trim();
 
-      if (phone.isEmpty || otp.isEmpty) {
-        Get.snackbar('Error', 'Please enter phone number and OTP');
+      final phoneValidation = Validators.validatePhone(phone);
+      if (phoneValidation != null) {
+        Get.snackbar('Error', phoneValidation);
         return;
       }
 
-      final success = await authController.verifyOtp(phone, otp);
+      final otpValidation = Validators.validateOTP(otp);
+      if (otpValidation != null) {
+        Get.snackbar('Error', otpValidation);
+        return;
+      }
+
+      final success = await authController.verifyOtp(
+        Validators.cleanPhone(phone),
+        otp,
+      );
 
       if (success) {
         Get.offAll(() => const TabsScreen());
@@ -84,16 +151,46 @@ class _LoginScreenState extends State<LoginScreen> {
                 hint: 'Enter your phone number',
                 controller: phoneController,
                 icon: Icons.phone_outlined,
+                inputFormatters: [PhoneInputFormatter()],
+                keyboardType: TextInputType.phone,
+                maxLength: 11,
               ),
               SizedBox(height: 20),
               Obx(
                 () => Visibility(
                   visible: authController.isOtpSent.value,
-                  child: TitleField(
-                    title: 'OTP',
-                    hint: 'Enter OTP',
-                    controller: otpController,
-                    icon: Icons.lock_outline,
+                  child: Column(
+                    children: [
+                      TitleField(
+                        title: 'OTP',
+                        hint: 'Enter OTP',
+                        controller: otpController,
+                        icon: Icons.lock_outline,
+                        inputFormatters: [OTPInputFormatter()],
+                        keyboardType: TextInputType.number,
+                        maxLength: 6,
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_resendCountdown > 0)
+                            Text(
+                              "Resend in ${_resendCountdown}s",
+                              style: AppStyles.bodySmall.copyWith(
+                                color: AppTheme.textGrey,
+                              ),
+                            )
+                          else
+                            GestureDetector(
+                              onTap: authController.isLoading.value
+                                  ? null
+                                  : resendOTP,
+                              child: Text("Resend OTP", style: AppStyles.link),
+                            ),
+                        ],
+                      ),
+                    ],
                   ),
                 ),
               ),

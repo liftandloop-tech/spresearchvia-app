@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class TitleField extends StatefulWidget {
   const TitleField({
@@ -9,6 +10,9 @@ class TitleField extends StatefulWidget {
     this.icon,
     this.isPasswordField = false,
     this.focusNode,
+    this.inputFormatters,
+    this.keyboardType,
+    this.maxLength,
   });
 
   final String title;
@@ -17,6 +21,9 @@ class TitleField extends StatefulWidget {
   final IconData? icon;
   final bool isPasswordField;
   final FocusNode? focusNode;
+  final List<TextInputFormatter>? inputFormatters;
+  final TextInputType? keyboardType;
+  final int? maxLength;
 
   @override
   State<TitleField> createState() => _TitleFieldState();
@@ -61,6 +68,9 @@ class _TitleFieldState extends State<TitleField> {
                 controller: widget.controller,
                 focusNode: widget.focusNode,
                 obscureText: widget.isPasswordField ? _obscure : false,
+                inputFormatters: widget.inputFormatters,
+                keyboardType: widget.keyboardType,
+                maxLength: widget.maxLength,
                 decoration: InputDecoration(
                   hintText: widget.hint,
                   hintStyle: const TextStyle(
@@ -69,6 +79,7 @@ class _TitleFieldState extends State<TitleField> {
                     fontFamily: 'Poppins',
                   ),
                   border: InputBorder.none,
+                  counterText: '',
                   suffixIcon: widget.isPasswordField
                       ? GestureDetector(
                           child: Icon(
