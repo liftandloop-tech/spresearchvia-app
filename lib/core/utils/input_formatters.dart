@@ -1,34 +1,34 @@
 import 'package:flutter/services.dart';
 
-class PhoneInputFormatter extends TextInputFormatter {
-  @override
-  TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue,
-    TextEditingValue newValue,
-  ) {
-    final text = newValue.text;
+// class PhoneInputFormatter extends TextInputFormatter {
+//   @override
+//   TextEditingValue formatEditUpdate(
+//     TextEditingValue oldValue,
+//     TextEditingValue newValue,
+//   ) {
+//     final text = newValue.text;
 
-    if (text.isEmpty) {
-      return newValue;
-    }
+//     if (text.isEmpty) {
+//       return newValue;
+//     }
 
-    final digitsOnly = text.replaceAll(RegExp(r'\D'), '');
+//     final digitsOnly = text.replaceAll(RegExp(r'\D'), '');
 
-    if (digitsOnly.length > 10) {
-      return oldValue;
-    }
+//     if (digitsOnly.length > 10) {
+//       return oldValue;
+//     }
 
-    String formatted = digitsOnly;
-    if (digitsOnly.length > 5) {
-      formatted = '${digitsOnly.substring(0, 5)} ${digitsOnly.substring(5)}';
-    }
+//     String formatted = digitsOnly;
+//     if (digitsOnly.length > 5) {
+//       formatted = '${digitsOnly.substring(0, 5)} ${digitsOnly.substring(5)}';
+//     }
 
-    return TextEditingValue(
-      text: formatted,
-      selection: TextSelection.collapsed(offset: formatted.length),
-    );
-  }
-}
+//     return TextEditingValue(
+//       text: formatted,
+//       selection: TextSelection.collapsed(offset: formatted.length),
+//     );
+//   }
+// }
 
 class AadharInputFormatter extends TextInputFormatter {
   @override

@@ -67,7 +67,14 @@ class _SignupScreenState extends State<SignupScreen> {
       return;
     }
 
-    final phone = phoneController.text.trim();
+    String getPhoneWithCountryCode(String phone) {
+      final cleaned = Validators.cleanPhone(phone);
+      if (cleaned.startsWith('+91')) return cleaned;
+      if (cleaned.length == 10) return '+91$cleaned';
+      return cleaned;
+    }
+
+    final phone = getPhoneWithCountryCode(phoneController.text.trim());
 
     final personalInfo = PersonalInformation(
       firstName: firstNameController.text.trim(),
@@ -282,7 +289,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   title: 'Mobile Number *',
                   hint: 'Enter mobile number',
                   controller: phoneController,
-                  inputFormatters: [PhoneInputFormatter()],
+                  // inputFormatters: [PhoneInputFormatter()],
                   keyboardType: TextInputType.phone,
                   maxLength: 11,
                 ),

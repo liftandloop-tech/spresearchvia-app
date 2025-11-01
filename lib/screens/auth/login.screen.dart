@@ -65,18 +65,22 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    String getPhoneWithCountryCode(String phone) {
+      final cleaned = Validators.cleanPhone(phone);
+      if (cleaned.startsWith('+91')) return cleaned;
+      if (cleaned.length == 10) return '+91$cleaned';
+      return cleaned;
+    }
+
     Future<void> requestOTP() async {
       final phone = phoneController.text.trim();
-
       final phoneValidation = Validators.validatePhone(phone);
       if (phoneValidation != null) {
         Get.snackbar('Error', phoneValidation);
         return;
       }
-
-      final success = await authController.sendOtp(
-        Validators.cleanPhone(phone),
-      );
+      final phoneWithCode = getPhoneWithCountryCode(phone);
+      final success = await authController.sendOtp(phoneWithCode);
       if (success) {
         _startResendTimer();
       }
@@ -84,16 +88,13 @@ class _LoginScreenState extends State<LoginScreen> {
 
     Future<void> resendOTP() async {
       final phone = phoneController.text.trim();
-
       final phoneValidation = Validators.validatePhone(phone);
       if (phoneValidation != null) {
         Get.snackbar('Error', phoneValidation);
         return;
       }
-
-      final success = await authController.sendOtp(
-        Validators.cleanPhone(phone),
-      );
+      final phoneWithCode = getPhoneWithCountryCode(phone);
+      final success = await authController.sendOtp(phoneWithCode);
       if (success) {
         _startResendTimer();
       }
@@ -102,24 +103,18 @@ class _LoginScreenState extends State<LoginScreen> {
     Future<void> verifyAndLogin() async {
       final phone = phoneController.text.trim();
       final otp = otpController.text.trim();
-
       final phoneValidation = Validators.validatePhone(phone);
       if (phoneValidation != null) {
         Get.snackbar('Error', phoneValidation);
         return;
       }
-
       final otpValidation = Validators.validateOTP(otp);
       if (otpValidation != null) {
         Get.snackbar('Error', otpValidation);
         return;
       }
-
-      final success = await authController.verifyOtp(
-        Validators.cleanPhone(phone),
-        otp,
-      );
-
+      final phoneWithCode = getPhoneWithCountryCode(phone);
+      final success = await authController.verifyOtp(phoneWithCode, otp);
       if (success) {
         Get.offAll(() => const TabsScreen());
       }
@@ -151,7 +146,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 hint: 'Enter your phone number',
                 controller: phoneController,
                 icon: Icons.phone_outlined,
-                inputFormatters: [PhoneInputFormatter()],
+                // inputFormatters: [PhoneInputFormatter()],
                 keyboardType: TextInputType.phone,
                 maxLength: 11,
               ),
