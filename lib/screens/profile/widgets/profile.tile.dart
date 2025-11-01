@@ -14,6 +14,14 @@ class ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Determine dot color for PAN/Aadhar
+    Color dotColor = Color(0xff22C55E); // green
+    if (title.toLowerCase().contains('pan') ||
+        title.toLowerCase().contains('aadhar')) {
+      if (value.isEmpty || value.toLowerCase().contains('not available')) {
+        dotColor = Color(0xffF87171); // orangish-red
+      }
+    }
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -63,10 +71,7 @@ class ProfileTile extends StatelessWidget {
           Container(
             width: 8,
             height: 8,
-            decoration: BoxDecoration(
-              color: Color(0xff22C55E),
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: dotColor, shape: BoxShape.circle),
           ),
         ],
       ),

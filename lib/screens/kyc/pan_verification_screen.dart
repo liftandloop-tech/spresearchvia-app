@@ -58,14 +58,12 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
       return;
     }
 
-    // Validate PAN format
     final panValidation = Validators.validatePAN(panNumber);
     if (panValidation != null) {
       Get.snackbar('Error', panValidation);
       return;
     }
 
-    // Validate selected file
     final fileError = FileValidator.validateDocumentFile(_selectedFile!);
     if (fileError != null) {
       Get.snackbar('Error', fileError);

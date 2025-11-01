@@ -1,6 +1,5 @@
 import 'package:dio/dio.dart';
 
-/// Custom API Exception class for handling errors
 class ApiException implements Exception {
   final String message;
   final int? statusCode;
@@ -12,7 +11,6 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
-/// Utility class for handling API errors
 class ApiErrorHandler {
   static ApiException handleError(dynamic error) {
     if (error is DioException) {

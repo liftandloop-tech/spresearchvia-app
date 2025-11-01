@@ -10,10 +10,8 @@ import 'package:spresearchvia2/services/storage.service.dart';
 Future<void> startup() async {
   await WidgetsFlutterBinding.ensureInitialized();
 
-  // Initialize GetStorage for local data persistence
   await StorageService.init();
 
-  // Initialize GetX Controllers
   Get.put(AuthController());
   Get.put(UserController());
   Get.put(KycController());

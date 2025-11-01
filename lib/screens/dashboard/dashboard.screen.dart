@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:spresearchvia2/controllers/user.controller.dart';
+import 'package:spresearchvia2/controllers/report.controller.dart';
 import 'package:spresearchvia2/screens/dashboard/widgets/quick_action_tile.dart';
 import 'package:spresearchvia2/screens/subscription/quick_renewal.screen.dart';
 import 'package:spresearchvia2/screens/subscription/subscription_history.screen.dart';
@@ -16,12 +19,32 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   bool showReminder = false;
+  int _reminderDays = 0;
+
+  int? _computeDaysRemaining() {
+    if (!Get.isRegistered<UserController>()) return null;
+    final user = Get.find<UserController>().currentUser.value;
+    if (user == null) return null;
+    // Prefer computing from subscriptionExpiryDate if available
+    if (user.subscriptionExpiryDate != null) {
+      final now = DateTime.now();
+      final diff = user.subscriptionExpiryDate!.difference(now);
+      return diff.inDays;
+    }
+    // Fallback: use cached daysRemaining if provided
+    return user.daysRemaining;
+  }
 
   @override
   void initState() {
     super.initState();
     Future.delayed(Duration(seconds: 1), () {
-      setState(() => showReminder = true);
+      final days = _computeDaysRemaining();
+      final shouldShow = days != null && days <= 7 && days >= 0;
+      setState(() {
+        showReminder = shouldShow;
+        _reminderDays = (days ?? 0).clamp(0, 9999);
+      });
     });
   }
 
@@ -48,28 +71,35 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       child: Row(
                         children: [
                           Expanded(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Sarah Johnson',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    color: Color(0xff11416B),
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                Text(
-                                  'Welcome Back',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    color: Colors.black,
-                                    fontSize: 13,
-                                  ),
-                                ),
-                              ],
+                            child: GetX<UserController>(
+                              builder: (controller) {
+                                final userName =
+                                    controller.currentUser.value?.name ??
+                                    'User';
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      userName,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Color(0xff11416B),
+                                        fontSize: 18,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                    Text(
+                                      'Welcome Back',
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Colors.black,
+                                        fontSize: 13,
+                                      ),
+                                    ),
+                                  ],
+                                );
+                              },
                             ),
                           ),
                           Container(
@@ -137,39 +167,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     Row(
                       children: [
                         Expanded(
-                          child: Container(
-                            height: 100,
-                            decoration: BoxDecoration(
-                              border: Border.all(
-                                width: 1,
-                                color: Color(0xffE5E7EB),
-                              ),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              crossAxisAlignment: CrossAxisAlignment.center,
-                              children: [
-                                Text(
-                                  '47',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.w500,
-                                    color: Color(0xff11416B),
+                          child: GetX<ReportController>(
+                            init: Get.find<ReportController>(),
+                            builder: (reportController) {
+                              final reportCount =
+                                  reportController.reports.length;
+                              return Container(
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  border: Border.all(
+                                    width: 1,
+                                    color: Color(0xffE5E7EB),
                                   ),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                                Text(
-                                  'Reports Generated',
-                                  overflow: TextOverflow.clip,
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    color: Colors.black,
-                                    fontSize: 14,
-                                  ),
+                                child: Column(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      reportCount.toString(),
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        fontSize: 20,
+                                        fontWeight: FontWeight.w500,
+                                        color: Color(0xff11416B),
+                                      ),
+                                    ),
+                                    Text(
+                                      'Reports Available',
+                                      overflow: TextOverflow.clip,
+                                      style: TextStyle(
+                                        fontFamily: 'Poppins',
+                                        color: Colors.black,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
                                 ),
-                              ],
-                            ),
+                              );
+                            },
                           ),
                         ),
                         SizedBox(width: 10),
@@ -188,7 +225,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
                                 Text(
-                                  '23',
+                                  'N/A',
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     fontSize: 20,
@@ -229,6 +266,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       ),
                     ),
                   ),
+                  daysRemaining: _reminderDays,
                 ),
               ),
             ),

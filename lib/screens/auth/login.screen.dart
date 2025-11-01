@@ -86,20 +86,6 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     }
 
-    Future<void> resendOTP() async {
-      final phone = phoneController.text.trim();
-      final phoneValidation = Validators.validatePhone(phone);
-      if (phoneValidation != null) {
-        Get.snackbar('Error', phoneValidation);
-        return;
-      }
-      final phoneWithCode = getPhoneWithCountryCode(phone);
-      final success = await authController.sendOtp(phoneWithCode);
-      if (success) {
-        _startResendTimer();
-      }
-    }
-
     Future<void> verifyAndLogin() async {
       final phone = phoneController.text.trim();
       final otp = otpController.text.trim();
@@ -146,7 +132,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 hint: 'Enter your phone number',
                 controller: phoneController,
                 icon: Icons.phone_outlined,
-                // inputFormatters: [PhoneInputFormatter()],
+
                 keyboardType: TextInputType.phone,
                 maxLength: 11,
               ),
@@ -180,7 +166,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             GestureDetector(
                               onTap: authController.isLoading.value
                                   ? null
-                                  : resendOTP,
+                                  : requestOTP,
                               child: Text("Resend OTP", style: AppStyles.link),
                             ),
                         ],

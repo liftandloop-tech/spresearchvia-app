@@ -1,35 +1,5 @@
 import 'package:flutter/services.dart';
 
-// class PhoneInputFormatter extends TextInputFormatter {
-//   @override
-//   TextEditingValue formatEditUpdate(
-//     TextEditingValue oldValue,
-//     TextEditingValue newValue,
-//   ) {
-//     final text = newValue.text;
-
-//     if (text.isEmpty) {
-//       return newValue;
-//     }
-
-//     final digitsOnly = text.replaceAll(RegExp(r'\D'), '');
-
-//     if (digitsOnly.length > 10) {
-//       return oldValue;
-//     }
-
-//     String formatted = digitsOnly;
-//     if (digitsOnly.length > 5) {
-//       formatted = '${digitsOnly.substring(0, 5)} ${digitsOnly.substring(5)}';
-//     }
-
-//     return TextEditingValue(
-//       text: formatted,
-//       selection: TextSelection.collapsed(offset: formatted.length),
-//     );
-//   }
-// }
-
 class AadharInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
@@ -132,11 +102,24 @@ class NameInputFormatter extends TextInputFormatter {
   ) {
     final text = newValue.text;
 
+    // Remove invalid characters
     final lettersAndSpacesOnly = text.replaceAll(RegExp(r"[^a-zA-Z\s.']"), '');
 
+    // Capitalize first letter of each word
+    String capitalizedText = lettersAndSpacesOnly;
+    if (lettersAndSpacesOnly.isNotEmpty) {
+      capitalizedText = lettersAndSpacesOnly
+          .split(' ')
+          .map((word) {
+            if (word.isEmpty) return word;
+            return word[0].toUpperCase() + word.substring(1).toLowerCase();
+          })
+          .join(' ');
+    }
+
     return TextEditingValue(
-      text: lettersAndSpacesOnly,
-      selection: TextSelection.collapsed(offset: lettersAndSpacesOnly.length),
+      text: capitalizedText,
+      selection: TextSelection.collapsed(offset: capitalizedText.length),
     );
   }
 }

@@ -7,10 +7,12 @@ class ReminderPopup extends StatelessWidget {
     super.key,
     required this.onClose,
     required this.onRenew,
+    required this.daysRemaining,
   });
 
   final void Function() onClose;
   final void Function() onRenew;
+  final int daysRemaining;
 
   @override
   Widget build(BuildContext context) {
@@ -61,8 +63,8 @@ class ReminderPopup extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 32),
-            const Text(
-              'Your subscription\nexpires in 3 days',
+            Text(
+              'Your subscription\nexpires in ${daysRemaining == 0 ? 'today' : '$daysRemaining day${daysRemaining == 1 ? '' : 's'}'}',
               textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 24,
@@ -74,8 +76,9 @@ class ReminderPopup extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Text(
-              'Renew now to continue access to\npremium research and analytics',
+              'Renew now to continue access to premium research and analytics',
               textAlign: TextAlign.center,
+              overflow: TextOverflow.clip,
               style: TextStyle(
                 fontSize: 15,
                 fontWeight: FontWeight.w400,

@@ -8,13 +8,10 @@ import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
 
-/// Controller for user profile operations
-/// Handles profile updates, image changes, and user data management
 class UserController extends GetxController {
   final ApiClient _apiClient = ApiClient();
   final StorageService _storage = StorageService();
 
-  // Observable variables
   final isLoading = false.obs;
   final currentUser = Rxn<User>();
 
@@ -24,7 +21,6 @@ class UserController extends GetxController {
     loadUserData();
   }
 
-  /// Load user data from storage
   void loadUserData() {
     final userData = _storage.getUserData();
     if (userData != null) {
@@ -32,10 +28,8 @@ class UserController extends GetxController {
     }
   }
 
-  /// Get current user ID
   String? get userId => _storage.getUserId();
 
-  /// Update user profile
   Future<bool> updateProfile({
     PersonalInformation? personalInformation,
     AddressDetails? addressDetails,
@@ -54,6 +48,8 @@ class UserController extends GetxController {
 
       if (personalInformation != null) {
         requestData['personalInformation'] = personalInformation.toJson();
+        // Also update fullName at top level to match personalInformation
+        requestData['fullName'] = personalInformation.fullName;
       }
       if (addressDetails != null) {
         requestData['addressDetails'] = addressDetails.toJson();
@@ -95,7 +91,6 @@ class UserController extends GetxController {
     }
   }
 
-  /// Change profile image
   Future<bool> changeProfileImage(File imageFile) async {
     try {
       final uid = userId;
@@ -126,11 +121,22 @@ class UserController extends GetxController {
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
-        final imageUrl = data['imageUrl'] ?? data['data']?['imageUrl'];
+        final imageUrl =
+            data['imageUrl'] ??
+            data['data']?['imageUrl'] ??
+            data['data']?['files']?.filesObj?.path;
 
         if (imageUrl != null && currentUser.value != null) {
+          // Construct full URL if it's a relative path
+          String fullImageUrl = imageUrl;
+          if (!imageUrl.startsWith('http')) {
+            // Get base URL from API config
+            final baseUrl = _apiClient.dio.options.baseUrl;
+            fullImageUrl = '$baseUrl$imageUrl';
+          }
+
           currentUser.value = currentUser.value!.copyWith(
-            profileImage: imageUrl,
+            profileImage: fullImageUrl,
           );
 
           final userData = currentUser.value!.toJson();
@@ -155,7 +161,6 @@ class UserController extends GetxController {
     }
   }
 
-  /// Get user list (admin functionality)
   Future<List<User>?> getUserList() async {
     try {
       isLoading.value = true;
@@ -179,7 +184,6 @@ class UserController extends GetxController {
     }
   }
 
-  /// Delete user (admin functionality)
   Future<bool> deleteUser(String userIdToDelete) async {
     try {
       isLoading.value = true;
@@ -207,7 +211,6 @@ class UserController extends GetxController {
     }
   }
 
-  /// Refresh user data from server
   Future<void> refreshUserData() async {
     loadUserData();
   }

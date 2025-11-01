@@ -28,13 +28,13 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
       _confettiParticles.add(
         ConfettiParticle(
           x: _random.nextDouble(),
-          y: -0.1 - (_random.nextDouble() * 0.2), // Stagger starting positions
+          y: -0.1 - (_random.nextDouble() * 0.2),
           color: _getRandomColor(),
           rotation: _random.nextDouble() * 2 * pi,
           rotationSpeed: (_random.nextDouble() - 0.5) * 4,
           size: _random.nextDouble() * 8 + 4,
           velocityX: (_random.nextDouble() - 0.5) * 0.3,
-          velocityY: _random.nextDouble() * 0.5 + 0.5, // Increased fall speed
+          velocityY: _random.nextDouble() * 0.5 + 0.5,
         ),
       );
     }
@@ -284,8 +284,7 @@ class ConfettiPainter extends CustomPainter {
       double currentRotation =
           particle.rotation + (particle.rotationSpeed * progress * 2 * pi);
 
-      // Calculate opacity - fade out as particles approach bottom
-      double fadeStart = 0.85; // Start fading at 85% of the fall
+      double fadeStart = 0.85;
       double opacity = 1.0;
 
       if (progress > fadeStart) {
@@ -294,7 +293,6 @@ class ConfettiPainter extends CustomPainter {
 
       if (opacity < 0) opacity = 0;
 
-      // Only draw if particle is still visible and hasn't fallen past screen
       if (currentY <= 1.1 && opacity > 0) {
         double actualX = currentX * size.width;
         double actualY = currentY * size.height;

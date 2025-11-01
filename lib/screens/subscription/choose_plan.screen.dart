@@ -12,7 +12,7 @@ class ChoosePlanScreen extends StatefulWidget {
 }
 
 class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
-  int selectedPlan = 0; // default to first plan
+  int selectedPlan = 0;
   final TextEditingController controller = TextEditingController();
 
   final List<List<dynamic>> plans = [
@@ -53,7 +53,6 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
             ),
             const SizedBox(height: 10),
 
-            // List of preset plans
             for (int i = 0; i < plans.length; i++) ...[
               PlanCard(
                 planName: plans[i][0],
@@ -66,7 +65,6 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
               const SizedBox(height: 7),
             ],
 
-            // Custom plan option
             CustomPlanCard(
               selected: selectedPlan == plans.length,
               controller: controller,

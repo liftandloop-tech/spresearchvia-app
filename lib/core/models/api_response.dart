@@ -1,4 +1,3 @@
-/// Standard API Response wrapper
 class ApiResponse<T> {
   final bool success;
   final String? message;

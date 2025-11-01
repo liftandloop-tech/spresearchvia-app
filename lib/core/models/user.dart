@@ -62,7 +62,6 @@ class User {
     this.totalInvestment,
   });
 
-  // Convenience getters
   String get name => fullName ?? personalInformation?.fullName ?? 'User';
 
   factory User.fromJson(Map<String, dynamic> json) {
@@ -246,7 +245,6 @@ class ContactDetails {
   }
 }
 
-// Dummy user for testing - will be replaced with API data
 final User dummyUser = User(
   id: 'USER_001',
   fullName: 'Rajesh Kumar',

@@ -8,22 +8,17 @@ import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
 
-/// Controller for KYC operations
-/// Handles document uploads and KYC verification
 class KycController extends GetxController {
   final ApiClient _apiClient = ApiClient();
   final StorageService _storage = StorageService();
 
-  // Observable variables
   final isLoading = false.obs;
   final isAadharUploaded = false.obs;
   final isPanUploaded = false.obs;
   final isKycCompleted = false.obs;
 
-  /// Get current user ID
   String? get userId => _storage.getUserId();
 
-  /// Upload PAN card
   Future<bool> uploadPanCard({
     required File panFile,
     required String panNumber,
@@ -83,7 +78,6 @@ class KycController extends GetxController {
     }
   }
 
-  /// Upload Aadhar card (front and back)
   Future<bool> uploadAadharCard({
     required File frontFile,
     required File backFile,
@@ -154,11 +148,10 @@ class KycController extends GetxController {
     }
   }
 
-  /// Complete document KYC (Digio integration)
   Future<bool> completeDocumentKyc({
     required String email,
     required String name,
-    required String signType, // 'aadhaar' or 'pancard'
+    required String signType,
   }) async {
     try {
       final uid = userId;
@@ -194,7 +187,6 @@ class KycController extends GetxController {
     }
   }
 
-  /// Reset KYC status
   void resetKycStatus() {
     isAadharUploaded.value = false;
     isPanUploaded.value = false;

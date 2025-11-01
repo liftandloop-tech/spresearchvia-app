@@ -178,7 +178,6 @@ class ResearchReportsScreen extends StatelessWidget {
                       description: report.description,
                       isDownloaded: false,
                       onTap: () {
-                        // Navigate to report detail (to be implemented)
                         Get.snackbar(
                           'Info',
                           'Report detail view - Coming soon',
@@ -189,10 +188,7 @@ class ResearchReportsScreen extends StatelessWidget {
                         final result = await reportController.downloadReport(
                           report.id,
                         );
-                        if (result != null) {
-                          // Handle download success
-                          // You can open the downloaded file or show success message
-                        }
+                        if (result != null) {}
                       },
                     );
                   },

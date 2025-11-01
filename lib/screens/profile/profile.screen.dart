@@ -100,7 +100,27 @@ class ProfileScreen extends StatelessWidget {
               KycStatusItem(
                 icon: Icons.verified_user,
                 title: 'KYC Status',
-                value: user.kycStatus?.toString().split('.').last ?? 'Pending',
+                value:
+                    (user.kycStatus?.toString().toLowerCase().contains(
+                          'verified',
+                        ) ??
+                        false)
+                    ? 'Verified'
+                    : 'Pending',
+                statusColor:
+                    (user.kycStatus?.toString().toLowerCase().contains(
+                          'verified',
+                        ) ??
+                        false)
+                    ? Color(0xff16A34A)
+                    : Color(0xffF87171), // orangish-red
+                statusLabel:
+                    (user.kycStatus?.toString().toLowerCase().contains(
+                          'verified',
+                        ) ??
+                        false)
+                    ? 'Completed'
+                    : 'Pending',
               ),
               SizedBox(height: 15),
               Button(

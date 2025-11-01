@@ -148,7 +148,6 @@ class _CustomPlanCardState extends State<CustomPlanCard> {
     super.initState();
     _focusNode = FocusNode();
     _focusNode.addListener(() {
-      // Call onTap when the field gets focused to update parent's selectedPlan
       if (_focusNode.hasFocus && !widget.selected) {
         widget.onTap();
       }
@@ -158,7 +157,7 @@ class _CustomPlanCardState extends State<CustomPlanCard> {
   @override
   void didUpdateWidget(CustomPlanCard oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Remove focus when this card is no longer selected
+
     if (!widget.selected && oldWidget.selected) {
       _focusNode.unfocus();
     }

@@ -1,8 +1,6 @@
 abstract class ApiConfig {
-  // Base API URL. Update this in one place when switching environments.
   static const String baseUrl = 'https://spresearchviaapp.koyeb.app/api';
 
-  // user
   static const String createUser = '$baseUrl/user/create-user';
   static const String loginUser = '$baseUrl/user/login';
   static const String changeImage = '$baseUrl/user/image-change';
@@ -13,11 +11,9 @@ abstract class ApiConfig {
   static const String logoutUser = '$baseUrl/user/logout';
   static String updateProfile(String userId) => '$baseUrl/user/update/$userId';
 
-  // otp
   static const String verifyOTP = '$baseUrl/user/verify-otp';
   static const String requestOTP = '$baseUrl/user/send-otp';
 
-  // documents (require user id or resource id)
   static String uploadAadhar(String userId) =>
       '$baseUrl/user/kyc/aadhaar-upload/$userId?type=aadhaar';
   static String uploadPancard(String userId) =>
@@ -25,11 +21,9 @@ abstract class ApiConfig {
   static String documentKYC(String userId) =>
       '$baseUrl/user/kyc/document-kyc/$userId';
 
-  // premium
   static const String purchasePlan = '$baseUrl/user/purchase/plan';
   static const String createPackage = '$baseUrl/user/plan/package-create';
 
-  // reports
   static const String createReport =
       '$baseUrl/reports/create-report?type=report';
   static String downloadReport(String reportId) =>

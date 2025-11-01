@@ -6,6 +6,7 @@ import 'package:spresearchvia2/controllers/user.controller.dart';
 import 'package:spresearchvia2/core/models/user.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/theme/app_styles.dart';
+import 'package:spresearchvia2/core/utils/input_formatters.dart';
 import 'package:spresearchvia2/screens/profile/widgets/profile.image.dart';
 import 'package:spresearchvia2/widgets/button.dart';
 import 'package:spresearchvia2/widgets/state_selector.dart';
@@ -21,7 +22,6 @@ class EditProfileScreen extends StatefulWidget {
 class _EditProfileScreenState extends State<EditProfileScreen> {
   final userController = Get.find<UserController>();
 
-  // Controllers
   final firstNameController = TextEditingController();
   final middleNameController = TextEditingController();
   final lastNameController = TextEditingController();
@@ -45,21 +45,55 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _loadUserData() {
     final user = userController.currentUser.value;
+    print('==========================================');
+    print('User ID: ${user?.id}');
+    print('User.fullName: ${user?.fullName}');
+    print('User.name (getter): ${user?.name}');
+    print('User.personalInformation: ${user?.personalInformation}');
+    print(
+      'User.personalInformation?.firstName: ${user?.personalInformation?.firstName}',
+    );
+    print('User.addressDetails: ${user?.addressDetails}');
+    print('User.phone: ${user?.phone}');
+    print('User.email: ${user?.email}');
+    print('==========================================');
+
     if (user != null) {
-      firstNameController.text = user.personalInformation?.firstName ?? '';
-      middleNameController.text = user.personalInformation?.middleName ?? '';
-      lastNameController.text = user.personalInformation?.lastName ?? '';
-      fatherNameController.text = user.personalInformation?.fatherName ?? '';
+      setState(() {
+        String firstName = user.personalInformation?.firstName ?? '';
+        String lastName = user.personalInformation?.lastName ?? '';
 
-      houseNoController.text = user.addressDetails?.houseNo ?? '';
-      streetAddressController.text = user.addressDetails?.streetAddress ?? '';
-      areaController.text = user.addressDetails?.area ?? '';
-      landmarkController.text = user.addressDetails?.landmark ?? '';
-      pincodeController.text = user.addressDetails?.pincode?.toString() ?? '';
-      selectedState = user.addressDetails?.state;
+        if (firstName.isEmpty &&
+            user.fullName != null &&
+            user.fullName!.isNotEmpty) {
+          final nameParts = user.fullName!.split(' ');
+          firstName = nameParts.first;
+          if (nameParts.length > 1) {
+            lastName = nameParts.last;
+          }
+        }
 
-      phoneController.text = user.phone ?? '';
-      emailController.text = user.email ?? '';
+        firstNameController.text = firstName;
+        middleNameController.text = user.personalInformation?.middleName ?? '';
+        lastNameController.text = lastName;
+        fatherNameController.text = user.personalInformation?.fatherName ?? '';
+
+        houseNoController.text = user.addressDetails?.houseNo ?? '';
+        streetAddressController.text = user.addressDetails?.streetAddress ?? '';
+        areaController.text = user.addressDetails?.area ?? '';
+        landmarkController.text = user.addressDetails?.landmark ?? '';
+        pincodeController.text = user.addressDetails?.pincode?.toString() ?? '';
+        selectedState = user.addressDetails?.state;
+
+        phoneController.text =
+            user.phone ?? user.contactDetails?.phone?.toString() ?? '';
+        emailController.text = user.email ?? user.contactDetails?.email ?? '';
+      });
+      print(
+        'Loaded - First: ${firstNameController.text}, Last: ${lastNameController.text}',
+      );
+    } else {
+      print('User is null!');
     }
   }
 
@@ -78,7 +112,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           _selectedImage = File(image.path);
         });
 
-        // Upload image immediately
         await userController.changeProfileImage(_selectedImage!);
       }
     } catch (e) {
@@ -168,32 +201,63 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                   ),
                 ),
               ),
-              TitleField(title: 'First Name', controller: firstNameController),
+              TitleField(
+                title: 'First Name',
+                controller: firstNameController,
+                hint: 'Enter first name',
+                inputFormatters: [NameInputFormatter()],
+              ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Middle Name',
                 controller: middleNameController,
+                hint: 'Enter middle name (optional)',
+                inputFormatters: [NameInputFormatter()],
               ),
               SizedBox(height: 5),
-              TitleField(title: 'Last Name', controller: lastNameController),
+              TitleField(
+                title: 'Last Name',
+                controller: lastNameController,
+                hint: 'Enter last name',
+                inputFormatters: [NameInputFormatter()],
+              ),
               SizedBox(height: 5),
               TitleField(
                 title: "Father's Name",
                 controller: fatherNameController,
+                hint: "Enter father's name (optional)",
+                inputFormatters: [NameInputFormatter()],
               ),
               SizedBox(height: 5),
-              TitleField(title: 'House No', controller: houseNoController),
+              TitleField(
+                title: 'House No',
+                controller: houseNoController,
+                hint: 'Enter house number (optional)',
+              ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Street Address',
                 controller: streetAddressController,
+                hint: 'Enter street address',
               ),
               SizedBox(height: 5),
-              TitleField(title: 'Area', controller: areaController),
+              TitleField(
+                title: 'Area',
+                controller: areaController,
+                hint: 'Enter area (optional)',
+              ),
               SizedBox(height: 5),
-              TitleField(title: 'Landmark', controller: landmarkController),
+              TitleField(
+                title: 'Landmark',
+                controller: landmarkController,
+                hint: 'Enter landmark (optional)',
+              ),
               SizedBox(height: 5),
-              TitleField(title: 'Pincode', controller: pincodeController),
+              TitleField(
+                title: 'Pincode',
+                controller: pincodeController,
+                hint: 'Enter pincode',
+              ),
               SizedBox(height: 5),
               StateSelector(
                 label: selectedState ?? 'Select State',
@@ -201,9 +265,17 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                     setState(() => selectedState = newState!),
               ),
               SizedBox(height: 5),
-              TitleField(title: 'Mobile Number', controller: phoneController),
+              TitleField(
+                title: 'Mobile Number',
+                controller: phoneController,
+                hint: 'Enter mobile number',
+              ),
               SizedBox(height: 5),
-              TitleField(title: 'Email', controller: emailController),
+              TitleField(
+                title: 'Email',
+                controller: emailController,
+                hint: 'Enter email (optional)',
+              ),
               SizedBox(height: 15),
               Obx(
                 () => Button(

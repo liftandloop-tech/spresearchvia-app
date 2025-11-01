@@ -6,18 +6,24 @@ class KycStatusItem extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.value,
+    this.statusColor,
+    this.statusLabel,
   });
 
   final IconData icon;
   final String title;
   final String value;
+  final Color? statusColor;
+  final String? statusLabel;
 
   @override
   Widget build(BuildContext context) {
+    final Color color = statusColor ?? const Color(0xff16A34A); // default green
+    final String label = statusLabel ?? 'Completed';
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xffF0FDF4),
+        color: color.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -26,13 +32,12 @@ class KycStatusItem extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Color(0xffDCFCE7),
+              color: color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 14, color: Color(0xff16A34A)),
+            child: Icon(icon, size: 14, color: color),
           ),
           SizedBox(width: 12),
-
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -53,24 +58,23 @@ class KycStatusItem extends StatelessWidget {
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xff16A34A),
+                    color: color,
                   ),
                 ),
               ],
             ),
           ),
-
           Container(
             padding: EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: Color(0xffDCFCE7),
+              color: color.withValues(alpha: 0.18),
               borderRadius: BorderRadius.circular(100),
             ),
             child: Text(
-              'Completed',
+              label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                color: Color(0xff16A34A),
+                color: color,
                 fontSize: 12,
                 fontFamily: 'Poppins',
               ),

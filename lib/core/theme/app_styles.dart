@@ -1,12 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 
-/// Centralized text styles for the application
-/// All text styles used throughout the app are defined here
 abstract class AppStyles {
   static const String _fontFamily = 'Poppins';
 
-  // Heading Styles
   static const TextStyle heading1 = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 24,
@@ -35,7 +32,6 @@ abstract class AppStyles {
     color: AppTheme.primaryBlue,
   );
 
-  // Body Text Styles
   static const TextStyle bodyLarge = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 16,
@@ -57,7 +53,6 @@ abstract class AppStyles {
     color: AppTheme.textGrey,
   );
 
-  // Subtitle Styles
   static const TextStyle subtitle1 = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 16,
@@ -72,7 +67,6 @@ abstract class AppStyles {
     color: AppTheme.textGrey,
   );
 
-  // Button Text Styles
   static const TextStyle button = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 16,
@@ -87,7 +81,6 @@ abstract class AppStyles {
     color: AppTheme.textWhite,
   );
 
-  // Link Styles
   static const TextStyle link = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 14,
@@ -102,7 +95,6 @@ abstract class AppStyles {
     color: AppTheme.primaryBlue,
   );
 
-  // Caption Styles
   static const TextStyle caption = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 12,
@@ -117,7 +109,6 @@ abstract class AppStyles {
     color: AppTheme.textGrey,
   );
 
-  // Special Styles
   static const TextStyle welcomeText = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 24,
@@ -144,7 +135,6 @@ abstract class AppStyles {
     fontWeight: FontWeight.w400,
   );
 
-  // Input Field Styles
   static const TextStyle inputLabel = TextStyle(
     fontFamily: _fontFamily,
     fontSize: 14,

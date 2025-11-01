@@ -3,7 +3,6 @@ import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
 
-/// Model for Plan data
 class Plan {
   final String id;
   final String name;
@@ -29,19 +28,21 @@ class Plan {
 
   factory Plan.fromJson(Map<String, dynamic> json) {
     return Plan(
-      id: json['_id'] ?? json['id'] ?? '',
-      name: json['name'] ?? '',
-      description: json['description'] ?? '',
-      amount: (json['amount'] ?? 0).toDouble(),
+      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
+      name: json['name']?.toString() ?? json['planName']?.toString() ?? '',
+      description: json['description']?.toString() ?? '',
+      amount: (json['amount'] is num)
+          ? (json['amount'] as num).toDouble()
+          : double.tryParse(json['amount']?.toString() ?? '') ?? 0.0,
       validityDays: json['validityDays'] ?? json['validity'] ?? 0,
       features:
           (json['features'] as List?)?.map((e) => e.toString()).toList() ?? [],
-      isActive: json['isActive'] ?? false,
+      isActive: json['isActive'] ?? json['active'] ?? false,
       purchaseDate: json['purchaseDate'] != null
-          ? DateTime.parse(json['purchaseDate'])
+          ? DateTime.tryParse(json['purchaseDate'].toString())
           : null,
       expiryDate: json['expiryDate'] != null
-          ? DateTime.parse(json['expiryDate'])
+          ? DateTime.tryParse(json['expiryDate'].toString())
           : null,
     );
   }
@@ -61,18 +62,14 @@ class Plan {
   }
 }
 
-/// Controller for Plan Purchase operations
-/// Handles plan purchase, Razorpay integration, and subscription management
 class PlanPurchaseController extends GetxController {
   final ApiClient _apiClient = ApiClient();
   final StorageService _storage = StorageService();
 
-  // Observable variables
   final isLoading = false.obs;
   final currentPlan = Rxn<Plan>();
   final expiryRemindersEnabled = true.obs;
 
-  /// Get current user ID
   String? get userId => _storage.getUserId();
 
   @override
@@ -81,8 +78,6 @@ class PlanPurchaseController extends GetxController {
     fetchUserPlan();
   }
 
-  /// Purchase a plan
-  /// Returns order details for Razorpay payment
   Future<Map<String, dynamic>?> purchasePlan({
     required String planId,
     required String planName,
@@ -118,7 +113,7 @@ class PlanPurchaseController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
 
-        return orderData;
+        return orderData as Map<String, dynamic>?;
       }
 
       return null;
@@ -131,7 +126,6 @@ class PlanPurchaseController extends GetxController {
     }
   }
 
-  /// Verify Razorpay payment
   Future<bool> verifyPayment({
     required String razorpayOrderId,
     required String razorpayPaymentId,
@@ -156,9 +150,7 @@ class PlanPurchaseController extends GetxController {
           snackPosition: SnackPosition.BOTTOM,
         );
 
-        // Refresh user plan after successful payment
         await fetchUserPlan();
-
         return true;
       }
 
@@ -172,14 +164,12 @@ class PlanPurchaseController extends GetxController {
     }
   }
 
-  /// Fetch user's current plan
   Future<void> fetchUserPlan() async {
     try {
       final uid = userId;
       if (uid == null) return;
 
       final response = await _apiClient.get('/user/purchase/user-plan/$uid');
-
       if (response.statusCode == 200) {
         final data = response.data;
         final planData = data['data'] ?? data['plan'];
@@ -187,10 +177,12 @@ class PlanPurchaseController extends GetxController {
         if (planData != null) {
           currentPlan.value = Plan.fromJson(planData);
 
-          // Update expiry reminders status if present
           if (planData['expiryRemindersEnabled'] != null) {
-            expiryRemindersEnabled.value = planData['expiryRemindersEnabled'];
+            expiryRemindersEnabled.value =
+                planData['expiryRemindersEnabled'] == true;
           }
+        } else {
+          currentPlan.value = null;
         }
       }
     } catch (e) {
@@ -199,7 +191,6 @@ class PlanPurchaseController extends GetxController {
     }
   }
 
-  /// Toggle expiry reminders on/off
   Future<bool> toggleExpiryReminders(bool enabled) async {
     try {
       final uid = userId;
@@ -235,21 +226,17 @@ class PlanPurchaseController extends GetxController {
     }
   }
 
-  /// Check if user has an active plan
   bool get hasActivePlan => currentPlan.value?.isActive ?? false;
 
-  /// Get days remaining in current plan
   int get daysRemaining {
-    if (currentPlan.value?.expiryDate == null) return 0;
+    final expiry = currentPlan.value?.expiryDate;
+    if (expiry == null) return 0;
     final now = DateTime.now();
-    final expiry = currentPlan.value!.expiryDate!;
     return expiry.difference(now).inDays;
   }
 
-  /// Check if plan is expiring soon (within 7 days)
   bool get isExpiringSoon =>
       hasActivePlan && daysRemaining <= 7 && daysRemaining > 0;
 
-  /// Check if plan is expired
   bool get isPlanExpired => hasActivePlan && daysRemaining <= 0;
 }

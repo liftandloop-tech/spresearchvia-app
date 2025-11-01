@@ -9,6 +9,10 @@ abstract class SnackbarService {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
+    // Print message to console for development visibility.
+    // Remove this single print in production if desired.
+    // ignore: avoid_print
+    print('SNACKBAR: ' + message);
     final scaffoldMessenger = ScaffoldMessenger.of(context);
     scaffoldMessenger.hideCurrentSnackBar();
     scaffoldMessenger.showSnackBar(

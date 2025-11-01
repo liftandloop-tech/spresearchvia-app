@@ -6,7 +6,6 @@ import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 
-/// Model for Report data
 class Report {
   final String id;
   final String title;
@@ -63,12 +62,9 @@ class Report {
   }
 }
 
-/// Controller for Research Reports operations
-/// Handles report listing, download, and creation (admin)
 class ReportController extends GetxController {
   final ApiClient _apiClient = ApiClient();
 
-  // Observable variables
   final isLoading = false.obs;
   final reports = <Report>[].obs;
   final filteredReports = <Report>[].obs;
@@ -80,7 +76,6 @@ class ReportController extends GetxController {
     fetchReportList();
   }
 
-  /// Fetch list of all reports
   Future<void> fetchReportList() async {
     try {
       isLoading.value = true;
@@ -89,13 +84,31 @@ class ReportController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final reportList = data['data'] ?? data['reports'] ?? [];
 
-        reports.value = (reportList as List)
-            .map((json) => Report.fromJson(json))
+        // Backend returns: { status, message, data: { report: [...] } }
+        // We need to access data.data.report or data.report
+        dynamic reportList;
+
+        if (data['data'] != null && data['data'] is Map) {
+          reportList = data['data']['report'];
+        } else if (data['report'] != null) {
+          reportList = data['report'];
+        } else if (data['reports'] != null) {
+          reportList = data['reports'];
+        } else {
+          reportList = [];
+        }
+
+        // Ensure reportList is a List
+        if (reportList == null || reportList is! List) {
+          print('Warning: Expected List but got ${reportList?.runtimeType}');
+          reportList = [];
+        }
+
+        reports.value = reportList
+            .map<Report>((json) => Report.fromJson(json))
             .toList();
 
-        // Apply current filter
         applyFilter();
       }
     } catch (e) {
@@ -106,7 +119,6 @@ class ReportController extends GetxController {
     }
   }
 
-  /// Download a report by ID
   Future<String?> downloadReport(String reportId) async {
     try {
       isLoading.value = true;
@@ -121,11 +133,9 @@ class ReportController extends GetxController {
       );
 
       if (response.statusCode == 200) {
-        // Return the file bytes or URL from response
         final data = response.data;
 
         if (data is Map<String, dynamic>) {
-          // If response is JSON with download URL
           final downloadUrl = data['url'] ?? data['downloadUrl'];
           if (downloadUrl != null) {
             Get.snackbar(
@@ -137,14 +147,13 @@ class ReportController extends GetxController {
           }
         }
 
-        // If response is direct file bytes, handle accordingly
         Get.snackbar(
           'Success',
           'Report downloaded successfully',
           snackPosition: SnackPosition.BOTTOM,
         );
 
-        return 'downloaded'; // Placeholder for bytes handling
+        return 'downloaded';
       }
 
       return null;
@@ -157,7 +166,6 @@ class ReportController extends GetxController {
     }
   }
 
-  /// Create a new report (admin functionality)
   Future<bool> createReport({
     required String title,
     required String description,
@@ -212,13 +220,11 @@ class ReportController extends GetxController {
     }
   }
 
-  /// Filter reports by category
   void filterByCategory(String? category) {
     selectedCategory.value = category;
     applyFilter();
   }
 
-  /// Apply current filter
   void applyFilter() {
     if (selectedCategory.value == null) {
       filteredReports.value = reports;
@@ -229,13 +235,11 @@ class ReportController extends GetxController {
     }
   }
 
-  /// Clear all filters
   void clearFilters() {
     selectedCategory.value = null;
     applyFilter();
   }
 
-  /// Get unique categories from reports
   List<String> get categories {
     final categorySet = <String>{};
     for (final report in reports) {
@@ -246,7 +250,6 @@ class ReportController extends GetxController {
     return categorySet.toList()..sort();
   }
 
-  /// Get reports count by category
   int getReportCountByCategory(String category) {
     return reports.where((report) => report.category == category).length;
   }

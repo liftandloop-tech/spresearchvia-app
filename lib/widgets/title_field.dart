@@ -71,6 +71,12 @@ class _TitleFieldState extends State<TitleField> {
                 inputFormatters: widget.inputFormatters,
                 keyboardType: widget.keyboardType,
                 maxLength: widget.maxLength,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: Color(0xff11416B),
+                  fontFamily: 'Poppins',
+                  fontWeight: FontWeight.w400,
+                ),
                 decoration: InputDecoration(
                   hintText: widget.hint,
                   hintStyle: const TextStyle(

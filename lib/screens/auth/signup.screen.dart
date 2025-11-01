@@ -29,7 +29,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final lastNameController = TextEditingController();
   final fatherNameController = TextEditingController();
 
-  // Address Controllers
   final houseNoController = TextEditingController();
   final streetAddressController = TextEditingController();
   final areaController = TextEditingController();
@@ -37,7 +36,6 @@ class _SignupScreenState extends State<SignupScreen> {
   final pincodeController = TextEditingController();
   String? selectedState;
 
-  // Contact Controllers
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
 
@@ -289,7 +287,7 @@ class _SignupScreenState extends State<SignupScreen> {
                   title: 'Mobile Number *',
                   hint: 'Enter mobile number',
                   controller: phoneController,
-                  // inputFormatters: [PhoneInputFormatter()],
+
                   keyboardType: TextInputType.phone,
                   maxLength: 11,
                 ),
