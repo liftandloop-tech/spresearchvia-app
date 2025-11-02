@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:spresearchvia2/controllers/kyc.controller.dart';
+import 'package:spresearchvia2/core/utils/error_message_handler.dart';
+import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/screens/kyc/digio_connect_screen.dart';
@@ -42,7 +44,8 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
         });
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to pick file: $e');
+      ErrorMessageHandler.logError('Pick Aadhar Front File', e);
+      CustomSnackbar.showErrorFromException(e, title: 'Failed to Pick File');
     }
   }
 
@@ -60,7 +63,8 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
         });
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to pick file: $e');
+      ErrorMessageHandler.logError('Pick Aadhar Back File', e);
+      CustomSnackbar.showErrorFromException(e, title: 'Failed to Pick File');
     }
   }
 
@@ -68,17 +72,17 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
     final aadharNumber = _aadharController.text.trim();
 
     if (aadharNumber.isEmpty) {
-      Get.snackbar('Error', 'Please enter Aadhar number');
+      CustomSnackbar.showWarning('Please enter Aadhar number');
       return;
     }
 
     if (aadharNumber.length != 12) {
-      Get.snackbar('Error', 'Aadhar number must be 12 digits');
+      CustomSnackbar.showWarning('Aadhar number must be 12 digits');
       return;
     }
 
     if (_frontFile == null || _backFile == null) {
-      Get.snackbar('Error', 'Please select both front and back images');
+      CustomSnackbar.showWarning('Please select both front and back images');
       return;
     }
 

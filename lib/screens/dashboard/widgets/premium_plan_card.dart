@@ -11,7 +11,6 @@ class PremiumPlanCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize controller if not already registered
     if (!Get.isRegistered<PlanPurchaseController>()) {
       Get.put(PlanPurchaseController());
     }
@@ -22,7 +21,6 @@ class PremiumPlanCard extends StatelessWidget {
         final hasActivePlan = controller.hasActivePlan;
         final daysRemaining = controller.daysRemaining;
 
-        // If no active plan, show "No active plan" card
         if (plan == null || !hasActivePlan) {
           return Container(
             padding: EdgeInsets.all(24),
@@ -38,38 +36,14 @@ class PremiumPlanCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      'No Active Plan',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: Colors.white,
-                      ),
-                    ),
-                    Container(
-                      padding: EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: Color(0xff9CA3AF),
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: Text(
-                        'Inactive',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ),
-                  ],
+                Text(
+                  'No Active Plan',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
+                  ),
                 ),
                 SizedBox(height: 24),
                 Text(
@@ -81,25 +55,11 @@ class PremiumPlanCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
-                SizedBox(height: 24),
-                Button(
-                  title: 'Subscribe Now',
-                  icon: Icons.star,
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (context) => QuickRenewalScreen(),
-                      ),
-                    );
-                  },
-                  buttonType: ButtonType.green,
-                ),
               ],
             ),
           );
         }
 
-        // Active plan card
         final expiryDate = plan.expiryDate;
         final formattedExpiry = expiryDate != null
             ? DateFormat('MMMM dd, yyyy').format(expiryDate)

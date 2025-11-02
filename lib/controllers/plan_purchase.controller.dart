@@ -79,10 +79,8 @@ class PlanPurchaseController extends GetxController {
   }
 
   Future<Map<String, dynamic>?> purchasePlan({
-    required String planId,
-    required String planName,
+    required String packageName,
     required double amount,
-    required int validityDays,
   }) async {
     try {
       final uid = userId;
@@ -95,17 +93,28 @@ class PlanPurchaseController extends GetxController {
 
       final response = await _apiClient.post(
         '/user/purchase/plan/$uid',
-        data: {
-          'planId': planId,
-          'planName': planName,
-          'amount': amount,
-          'validityDays': validityDays,
-        },
+        data: {'packageName': packageName, 'amount': amount},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         final orderData = data['data'] ?? data;
+
+        // Extract order details from response
+        // Backend returns: { data: { orderCreate, userPlan } }
+        final orderCreate = orderData['orderCreate'];
+        final userPlan = orderData['userPlan'];
+
+        if (orderCreate != null) {
+          // Return a flattened structure with razorpayOrderId at top level
+          return {
+            'razorpayOrderId': orderCreate['razorpayOrderId'],
+            'paymentId':
+                orderCreate['_id'], // Store payment document ID for verification
+            'orderCreate': orderCreate,
+            'userPlan': userPlan,
+          };
+        }
 
         Get.snackbar(
           'Success',
@@ -127,6 +136,7 @@ class PlanPurchaseController extends GetxController {
   }
 
   Future<bool> verifyPayment({
+    required String paymentId,
     required String razorpayOrderId,
     required String razorpayPaymentId,
     required String razorpaySignature,
@@ -137,21 +147,34 @@ class PlanPurchaseController extends GetxController {
       final response = await _apiClient.post(
         '/user/purchase/razorpay/verify',
         data: {
+          'paymentId': paymentId,
           'razorpay_order_id': razorpayOrderId,
           'razorpay_payment_id': razorpayPaymentId,
-          'razorpay_signature': razorpaySignature,
+          'signature': razorpaySignature,
         },
       );
 
       if (response.statusCode == 200) {
-        Get.snackbar(
-          'Success',
-          'Payment verified successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        final data = response.data;
+        final success = data['success'] ?? false;
 
-        await fetchUserPlan();
-        return true;
+        if (success) {
+          Get.snackbar(
+            'Success',
+            'Payment verified successfully',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+
+          await fetchUserPlan();
+          return true;
+        } else {
+          Get.snackbar(
+            'Error',
+            data['message'] ?? 'Payment verification failed',
+            snackPosition: SnackPosition.BOTTOM,
+          );
+          return false;
+        }
       }
 
       return false;
@@ -239,4 +262,34 @@ class PlanPurchaseController extends GetxController {
       hasActivePlan && daysRemaining <= 7 && daysRemaining > 0;
 
   bool get isPlanExpired => hasActivePlan && daysRemaining <= 0;
+
+  Future<List<Map<String, dynamic>>> fetchSubscriptionHistory({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      final uid = userId;
+      if (uid == null) return [];
+
+      final response = await _apiClient.get(
+        '/user/purchase/user-plan/$uid',
+        queryParameters: {'page': page, 'pageSize': pageSize},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final userPlan = data['data']?['userPlan'] ?? data['userPlan'] ?? [];
+
+        if (userPlan is List) {
+          return userPlan.cast<Map<String, dynamic>>();
+        }
+      }
+
+      return [];
+    } catch (e) {
+      final error = ApiErrorHandler.handleError(e);
+      print('Error fetching subscription history: ${error.message}');
+      return [];
+    }
+  }
 }

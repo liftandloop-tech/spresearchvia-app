@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
+import 'package:spresearchvia2/controllers/user.controller.dart';
+import 'package:spresearchvia2/screens/tabs.screen.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/expiry_warning_card.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/section_header.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/current_plan_card.dart';
-import 'package:spresearchvia2/screens/renewal/widgets/payment_method_card.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/renew_button.dart';
-import 'package:spresearchvia2/screens/renewal/widgets/change_plan_button.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/benefits_section.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/secure_payment_footer.dart';
 
@@ -16,15 +19,109 @@ class QuickRenewalScreen extends StatefulWidget {
 }
 
 class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
+  final planController = Get.find<PlanPurchaseController>();
+  final userController = Get.find<UserController>();
+
+  @override
+  void initState() {
+    super.initState();
+    // Check if there's an active plan, redirect if none
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!planController.hasActivePlan) {
+        Get.off(() => TabsScreen(initialIndex: 2));
+      }
+    });
+    // Refresh plan data when screen opens
+    planController.fetchUserPlan();
+  }
+
+  Future<void> _renewPlan() async {
+    final plan = planController.currentPlan.value;
+    if (plan == null) {
+      Get.snackbar('Error', 'No active plan found');
+      return;
+    }
+
+    // Show loading
+    Get.dialog(
+      Center(
+        child: Container(
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: AppTheme.backgroundWhite,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 16),
+              Text(
+                'Creating order...',
+                style: TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: false,
+    );
+
+    try {
+      final orderData = await planController.purchasePlan(
+        packageName: plan.name,
+        amount: plan.amount,
+      );
+
+      // Close loading dialog
+      Get.back();
+
+      if (orderData == null) {
+        Get.snackbar(
+          'Error',
+          'Failed to create renewal order. Please try again.',
+          snackPosition: SnackPosition.BOTTOM,
+        );
+        return;
+      }
+
+      // Show success and inform about payment
+      Get.snackbar(
+        'Order Created',
+        'Renewal order created successfully. You can now proceed with payment.',
+        snackPosition: SnackPosition.BOTTOM,
+        duration: Duration(seconds: 3),
+      );
+
+      // Refresh plan data
+      await planController.fetchUserPlan();
+    } catch (e) {
+      // Close loading dialog if still open
+      if (Get.isDialogOpen ?? false) {
+        Get.back();
+      }
+
+      Get.snackbar(
+        'Error',
+        'Failed to initiate renewal: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppTheme.backgroundWhite,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xff163174)),
+          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
           onPressed: () => Navigator.pop(context),
         ),
         title: Text(
@@ -33,60 +130,157 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             fontFamily: 'Poppins',
             fontSize: 18,
             fontWeight: FontWeight.w600,
-            color: Color(0xff163174),
+            color: AppTheme.primaryBlueDark,
           ),
         ),
         centerTitle: true,
       ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(20),
-          child: SingleChildScrollView(
+      body: Obx(() {
+        final plan = planController.currentPlan.value;
+        final isLoading = planController.isLoading.value;
+
+        if (isLoading) {
+          return Center(child: CircularProgressIndicator());
+        }
+
+        if (plan == null) {
+          return Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(
+                  Icons.subscriptions_outlined,
+                  size: 64,
+                  color: AppTheme.borderGrey,
+                ),
+                SizedBox(height: 16),
+                Text(
+                  'No active plan found',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.textGrey,
+                  ),
+                ),
+                SizedBox(height: 8),
+                TextButton(
+                  onPressed: () => Get.off(() => TabsScreen(initialIndex: 2)),
+                  child: Text('Browse Plans'),
+                ),
+              ],
+            ),
+          );
+        }
+
+        final daysRemaining = planController.daysRemaining;
+        final validityText = plan.validityDays > 0
+            ? '${plan.validityDays} days'
+            : 'N/A';
+
+        // Format expiry date as dd/MM/yyyy
+        String expiryDateText = 'N/A';
+        if (plan.expiryDate != null) {
+          final expiry = plan.expiryDate!;
+          expiryDateText =
+              '${expiry.day.toString().padLeft(2, '0')}/${expiry.month.toString().padLeft(2, '0')}/${expiry.year}';
+        }
+
+        // Default benefits if none provided
+        final benefits = plan.features.isNotEmpty
+            ? plan.features
+            : [
+                'Access to all premium research reports',
+                'Real-time market alerts and notifications',
+                'Priority customer support',
+                'Advanced portfolio analytics',
+              ];
+
+        return SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                ExpiryWarningCard(
-                  daysRemaining: 3,
-                  message: 'Renew now to continue accessing premium research',
-                ),
-                SizedBox(height: 24),
+                // Show expiry warning - red if ≤7 days, neutral otherwise
+                if (daysRemaining >= 0)
+                  ExpiryWarningCard(
+                    daysRemaining: daysRemaining,
+                    message: daysRemaining > 7
+                        ? 'Your plan is active'
+                        : daysRemaining > 0
+                        ? 'Renew now to continue accessing premium research'
+                        : 'Your plan has expired. Renew to regain access',
+                  ),
+                if (daysRemaining >= 0) SizedBox(height: 24),
                 SectionHeader(title: 'Current Plan'),
+                SizedBox(height: 8),
+                // Greeting with user name when available
+                if (userController.currentUser.value != null)
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 12.0),
+                    child: Text(
+                      'Hello, ${userController.currentUser.value!.name}',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryBlueDark,
+                      ),
+                    ),
+                  ),
                 SizedBox(height: 12),
                 CurrentPlanCard(
-                  planName: 'Premium Research',
-                  description: 'Full access to all reports',
-                  price: '\$49.99/month',
-                  validity: '30 days',
-                  expiryDate: 'Jan 28, 2025',
+                  planName: plan.name.isNotEmpty ? plan.name : 'Premium Plan',
+                  description: plan.description.isNotEmpty
+                      ? plan.description
+                      : 'Full access to all reports',
+                  price: '₹${plan.amount.toStringAsFixed(2)}/$validityText',
+                  validity: validityText,
+                  expiryDate: expiryDateText,
                 ),
                 SizedBox(height: 24),
-                SectionHeader(title: 'Payment Method'),
-                SizedBox(height: 12),
-                PaymentMethodCard(
-                  cardType: 'VISA',
-                  cardNumber: '•••• •••• •••• 4532',
-                  expiryDate: 'Expires 12/27',
+                // Amount to pay summary
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Amount to pay',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textGrey,
+                        ),
+                      ),
+                      Text(
+                        plan.amount > 0
+                            ? '₹${plan.amount.toStringAsFixed(2)}'
+                            : 'Free',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 16,
+                          fontWeight: FontWeight.w700,
+                          color: AppTheme.primaryBlueDark,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+
+                RenewButton(onPressed: _renewPlan),
                 SizedBox(height: 24),
-                RenewButton(onPressed: () {}),
-                SizedBox(height: 12),
-                ChangePlanButton(onPressed: () {}),
-                SizedBox(height: 24),
-                BenefitsSection(
-                  benefits: [
-                    'Unlimited research reports',
-                    'Real-time market data',
-                    'Expert analysis & insights',
-                  ],
-                ),
+                BenefitsSection(benefits: benefits),
                 SizedBox(height: 24),
                 SecurePaymentFooter(),
                 SizedBox(height: 20),
               ],
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }

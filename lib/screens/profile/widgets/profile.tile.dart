@@ -14,12 +14,11 @@ class ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Determine dot color for PAN/Aadhar
-    Color dotColor = Color(0xff22C55E); // green
+    Color dotColor = Color(0xff22C55E);
     if (title.toLowerCase().contains('pan') ||
         title.toLowerCase().contains('aadhar')) {
       if (value.isEmpty || value.toLowerCase().contains('not available')) {
-        dotColor = Color(0xffF87171); // orangish-red
+        dotColor = Color(0xffF87171);
       }
     }
     return Container(

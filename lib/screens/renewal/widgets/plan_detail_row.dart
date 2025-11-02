@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 
 class PlanDetailRow extends StatelessWidget {
   const PlanDetailRow({
@@ -23,7 +24,7 @@ class PlanDetailRow extends StatelessWidget {
             fontFamily: 'Poppins',
             fontSize: 14,
             fontWeight: FontWeight.w400,
-            color: Color(0xff6B7280),
+            color: AppTheme.textGrey,
           ),
         ),
         Text(
@@ -32,7 +33,7 @@ class PlanDetailRow extends StatelessWidget {
             fontFamily: 'Poppins',
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: isExpiry ? Color(0xffDC2626) : Color(0xff163174),
+            color: isExpiry ? AppTheme.error : AppTheme.primaryBlueDark,
           ),
         ),
       ],

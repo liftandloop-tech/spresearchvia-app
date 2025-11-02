@@ -232,6 +232,7 @@ class _CustomPlanCardState extends State<CustomPlanCard> {
             TitleField(
               title: 'Enter Amount',
               hint: '0',
+              keyboardType: TextInputType.number,
               controller: widget.controller,
               icon: Icons.currency_rupee_outlined,
               focusNode: _focusNode,

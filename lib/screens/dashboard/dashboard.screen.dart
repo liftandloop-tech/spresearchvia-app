@@ -25,13 +25,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     if (!Get.isRegistered<UserController>()) return null;
     final user = Get.find<UserController>().currentUser.value;
     if (user == null) return null;
-    // Prefer computing from subscriptionExpiryDate if available
+
     if (user.subscriptionExpiryDate != null) {
       final now = DateTime.now();
       final diff = user.subscriptionExpiryDate!.difference(now);
       return diff.inDays;
     }
-    // Fallback: use cached daysRemaining if provided
+
     return user.daysRemaining;
   }
 
@@ -143,8 +143,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     ),
                     SizedBox(height: 8),
                     QuickActionTile(
-                      title: 'Auto-Renewal',
-                      icon: Icons.person,
+                      title: 'Quick Renewal',
+                      icon: Icons.credit_card,
                       onTap: () {
                         Navigator.of(context).push(
                           MaterialPageRoute(
@@ -168,7 +168,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       children: [
                         Expanded(
                           child: GetX<ReportController>(
-                            init: Get.find<ReportController>(),
                             builder: (reportController) {
                               final reportCount =
                                   reportController.reports.length;

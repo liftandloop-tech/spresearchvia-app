@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:spresearchvia2/core/utils/error_message_handler.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -18,42 +19,36 @@ class ApiErrorHandler {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
-          return ApiException(
-            message:
-                'Connection timeout. Please check your internet connection and try again.',
-            statusCode: null,
-          );
+          return ApiException(message: 'Connection Timeout', statusCode: null);
 
         case DioExceptionType.badResponse:
           return _handleBadResponse(error.response);
 
         case DioExceptionType.cancel:
-          return ApiException(
-            message: 'Request was cancelled',
-            statusCode: null,
-          );
+          return ApiException(message: 'Request Cancelled', statusCode: null);
 
         case DioExceptionType.connectionError:
           return ApiException(
-            message:
-                'No internet connection. Please check your connection and try again.',
+            message: 'No Internet Connection',
             statusCode: null,
           );
 
         case DioExceptionType.unknown:
-          return ApiException(
-            message: 'An unexpected error occurred. Please try again.',
-            statusCode: null,
-          );
+          return ApiException(message: 'Network Error', statusCode: null);
 
         default:
           return ApiException(
-            message: 'An unexpected error occurred. Please try again.',
+            message: 'Something Went Wrong',
             statusCode: null,
           );
       }
     } else {
-      return ApiException(message: error.toString(), statusCode: null);
+      // Use error message handler for non-Dio errors
+      ErrorMessageHandler.logError('API Error', error);
+      return ApiException(
+        message: ErrorMessageHandler.getUserFriendlyMessage(error),
+        statusCode: null,
+      );
     }
   }
 
@@ -61,7 +56,7 @@ class ApiErrorHandler {
     final statusCode = response?.statusCode;
     final data = response?.data;
 
-    String message = 'An error occurred';
+    String message = 'Error Occurred';
 
     if (data is Map<String, dynamic>) {
       message = data['message'] ?? data['error'] ?? data['msg'] ?? message;
@@ -69,95 +64,93 @@ class ApiErrorHandler {
       message = data;
     }
 
+    // Make message concise and user-friendly
+    if (message.length > 50) {
+      message = ErrorMessageHandler.getUserFriendlyMessage(message);
+    }
+
     switch (statusCode) {
       case 400:
         if (message.toLowerCase().contains('already exists') ||
             message.toLowerCase().contains('duplicate')) {
           return ApiException(
-            message: 'This account already exists. Please try logging in.',
+            message: 'Account Already Exists',
             statusCode: statusCode,
             data: data,
           );
         }
         return ApiException(
-          message: message.isNotEmpty
-              ? message
-              : 'Bad request. Please check your input.',
+          message: message.isNotEmpty ? message : 'Invalid Request',
           statusCode: statusCode,
           data: data,
         );
 
       case 401:
         return ApiException(
-          message: 'Session expired. Please login again.',
+          message: 'Session Expired',
           statusCode: statusCode,
           data: data,
         );
 
       case 403:
         return ApiException(
-          message:
-              'Access forbidden. You don\'t have permission to access this resource.',
+          message: 'Access Forbidden',
           statusCode: statusCode,
           data: data,
         );
 
       case 404:
         return ApiException(
-          message: message.isNotEmpty ? message : 'Resource not found.',
+          message: message.isNotEmpty ? message : 'Not Found',
           statusCode: statusCode,
           data: data,
         );
 
       case 409:
         return ApiException(
-          message: 'This resource already exists. Please try a different one.',
+          message: 'Already Exists',
           statusCode: statusCode,
           data: data,
         );
 
       case 422:
         return ApiException(
-          message: message.isNotEmpty
-              ? message
-              : 'Validation error. Please check your input.',
+          message: message.isNotEmpty ? message : 'Validation Error',
           statusCode: statusCode,
           data: data,
         );
 
       case 429:
         return ApiException(
-          message: 'Too many requests. Please try again after some time.',
+          message: 'Too Many Requests',
           statusCode: statusCode,
           data: data,
         );
 
       case 500:
         return ApiException(
-          message: 'Internal server error. Please try again later.',
+          message: 'Server Error',
           statusCode: statusCode,
           data: data,
         );
 
       case 502:
         return ApiException(
-          message: 'Bad gateway. Please try again later.',
+          message: 'Service Unavailable',
           statusCode: statusCode,
           data: data,
         );
 
       case 503:
         return ApiException(
-          message: 'Service unavailable. Please try again later.',
+          message: 'Service Unavailable',
           statusCode: statusCode,
           data: data,
         );
 
       default:
         return ApiException(
-          message: message.isNotEmpty
-              ? message
-              : 'An error occurred. Please try again.',
+          message: message.isNotEmpty ? message : 'Something Went Wrong',
           statusCode: statusCode,
           data: data,
         );

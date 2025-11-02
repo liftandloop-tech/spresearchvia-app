@@ -7,20 +7,28 @@ import 'package:spresearchvia2/screens/research/research_reports.screen.dart';
 import 'package:spresearchvia2/screens/subscription/choose_plan.screen.dart';
 
 class TabsScreen extends StatefulWidget {
-  const TabsScreen({super.key});
+  final int initialIndex;
+
+  const TabsScreen({super.key, this.initialIndex = 0});
 
   @override
   State<TabsScreen> createState() => _TabsScreenState();
 }
 
 class _TabsScreenState extends State<TabsScreen> {
-  int currentScreenIndex = 0;
+  late int currentScreenIndex;
   final List<Widget> screens = [
     DashboardScreen(),
     ResearchReportsScreen(),
     ChoosePlanScreen(),
     ProfileScreen(),
   ];
+
+  @override
+  void initState() {
+    super.initState();
+    currentScreenIndex = widget.initialIndex;
+  }
 
   @override
   Widget build(BuildContext context) {

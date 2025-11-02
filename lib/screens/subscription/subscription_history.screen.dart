@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/models/user.dart';
+import 'package:get/get.dart';
+import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
+import 'package:spresearchvia2/core/models/subscription_history.dart';
 import 'widgets/subscription_card.dart';
 
 class SubscriptionHistoryScreen extends StatefulWidget {
@@ -11,7 +13,61 @@ class SubscriptionHistoryScreen extends StatefulWidget {
 }
 
 class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
+  final planController = Get.find<PlanPurchaseController>();
   String selectedFilter = 'Latest';
+  List<SubscriptionHistory> subscriptions = [];
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadSubscriptionHistory();
+  }
+
+  Future<void> _loadSubscriptionHistory() async {
+    setState(() => isLoading = true);
+
+    try {
+      final data = await planController.fetchSubscriptionHistory();
+      final loadedSubscriptions = data
+          .map((json) => SubscriptionHistory.fromJson(json))
+          .toList();
+
+      setState(() {
+        subscriptions = _filterSubscriptions(loadedSubscriptions);
+        isLoading = false;
+      });
+    } catch (e) {
+      setState(() => isLoading = false);
+      Get.snackbar('Error', 'Failed to load subscription history');
+    }
+  }
+
+  List<SubscriptionHistory> _filterSubscriptions(
+    List<SubscriptionHistory> subs,
+  ) {
+    List<SubscriptionHistory> filtered = List.from(subs);
+
+    switch (selectedFilter) {
+      case 'Latest':
+        break;
+      case 'Oldest':
+        filtered = filtered.reversed.toList();
+        break;
+      case 'Active':
+        filtered = filtered
+            .where((s) => s.headerStatus == SubscriptionStatus.active)
+            .toList();
+        break;
+      case 'Expired':
+        filtered = filtered
+            .where((s) => s.headerStatus == SubscriptionStatus.expired)
+            .toList();
+        break;
+    }
+
+    return filtered;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -67,6 +123,7 @@ class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
                 if (newValue != null) {
                   setState(() {
                     selectedFilter = newValue;
+                    _loadSubscriptionHistory();
                   });
                 }
               },
@@ -74,21 +131,45 @@ class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
           ),
         ],
       ),
-      body: ListView.builder(
-        padding: EdgeInsets.all(16),
-        itemCount: dummyUser.subscriptionHistory?.length ?? 0,
-        itemBuilder: (context, index) {
-          final subscription = dummyUser.subscriptionHistory![index];
-          return SubscriptionCard(
-            paymentDate: subscription.paymentDate,
-            amountPaid: subscription.amountPaid,
-            validityDays: subscription.validityDays,
-            expiryDate: subscription.expiryDate,
-            headerStatus: subscription.headerStatus,
-            footerStatus: subscription.footerStatus,
-          );
-        },
-      ),
+      body: isLoading
+          ? Center(child: CircularProgressIndicator())
+          : subscriptions.isEmpty
+          ? Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 64, color: Color(0xffD1D5DB)),
+                  SizedBox(height: 16),
+                  Text(
+                    'No subscription history',
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                      color: Color(0xff6B7280),
+                    ),
+                  ),
+                ],
+              ),
+            )
+          : RefreshIndicator(
+              onRefresh: _loadSubscriptionHistory,
+              child: ListView.builder(
+                padding: EdgeInsets.all(16),
+                itemCount: subscriptions.length,
+                itemBuilder: (context, index) {
+                  final subscription = subscriptions[index];
+                  return SubscriptionCard(
+                    paymentDate: subscription.paymentDate,
+                    amountPaid: subscription.amountPaid,
+                    validityDays: subscription.validityDays,
+                    expiryDate: subscription.expiryDate,
+                    headerStatus: subscription.headerStatus,
+                    footerStatus: subscription.footerStatus,
+                  );
+                },
+              ),
+            ),
     );
   }
 }

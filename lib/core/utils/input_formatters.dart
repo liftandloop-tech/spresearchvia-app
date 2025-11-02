@@ -102,10 +102,8 @@ class NameInputFormatter extends TextInputFormatter {
   ) {
     final text = newValue.text;
 
-    // Remove invalid characters
     final lettersAndSpacesOnly = text.replaceAll(RegExp(r"[^a-zA-Z\s.']"), '');
 
-    // Capitalize first letter of each word
     String capitalizedText = lettersAndSpacesOnly;
     if (lettersAndSpacesOnly.isNotEmpty) {
       capitalizedText = lettersAndSpacesOnly

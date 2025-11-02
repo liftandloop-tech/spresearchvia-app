@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/current_badge.dart';
 import 'package:spresearchvia2/screens/renewal/widgets/plan_detail_row.dart';
 
@@ -23,9 +24,9 @@ class CurrentPlanCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppTheme.backgroundWhite,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Color(0xff163174), width: 2),
+        border: Border.all(color: AppTheme.primaryBlueDark, width: 2),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -44,7 +45,7 @@ class CurrentPlanCard extends StatelessWidget {
                         fontFamily: 'Poppins',
                         fontSize: 18,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xff163174),
+                        color: AppTheme.primaryBlueDark,
                       ),
                     ),
                     SizedBox(height: 4),
@@ -54,7 +55,7 @@ class CurrentPlanCard extends StatelessWidget {
                         fontFamily: 'Poppins',
                         fontSize: 14,
                         fontWeight: FontWeight.w400,
-                        color: Color(0xff6B7280),
+                        color: AppTheme.textGrey,
                       ),
                     ),
                   ],

@@ -72,63 +72,21 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
               padding: EdgeInsets.all(24),
               child: Column(
                 children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Positioned(
-                        top: -10,
-                        right: 40,
-                        child: Container(
-                          width: 12,
-                          height: 12,
-                          decoration: BoxDecoration(
-                            color: Color(0xff7C9CB6),
-                            shape: BoxShape.circle,
-                          ),
+                  Container(
+                    width: 120,
+                    height: 120,
+                    decoration: BoxDecoration(
+                      color: Color(0xff8DB4A0),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          offset: Offset(0, 4),
+                          blurRadius: 20,
+                          color: Color(0xff8DB4A0).withValues(alpha: 0.3),
                         ),
-                      ),
-                      Positioned(
-                        top: 20,
-                        right: -10,
-                        child: Container(
-                          width: 32,
-                          height: 32,
-                          decoration: BoxDecoration(
-                            color: Color(0xff8DB4A0),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: -10,
-                        left: 40,
-                        child: Container(
-                          width: 20,
-                          height: 20,
-                          decoration: BoxDecoration(
-                            color: Color(0xff8DB4A0),
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-
-                      Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          color: Color(0xff8DB4A0),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              offset: Offset(0, 4),
-                              blurRadius: 20,
-                              color: Color(0xff8DB4A0).withValues(alpha: 0.3),
-                            ),
-                          ],
-                        ),
-                        child: Icon(Icons.check, color: Colors.white, size: 60),
-                      ),
-                    ],
+                      ],
+                    ),
+                    child: Icon(Icons.check, color: Colors.white, size: 60),
                   ),
                   SizedBox(height: 40),
 

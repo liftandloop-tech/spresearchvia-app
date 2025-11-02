@@ -85,8 +85,6 @@ class ReportController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
 
-        // Backend returns: { status, message, data: { report: [...] } }
-        // We need to access data.data.report or data.report
         dynamic reportList;
 
         if (data['data'] != null && data['data'] is Map) {
@@ -99,7 +97,6 @@ class ReportController extends GetxController {
           reportList = [];
         }
 
-        // Ensure reportList is a List
         if (reportList == null || reportList is! List) {
           print('Warning: Expected List but got ${reportList?.runtimeType}');
           reportList = [];

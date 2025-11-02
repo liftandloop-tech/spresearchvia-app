@@ -18,7 +18,7 @@ class KycStatusItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Color color = statusColor ?? const Color(0xff16A34A); // default green
+    final Color color = statusColor ?? const Color(0xff16A34A);
     final String label = statusLabel ?? 'Completed';
     return Container(
       padding: EdgeInsets.all(16),

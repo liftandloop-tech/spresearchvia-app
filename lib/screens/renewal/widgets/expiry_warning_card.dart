@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 
 class ExpiryWarningCard extends StatelessWidget {
   const ExpiryWarningCard({
@@ -12,29 +13,43 @@ class ExpiryWarningCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isUrgent = daysRemaining <= 7;
+    final backgroundColor = isUrgent
+        ? AppTheme.errorBackground
+        : AppTheme.infoBackground;
+    final borderColor = isUrgent ? AppTheme.errorBorder : AppTheme.infoBorder;
+    final textColor = isUrgent ? AppTheme.error : AppTheme.infoText;
+    final iconColor = isUrgent ? AppTheme.error : AppTheme.textGrey;
+
     return Container(
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xffFEF2F2),
+        color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Color(0xffFECACA), width: 1),
+        border: Border.all(color: borderColor, width: 1),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.warning, color: Color(0xffDC2626), size: 20),
+          Icon(
+            isUrgent ? Icons.warning : Icons.info_outline,
+            color: iconColor,
+            size: 20,
+          ),
           SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Plan expiring in $daysRemaining days',
+                  daysRemaining == 0
+                      ? 'Plan expired'
+                      : 'Plan expiring in $daysRemaining days',
                   style: TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xffDC2626),
+                    color: textColor,
                   ),
                 ),
                 SizedBox(height: 4),
@@ -44,7 +59,7 @@ class ExpiryWarningCard extends StatelessWidget {
                     fontFamily: 'Poppins',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xffDC2626),
+                    color: textColor,
                   ),
                 ),
               ],

@@ -113,7 +113,7 @@ class ProfileScreen extends StatelessWidget {
                         ) ??
                         false)
                     ? Color(0xff16A34A)
-                    : Color(0xffF87171), // orangish-red
+                    : Color(0xffF87171),
                 statusLabel:
                     (user.kycStatus?.toString().toLowerCase().contains(
                           'verified',

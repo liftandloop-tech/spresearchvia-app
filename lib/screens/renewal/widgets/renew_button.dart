@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 
 class RenewButton extends StatelessWidget {
   const RenewButton({super.key, required this.onPressed});
@@ -13,7 +14,7 @@ class RenewButton extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xff22C55E),
+          backgroundColor: AppTheme.successGreen,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
@@ -22,7 +23,7 @@ class RenewButton extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.credit_card, color: Colors.white, size: 20),
+            Icon(Icons.credit_card, color: AppTheme.textWhite, size: 20),
             SizedBox(width: 8),
             Text(
               'Renew with One Click',
@@ -30,7 +31,7 @@ class RenewButton extends StatelessWidget {
                 fontFamily: 'Poppins',
                 fontSize: 16,
                 fontWeight: FontWeight.w600,
-                color: Colors.white,
+                color: AppTheme.textWhite,
               ),
             ),
           ],

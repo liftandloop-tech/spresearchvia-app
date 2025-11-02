@@ -83,12 +83,12 @@ class AuthController extends GetxController {
           await _storage.saveUserId(user.id);
           await _storage.saveUserData(userData);
           await _storage.setLoggedIn(true);
-          // Sync the global UserController so Profile screen sees the user immediately
+
           if (Get.isRegistered<UserController>()) {
             final uc = Get.find<UserController>();
             uc.currentUser.value = user;
           }
-          // Force UserController to reload all user data for dashboard/profile
+
           if (Get.isRegistered<UserController>()) {
             final uc = Get.find<UserController>();
             uc.loadUserData();
@@ -195,7 +195,7 @@ class AuthController extends GetxController {
           await _storage.saveUserId(user.id);
           await _storage.saveUserData(userData);
           await _storage.setLoggedIn(true);
-          // Sync UserController as well
+
           if (Get.isRegistered<UserController>()) {
             final uc = Get.find<UserController>();
             uc.currentUser.value = user;
@@ -230,7 +230,6 @@ class AuthController extends GetxController {
       currentUser.value = null;
       isOtpSent.value = false;
 
-      // Clear UserController if registered
       if (Get.isRegistered<UserController>()) {
         final uc = Get.find<UserController>();
         uc.currentUser.value = null;
@@ -242,20 +241,17 @@ class AuthController extends GetxController {
         snackPosition: SnackPosition.BOTTOM,
       );
 
-      // Navigate to login screen after logout
       Get.offAllNamed('/login');
     } catch (e) {
       await _storage.clearAuthData();
       currentUser.value = null;
       isOtpSent.value = false;
 
-      // Clear UserController if registered
       if (Get.isRegistered<UserController>()) {
         final uc = Get.find<UserController>();
         uc.currentUser.value = null;
       }
 
-      // Navigate to login screen even if logout API fails
       Get.offAllNamed('/login');
     } finally {
       isLoading.value = false;

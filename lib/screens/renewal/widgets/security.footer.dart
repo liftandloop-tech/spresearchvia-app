@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 
 class SecurePaymentFooter extends StatelessWidget {
   const SecurePaymentFooter({super.key});
@@ -8,7 +9,7 @@ class SecurePaymentFooter extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        Icon(Icons.lock_outline, size: 16, color: Color(0xff9CA3AF)),
+        Icon(Icons.lock_outline, size: 16, color: AppTheme.iconGrey),
         SizedBox(width: 6),
         Text(
           'Secure payment powered by Stripe',
@@ -16,7 +17,7 @@ class SecurePaymentFooter extends StatelessWidget {
             fontFamily: 'Poppins',
             fontSize: 12,
             fontWeight: FontWeight.w400,
-            color: Color(0xff9CA3AF),
+            color: AppTheme.textGreyLight,
           ),
         ),
       ],
