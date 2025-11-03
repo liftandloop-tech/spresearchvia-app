@@ -4,7 +4,7 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
 import 'package:spresearchvia2/controllers/user.controller.dart';
 import 'package:spresearchvia2/core/config/razorpay.config.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
 import 'package:spresearchvia2/screens/subscription/widgets/plan.card.dart';
 import 'package:spresearchvia2/widgets/button.dart';
 
@@ -65,60 +65,61 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
       );
 
       if (success) {
-        Get.snackbar(
-          'Success',
-          'Payment completed successfully!',
-          backgroundColor: AppTheme.success,
-          colorText: AppTheme.textWhite,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        CustomSnackbar.showSuccess('Payment completed successfully!');
 
         // Navigate back or to success screen
         Get.back();
       } else {
-        Get.snackbar(
-          'Error',
+        CustomSnackbar.showError(
           'Payment verification failed. Please contact support.',
-          backgroundColor: AppTheme.error,
-          colorText: AppTheme.textWhite,
-          snackPosition: SnackPosition.BOTTOM,
         );
       }
     } catch (e) {
-      Get.snackbar(
-        'Error',
-        'Payment verification failed: ${e.toString()}',
-        backgroundColor: AppTheme.error,
-        colorText: AppTheme.textWhite,
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomSnackbar.showError('Payment verification failed: ${e.toString()}');
     } finally {
-      setState(() => _isProcessing = false);
+      setState(() {
+        _isProcessing = false;
+        _currentPaymentId = null; // Clear payment ID
+      });
     }
   }
 
-  void _handlePaymentError(PaymentFailureResponse response) {
+  void _handlePaymentError(PaymentFailureResponse response) async {
     print('Payment Error: ${response.code} - ${response.message}');
-    setState(() => _isProcessing = false);
 
-    Get.snackbar(
-      'Payment Failed',
-      response.message ?? 'Payment was not completed',
-      backgroundColor: AppTheme.error,
-      colorText: AppTheme.textWhite,
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Mark payment as failed in backend
+    if (_currentPaymentId != null) {
+      await planController.markPaymentFailed(
+        paymentId: _currentPaymentId!,
+        reason: 'Payment failed: ${response.message}',
+      );
+    }
+
+    setState(() {
+      _isProcessing = false;
+      _currentPaymentId = null; // Clear payment ID
+    });
+
+    CustomSnackbar.showError(response.message ?? 'Payment was not completed');
   }
 
-  void _handleExternalWallet(ExternalWalletResponse response) {
+  void _handleExternalWallet(ExternalWalletResponse response) async {
     print('External Wallet: ${response.walletName}');
-    setState(() => _isProcessing = false);
 
-    Get.snackbar(
-      'External Wallet',
-      'Payment via ${response.walletName}',
-      snackPosition: SnackPosition.BOTTOM,
-    );
+    // Mark payment as failed (external wallet not fully supported yet)
+    if (_currentPaymentId != null) {
+      await planController.markPaymentFailed(
+        paymentId: _currentPaymentId!,
+        reason: 'External wallet payment: ${response.walletName}',
+      );
+    }
+
+    setState(() {
+      _isProcessing = false;
+      _currentPaymentId = null; // Clear payment ID
+    });
+
+    CustomSnackbar.showInfo('Payment via ${response.walletName}');
   }
 
   Future<void> _proceedToPay() async {
@@ -135,13 +136,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
       // Custom plan
       final customDays = int.tryParse(controller.text);
       if (customDays == null || customDays <= 0) {
-        Get.snackbar(
-          'Error',
-          'Please enter a valid number of days',
-          backgroundColor: AppTheme.error,
-          colorText: AppTheme.textWhite,
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        CustomSnackbar.showWarning('Please enter a valid number of days');
         return;
       }
       planName = 'Custom Plan';
@@ -191,15 +186,26 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
 
       _razorpay.open(options);
     } catch (e) {
-      setState(() => _isProcessing = false);
-      Get.snackbar(
-        'Error',
-        'Failed to initiate payment: ${e.toString()}',
-        backgroundColor: AppTheme.error,
-        colorText: AppTheme.textWhite,
-        snackPosition: SnackPosition.BOTTOM,
+      // If order creation fails, no need to mark as failed since payment wasn't created
+      setState(() {
+        _isProcessing = false;
+        _currentPaymentId = null;
+      });
+      CustomSnackbar.showError('Failed to initiate payment: ${e.toString()}');
+    }
+  }
+
+  @override
+  void deactivate() {
+    // Handle case when user navigates away (back button) during payment
+    if (_isProcessing && _currentPaymentId != null) {
+      // Mark payment as failed/cancelled when user leaves screen
+      planController.markPaymentFailed(
+        paymentId: _currentPaymentId!,
+        reason: 'Payment cancelled - user navigated away',
       );
     }
+    super.deactivate();
   }
 
   @override

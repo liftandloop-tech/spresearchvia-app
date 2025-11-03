@@ -2,6 +2,7 @@ import 'package:get/get.dart';
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
+import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
 
 class Plan {
   final String id;
@@ -85,7 +86,7 @@ class PlanPurchaseController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        Get.snackbar('Error', 'User not logged in');
+        CustomSnackbar.showWarning('User not logged in');
         return null;
       }
 
@@ -116,11 +117,7 @@ class PlanPurchaseController extends GetxController {
           };
         }
 
-        Get.snackbar(
-          'Success',
-          'Order created successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        CustomSnackbar.showSuccess('Order created successfully');
 
         return orderData as Map<String, dynamic>?;
       }
@@ -128,10 +125,35 @@ class PlanPurchaseController extends GetxController {
       return null;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      CustomSnackbar.showError(error.message);
       return null;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  /// Mark payment as failed when user cancels or abandons payment
+  Future<bool> markPaymentFailed({
+    required String paymentId,
+    String? reason,
+  }) async {
+    try {
+      final response = await _apiClient.patch(
+        '/user/purchase/payment/failed/$paymentId',
+        data: {
+          'status': 'failed',
+          'reason': reason ?? 'Payment cancelled by user',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return true;
+      }
+
+      return false;
+    } catch (e) {
+      print('Error marking payment as failed: $e');
+      return false;
     }
   }
 
@@ -159,19 +181,13 @@ class PlanPurchaseController extends GetxController {
         final success = data['success'] ?? false;
 
         if (success) {
-          Get.snackbar(
-            'Success',
-            'Payment verified successfully',
-            snackPosition: SnackPosition.BOTTOM,
-          );
+          CustomSnackbar.showSuccess('Payment verified successfully');
 
           await fetchUserPlan();
           return true;
         } else {
-          Get.snackbar(
-            'Error',
+          CustomSnackbar.showError(
             data['message'] ?? 'Payment verification failed',
-            snackPosition: SnackPosition.BOTTOM,
           );
           return false;
         }
@@ -180,7 +196,7 @@ class PlanPurchaseController extends GetxController {
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      CustomSnackbar.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -218,7 +234,7 @@ class PlanPurchaseController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        Get.snackbar('Error', 'User not logged in');
+        CustomSnackbar.showWarning('User not logged in');
         return false;
       }
 
@@ -231,10 +247,8 @@ class PlanPurchaseController extends GetxController {
 
       if (response.statusCode == 200) {
         expiryRemindersEnabled.value = enabled;
-        Get.snackbar(
-          'Success',
+        CustomSnackbar.showSuccess(
           'Expiry reminders ${enabled ? 'enabled' : 'disabled'}',
-          snackPosition: SnackPosition.BOTTOM,
         );
         return true;
       }
@@ -242,7 +256,7 @@ class PlanPurchaseController extends GetxController {
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      CustomSnackbar.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;

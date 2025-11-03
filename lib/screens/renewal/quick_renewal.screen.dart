@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
 import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
 import 'package:spresearchvia2/controllers/user.controller.dart';
 import 'package:spresearchvia2/screens/tabs.screen.dart';
@@ -38,7 +39,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
   Future<void> _renewPlan() async {
     final plan = planController.currentPlan.value;
     if (plan == null) {
-      Get.snackbar('Error', 'No active plan found');
+      CustomSnackbar.showWarning('No active plan found');
       return;
     }
 
@@ -81,20 +82,16 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
       Get.back();
 
       if (orderData == null) {
-        Get.snackbar(
-          'Error',
+        CustomSnackbar.showError(
           'Failed to create renewal order. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
         );
         return;
       }
 
       // Show success and inform about payment
-      Get.snackbar(
-        'Order Created',
+      CustomSnackbar.showSuccess(
         'Renewal order created successfully. You can now proceed with payment.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 3),
+        title: 'Order Created',
       );
 
       // Refresh plan data
@@ -105,11 +102,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         Get.back();
       }
 
-      Get.snackbar(
-        'Error',
-        'Failed to initiate renewal: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      CustomSnackbar.showError('Failed to initiate renewal: ${e.toString()}');
     }
   }
 
