@@ -1,9 +1,10 @@
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
+import 'package:spresearchvia2/core/config/api.config.dart';
 import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:spresearchvia2/core/utils/validators.dart';
-import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 import 'package:path/path.dart' as path;
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
@@ -27,19 +28,19 @@ class KycController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return false;
       }
 
       final panValidation = Validators.validatePAN(panNumber);
       if (panValidation != null) {
-        CustomSnackbar.showWarning(panValidation);
+        SnackbarService.showWarning(panValidation);
         return false;
       }
 
       final fileValidation = FileValidator.validateDocumentFile(panFile);
       if (fileValidation != null) {
-        CustomSnackbar.showWarning(fileValidation);
+        SnackbarService.showWarning(fileValidation);
         return false;
       }
 
@@ -54,21 +55,20 @@ class KycController extends GetxController {
       });
 
       final response = await _apiClient.uploadFile(
-        '/user/kyc/pancard-upload/$uid',
+        ApiConfig.uploadPancard(uid),
         formData: formData,
-        queryParameters: {'type': 'pancard'},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         isPanUploaded.value = true;
-        CustomSnackbar.showSuccess('PAN card uploaded successfully');
+        SnackbarService.showSuccess('PAN card uploaded successfully');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      CustomSnackbar.showError(error.message);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -83,25 +83,25 @@ class KycController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return false;
       }
 
       final aadharValidation = Validators.validateAadhar(aadharNumber);
       if (aadharValidation != null) {
-        CustomSnackbar.showWarning(aadharValidation);
+        SnackbarService.showWarning(aadharValidation);
         return false;
       }
 
       final frontFileValidation = FileValidator.validateDocumentFile(frontFile);
       if (frontFileValidation != null) {
-        CustomSnackbar.showWarning('Front image: $frontFileValidation');
+        SnackbarService.showWarning('Front image: $frontFileValidation');
         return false;
       }
 
       final backFileValidation = FileValidator.validateDocumentFile(backFile);
       if (backFileValidation != null) {
-        CustomSnackbar.showWarning('Back image: $backFileValidation');
+        SnackbarService.showWarning('Back image: $backFileValidation');
         return false;
       }
 
@@ -120,21 +120,20 @@ class KycController extends GetxController {
       });
 
       final response = await _apiClient.uploadFile(
-        '/user/kyc/aadhaar-upload/$uid',
+        ApiConfig.uploadAadhar(uid),
         formData: formData,
-        queryParameters: {'type': 'aadhaar'},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         isAadharUploaded.value = true;
-        CustomSnackbar.showSuccess('Aadhar card uploaded successfully');
+        SnackbarService.showSuccess('Aadhar card uploaded successfully');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -149,27 +148,27 @@ class KycController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return false;
       }
 
       isLoading.value = true;
 
       final response = await _apiClient.post(
-        '/user/kyc/document-kyc/$uid',
+        ApiConfig.documentKYC(uid),
         data: {'email': email, 'name': name, 'sign_type': signType},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         isKycCompleted.value = true;
-        CustomSnackbar.showSuccess('KYC verification initiated successfully');
+        SnackbarService.showSuccess('KYC verification initiated successfully');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      CustomSnackbar.showError(error.message);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;

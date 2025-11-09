@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:get/get.dart';
+import 'package:spresearchvia2/core/config/api.config.dart';
 import 'package:spresearchvia2/core/models/user.dart';
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 
 import 'package:spresearchvia2/controllers/user.controller.dart';
 
@@ -10,6 +13,7 @@ class AuthController extends GetxController {
   final ApiClient _apiClient = ApiClient();
   final StorageService _storage = StorageService();
 
+  final isFetchingPhoneNumber = false.obs;
   final isLoading = false.obs;
   final isOtpSent = false.obs;
   final currentUser = Rxn<User>();
@@ -33,25 +37,31 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
       final response = await _apiClient.post(
-        '/user/send-otp',
+        ApiConfig.requestOTP,
         data: {'phone': phone},
+        options: Options(
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         isOtpSent.value = true;
-        Get.snackbar(
-          'Success',
-          'OTP sent successfully to $phone',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('OTP sent successfully to $phone');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      print(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+
+      String errorMessage = error.message;
+      if (errorMessage.toLowerCase().contains('timeout')) {
+        errorMessage =
+            'Request timed out. Please check your internet connection and try again.';
+      }
+
+      SnackbarService.showError(errorMessage);
       return false;
     } finally {
       isLoading.value = false;
@@ -63,8 +73,12 @@ class AuthController extends GetxController {
       isLoading.value = true;
 
       final response = await _apiClient.post(
-        '/user/verify-otp',
+        ApiConfig.verifyOTP,
         data: {'phone': phone, 'otp': int.tryParse(otp) ?? otp},
+        options: Options(
+          sendTimeout: const Duration(seconds: 30),
+          receiveTimeout: const Duration(seconds: 30),
+        ),
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
@@ -95,18 +109,21 @@ class AuthController extends GetxController {
           }
         }
 
-        Get.snackbar(
-          'Success',
-          'Login successful!',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Login successful!');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+
+      String errorMessage = error.message;
+      if (errorMessage.toLowerCase().contains('timeout')) {
+        errorMessage =
+            'Request timed out. Please check your internet connection and try again.';
+      }
+
+      SnackbarService.showError(errorMessage);
       return false;
     } finally {
       isLoading.value = false;
@@ -139,7 +156,7 @@ class AuthController extends GetxController {
       }
 
       final response = await _apiClient.post(
-        '/user/create-user',
+        ApiConfig.createUser,
         data: requestData,
       );
 
@@ -152,18 +169,14 @@ class AuthController extends GetxController {
           await _storage.saveUserId(user.id);
         }
 
-        Get.snackbar(
-          'Success',
-          'Account created successfully!',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Account created successfully!');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -175,7 +188,7 @@ class AuthController extends GetxController {
       isLoading.value = true;
 
       final response = await _apiClient.post(
-        '/user/login',
+        ApiConfig.loginUser,
         data: {'email': email, 'password': password},
       );
 
@@ -202,18 +215,14 @@ class AuthController extends GetxController {
           }
         }
 
-        Get.snackbar(
-          'Success',
-          'Login successful!',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Login successful!');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -224,7 +233,7 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      await _apiClient.post('/user/logout');
+      await _apiClient.post(ApiConfig.logoutUser);
 
       await _storage.clearAuthData();
       currentUser.value = null;
@@ -235,11 +244,7 @@ class AuthController extends GetxController {
         uc.currentUser.value = null;
       }
 
-      Get.snackbar(
-        'Success',
-        'Logged out successfully',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarService.showSuccess('Logged out successfully');
 
       Get.offAllNamed('/login');
     } catch (e) {
@@ -262,24 +267,17 @@ class AuthController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await _apiClient.post(
-        '/user/forget-password',
-        queryParameters: {'email': email},
-      );
+      final response = await _apiClient.post(ApiConfig.forgotPassword(email));
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          'Success',
-          'Password reset link sent to your email',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Password reset link sent to your email');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -291,27 +289,30 @@ class AuthController extends GetxController {
       isLoading.value = true;
 
       final response = await _apiClient.post(
-        '/user/reset-password/$token',
+        ApiConfig.resetPassword(token),
         data: {'password': newPassword},
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          'Success',
-          'Password reset successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Password reset successfully');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
     }
+  }
+
+  Future<void> fetchPhoneNumber(String pan, String aadhar) async {
+    isFetchingPhoneNumber.value = true;
+    Future.delayed(Duration(seconds: 2));
+
+    isFetchingPhoneNumber.value = false;
   }
 
   void resetOtpState() {

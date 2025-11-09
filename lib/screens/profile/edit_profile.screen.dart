@@ -5,7 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:spresearchvia2/controllers/user.controller.dart';
 import 'package:spresearchvia2/core/models/user.dart';
 import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/theme/app_styles.dart';
 import 'package:spresearchvia2/core/utils/input_formatters.dart';
@@ -47,18 +47,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _loadUserData() {
     final user = userController.currentUser.value;
-    print('==========================================');
-    print('User ID: ${user?.id}');
-    print('User.fullName: ${user?.fullName}');
-    print('User.name (getter): ${user?.name}');
-    print('User.personalInformation: ${user?.personalInformation}');
-    print(
-      'User.personalInformation?.firstName: ${user?.personalInformation?.firstName}',
-    );
-    print('User.addressDetails: ${user?.addressDetails}');
-    print('User.phone: ${user?.phone}');
-    print('User.email: ${user?.email}');
-    print('==========================================');
 
     if (user != null) {
       setState(() {
@@ -91,12 +79,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
             user.phone ?? user.contactDetails?.phone?.toString() ?? '';
         emailController.text = user.email ?? user.contactDetails?.email ?? '';
       });
-      print(
-        'Loaded - First: ${firstNameController.text}, Last: ${lastNameController.text}',
-      );
-    } else {
-      print('User is null!');
-    }
+    } else {}
   }
 
   void _pickImage() {
@@ -264,7 +247,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       }
     } catch (e) {
       ErrorMessageHandler.logError('Pick Image', e);
-      CustomSnackbar.showErrorFromException(e, title: 'Failed to Pick Image');
+      SnackbarService.showErrorFromException(e, title: 'Failed to Pick Image');
     }
   }
 

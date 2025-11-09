@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
+import 'package:spresearchvia2/core/config/api.config.dart';
 import 'package:spresearchvia2/core/models/user.dart';
 import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:path/path.dart' as path;
@@ -8,7 +9,7 @@ import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
 import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 
 class UserController extends GetxController {
   final ApiClient _apiClient = ApiClient();
@@ -40,7 +41,7 @@ class UserController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return false;
       }
 
@@ -61,7 +62,7 @@ class UserController extends GetxController {
       }
 
       final response = await _apiClient.put(
-        '/user/update/$uid',
+        ApiConfig.updateProfile(uid),
         data: requestData,
       );
 
@@ -75,14 +76,14 @@ class UserController extends GetxController {
           await _storage.saveUserData(userData);
         }
 
-        CustomSnackbar.showSuccess('Profile updated successfully');
+        SnackbarService.showSuccess('Profile updated successfully');
         return true;
       }
 
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -93,13 +94,13 @@ class UserController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return false;
       }
 
       final validationError = FileValidator.validateImageFile(imageFile);
       if (validationError != null) {
-        CustomSnackbar.showWarning(validationError);
+        SnackbarService.showWarning(validationError);
         return false;
       }
 
@@ -113,7 +114,7 @@ class UserController extends GetxController {
       });
 
       final response = await _apiClient.patch(
-        '/user/image-change/$uid',
+        ApiConfig.changeImage,
         data: formData,
         options: dio.Options(contentType: 'multipart/form-data'),
       );
@@ -140,7 +141,7 @@ class UserController extends GetxController {
           await _storage.saveUserData(userData);
         }
 
-        CustomSnackbar.showSuccess('Profile image updated successfully');
+        SnackbarService.showSuccess('Profile image updated successfully');
         return true;
       }
 
@@ -148,7 +149,7 @@ class UserController extends GetxController {
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       ErrorMessageHandler.logError('Change Profile Image', error);
-      CustomSnackbar.showError(
+      SnackbarService.showError(
         ErrorMessageHandler.getUserFriendlyMessage(error),
       );
       return false;
@@ -161,7 +162,7 @@ class UserController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await _apiClient.get('/user/user-list');
+      final response = await _apiClient.get(ApiConfig.userList);
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -174,7 +175,7 @@ class UserController extends GetxController {
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       ErrorMessageHandler.logError('Get User List', error);
-      CustomSnackbar.showError(
+      SnackbarService.showError(
         ErrorMessageHandler.getUserFriendlyMessage(error),
       );
       return null;
@@ -188,11 +189,11 @@ class UserController extends GetxController {
       isLoading.value = true;
 
       final response = await _apiClient.delete(
-        '/user/delete-user/$userIdToDelete',
+        ApiConfig.deleteUser(userIdToDelete),
       );
 
       if (response.statusCode == 200) {
-        CustomSnackbar.showSuccess('User deleted successfully');
+        SnackbarService.showSuccess('User deleted successfully');
         return true;
       }
 
@@ -200,7 +201,7 @@ class UserController extends GetxController {
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       ErrorMessageHandler.logError('Delete User', error);
-      CustomSnackbar.showError(
+      SnackbarService.showError(
         ErrorMessageHandler.getUserFriendlyMessage(error),
       );
       return false;

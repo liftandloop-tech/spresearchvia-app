@@ -4,7 +4,7 @@ import 'package:get/get.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:spresearchvia2/controllers/kyc.controller.dart';
 import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 import 'package:spresearchvia2/core/utils/validators.dart';
 import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
@@ -44,7 +44,7 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
       }
     } catch (e) {
       ErrorMessageHandler.logError('Pick PAN File', e);
-      CustomSnackbar.showErrorFromException(e, title: 'Failed to Pick File');
+      SnackbarService.showErrorFromException(e, title: 'Failed to Pick File');
     }
   }
 
@@ -52,24 +52,24 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
     final panNumber = _panController.text.trim();
 
     if (panNumber.isEmpty) {
-      CustomSnackbar.showWarning('Please enter PAN number');
+      SnackbarService.showWarning('Please enter PAN number');
       return;
     }
 
     if (_selectedFile == null) {
-      CustomSnackbar.showWarning('Please select PAN card file');
+      SnackbarService.showWarning('Please select PAN card file');
       return;
     }
 
     final panValidation = Validators.validatePAN(panNumber);
     if (panValidation != null) {
-      CustomSnackbar.showWarning(panValidation);
+      SnackbarService.showWarning(panValidation);
       return;
     }
 
     final fileError = FileValidator.validateDocumentFile(_selectedFile!);
     if (fileError != null) {
-      CustomSnackbar.showWarning(fileError);
+      SnackbarService.showWarning(fileError);
       return;
     }
 
@@ -195,3 +195,5 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
     );
   }
 }
+
+

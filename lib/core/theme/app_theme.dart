@@ -22,7 +22,6 @@ abstract class AppTheme {
   static const Color warning = Color(0xFFF59E0B);
   static const Color info = Color(0xff11416B);
 
-  // Background colors for alerts/warnings
   static const Color errorBackground = Color(0xffFEF2F2);
   static const Color errorBorder = Color(0xffFECACA);
   static const Color infoBackground = Color(0xffF3F4F6);

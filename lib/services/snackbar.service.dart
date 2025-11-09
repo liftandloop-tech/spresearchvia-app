@@ -1,280 +1,359 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart' as getx;
 import 'package:spresearchvia2/core/theme/app_theme.dart';
 import 'package:spresearchvia2/core/utils/error_message_handler.dart';
 
 enum SnackbarType { success, error, warning, info }
 
+///
+
 abstract class SnackbarService {
+  static OverlayEntry? _currentSnackbar;
+
+  static void show(
+    String message, {
+    String? title,
+    IconData? icon,
+    Color? backgroundColor,
+    Duration duration = const Duration(seconds: 3),
+    VoidCallback? onTap,
+  }) {
+    _dismiss();
+
+    final overlayState = getx.Get.overlayContext;
+    if (overlayState == null) {
+      return;
+    }
+
+    _currentSnackbar = OverlayEntry(
+      builder: (context) => _SnackbarWidget(
+        message: message,
+        title: title,
+        icon: icon ?? Icons.notifications_outlined,
+        backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
+        duration: duration,
+        onTap: onTap,
+        onDismiss: _dismiss,
+      ),
+    );
+
+    Overlay.of(overlayState).insert(_currentSnackbar!);
+  }
+
+  static void showSuccess(String message, {String? title, Duration? duration}) {
+    show(
+      message,
+      title: title,
+      icon: Icons.check_circle_rounded,
+      backgroundColor: AppTheme.success,
+      duration: duration ?? const Duration(seconds: 3),
+    );
+  }
+
+  static void showError(String message, {String? title, Duration? duration}) {
+    show(
+      message,
+      title: title,
+      icon: Icons.error_rounded,
+      backgroundColor: AppTheme.error,
+      duration: duration ?? const Duration(seconds: 4),
+    );
+  }
+
+  static void showErrorFromException(
+    dynamic error, {
+    String? title,
+    String? customMessage,
+    Duration? duration,
+  }) {
+    ErrorMessageHandler.logError(title ?? 'Error', error);
+
+    final message =
+        customMessage ?? ErrorMessageHandler.getUserFriendlyMessage(error);
+
+    showError(message, title: title, duration: duration);
+  }
+
+  static void showWarning(String message, {String? title, Duration? duration}) {
+    show(
+      message,
+      title: title,
+      icon: Icons.warning_rounded,
+      backgroundColor: AppTheme.warning,
+      duration: duration ?? const Duration(seconds: 3),
+    );
+  }
+
+  static void showInfo(String message, {String? title, Duration? duration}) {
+    show(
+      message,
+      title: title,
+      icon: Icons.info_rounded,
+      backgroundColor: AppTheme.primaryBlueDark,
+      duration: duration ?? const Duration(seconds: 3),
+    );
+  }
+
+  static void showLoading(String message, {String? title}) {
+    _dismiss();
+
+    final overlayState = getx.Get.overlayContext;
+    if (overlayState == null) return;
+
+    _currentSnackbar = OverlayEntry(
+      builder: (context) => _SnackbarWidget(
+        message: message,
+        title: title,
+        icon: Icons.hourglass_empty_rounded,
+        backgroundColor: AppTheme.primaryBlueDark,
+        duration: const Duration(days: 365),
+        showLoading: true,
+        onDismiss: _dismiss,
+      ),
+    );
+
+    Overlay.of(overlayState).insert(_currentSnackbar!);
+  }
+
+  static void _dismiss() {
+    _currentSnackbar?.remove();
+    _currentSnackbar = null;
+  }
+
+  static void closeAll() => _dismiss();
+
+  static void close() => _dismiss();
+
   static void showSnackbar(
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    print('SNACKBAR: ' + message);
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    scaffoldMessenger.hideCurrentSnackBar();
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppTheme.textWhite.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(
-                Icons.notifications_outlined,
-                color: AppTheme.textWhite,
-                size: 18,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: "Poppins",
-                  color: AppTheme.textWhite,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: AppTheme.primaryBlueDark,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: duration,
-        action: action,
-        elevation: 6,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    );
+    show(message, duration: duration);
   }
 
-  static void showSuccess(
+  static void showSuccessContext(
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showTypedSnackbar(
-      context,
-      message,
-      SnackbarType.success,
-      duration: duration,
-      action: action,
-    );
+    showSuccess(message, duration: duration);
   }
 
-  static void showError(
+  static void showErrorContext(
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 4),
     SnackBarAction? action,
   }) {
-    // Clean up the error message
-    final cleanMessage = ErrorMessageHandler.getUserFriendlyMessage(message);
-    _showTypedSnackbar(
-      context,
-      cleanMessage,
-      SnackbarType.error,
-      duration: duration,
-      action: action,
-    );
+    showError(message, duration: duration);
   }
 
-  /// Show error from exception - logs full details internally
-  static void showErrorFromException(
+  static void showErrorFromExceptionContext(
     BuildContext context,
     dynamic error, {
     String? customMessage,
     Duration duration = const Duration(seconds: 4),
     SnackBarAction? action,
   }) {
-    // Log full error details for debugging
-    ErrorMessageHandler.logError('Snackbar Error', error);
-
-    // Show user-friendly message
-    final message =
-        customMessage ?? ErrorMessageHandler.getUserFriendlyMessage(error);
-    _showTypedSnackbar(
-      context,
-      message,
-      SnackbarType.error,
+    showErrorFromException(
+      error,
+      customMessage: customMessage,
       duration: duration,
-      action: action,
     );
   }
 
-  static void showWarning(
+  static void showWarningContext(
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showTypedSnackbar(
-      context,
-      message,
-      SnackbarType.warning,
-      duration: duration,
-      action: action,
-    );
+    showWarning(message, duration: duration);
   }
 
-  static void showInfo(
+  static void showInfoContext(
     BuildContext context,
     String message, {
     Duration duration = const Duration(seconds: 3),
     SnackBarAction? action,
   }) {
-    _showTypedSnackbar(
-      context,
-      message,
-      SnackbarType.info,
-      duration: duration,
-      action: action,
-    );
-  }
-
-  static void _showTypedSnackbar(
-    BuildContext context,
-    String message,
-    SnackbarType type, {
-    Duration duration = const Duration(seconds: 3),
-    SnackBarAction? action,
-  }) {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    scaffoldMessenger.hideCurrentSnackBar();
-
-    final config = _getSnackbarConfig(type);
-
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(6),
-              decoration: BoxDecoration(
-                color: AppTheme.textWhite.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: Icon(config.icon, color: AppTheme.textWhite, size: 18),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                message,
-                style: const TextStyle(
-                  fontSize: 14,
-                  fontFamily: "Poppins",
-                  color: AppTheme.textWhite,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: config.color,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: duration,
-        action: action,
-        elevation: 6,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    );
-  }
-
-  static void showCustom(
-    BuildContext context, {
-    required String message,
-    Color backgroundColor = AppTheme.textBlack,
-    Color textColor = AppTheme.textWhite,
-    IconData? icon,
-    Duration duration = const Duration(seconds: 3),
-    SnackBarAction? action,
-    double fontSize = 14,
-    FontWeight fontWeight = FontWeight.w500,
-  }) {
-    final scaffoldMessenger = ScaffoldMessenger.of(context);
-    scaffoldMessenger.hideCurrentSnackBar();
-
-    scaffoldMessenger.showSnackBar(
-      SnackBar(
-        content: Row(
-          children: [
-            if (icon != null) ...[
-              Container(
-                padding: const EdgeInsets.all(6),
-                decoration: BoxDecoration(
-                  color: textColor.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: Icon(icon, color: textColor, size: 18),
-              ),
-              const SizedBox(width: 12),
-            ],
-            Expanded(
-              child: Text(
-                message,
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontFamily: "Poppins",
-                  color: textColor,
-                  fontWeight: fontWeight,
-                ),
-              ),
-            ),
-          ],
-        ),
-        backgroundColor: backgroundColor,
-        behavior: SnackBarBehavior.floating,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-        margin: const EdgeInsets.all(16),
-        duration: duration,
-        action: action,
-        elevation: 6,
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      ),
-    );
-  }
-
-  static void clearAll(BuildContext context) {
-    ScaffoldMessenger.of(context).clearSnackBars();
-  }
-
-  static _SnackbarConfig _getSnackbarConfig(SnackbarType type) {
-    switch (type) {
-      case SnackbarType.success:
-        return _SnackbarConfig(
-          color: AppTheme.success,
-          icon: Icons.check_circle_rounded,
-        );
-      case SnackbarType.error:
-        return _SnackbarConfig(
-          color: AppTheme.error,
-          icon: Icons.error_rounded,
-        );
-      case SnackbarType.warning:
-        return _SnackbarConfig(
-          color: AppTheme.warning,
-          icon: Icons.warning_rounded,
-        );
-      case SnackbarType.info:
-        return _SnackbarConfig(color: AppTheme.info, icon: Icons.info_rounded);
-    }
+    showInfo(message, duration: duration);
   }
 }
 
-class _SnackbarConfig {
-  final Color color;
+class _SnackbarWidget extends StatefulWidget {
+  final String message;
+  final String? title;
   final IconData icon;
+  final Color backgroundColor;
+  final Duration duration;
+  final VoidCallback? onTap;
+  final VoidCallback onDismiss;
+  final bool showLoading;
 
-  _SnackbarConfig({required this.color, required this.icon});
+  const _SnackbarWidget({
+    required this.message,
+    this.title,
+    required this.icon,
+    required this.backgroundColor,
+    required this.duration,
+    this.onTap,
+    required this.onDismiss,
+    this.showLoading = false,
+  });
+
+  @override
+  State<_SnackbarWidget> createState() => _SnackbarWidgetState();
+}
+
+class _SnackbarWidgetState extends State<_SnackbarWidget>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<Offset> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 400),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<Offset>(
+      begin: const Offset(0, -1.5),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutBack));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeIn));
+
+    _controller.forward();
+
+    if (!widget.showLoading) {
+      Future.delayed(widget.duration, _dismiss);
+    }
+  }
+
+  void _dismiss() async {
+    if (!mounted) return;
+
+    await _controller.reverse();
+    widget.onDismiss();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      top: 50,
+      left: 16,
+      right: 16,
+      child: SlideTransition(
+        position: _slideAnimation,
+        child: FadeTransition(
+          opacity: _fadeAnimation,
+          child: Material(
+            color: Colors.transparent,
+            child: GestureDetector(
+              onTap: widget.onTap ?? _dismiss,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 16,
+                ),
+                decoration: BoxDecoration(
+                  color: widget.backgroundColor,
+                  borderRadius: BorderRadius.circular(12),
+                  boxShadow: [
+                    BoxShadow(
+                      color: widget.backgroundColor.withValues(alpha: 0.3),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        shape: BoxShape.circle,
+                      ),
+                      child: widget.showLoading
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(
+                                  Colors.white,
+                                ),
+                              ),
+                            )
+                          : Icon(widget.icon, color: Colors.white, size: 22),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (widget.title != null && widget.title!.isNotEmpty)
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 4),
+                              child: Text(
+                                widget.title!,
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  fontFamily: 'Poppins',
+                                ),
+                              ),
+                            ),
+                          Text(
+                            widget.message,
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 14,
+                              fontWeight: FontWeight.w400,
+                              fontFamily: 'Poppins',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    if (!widget.showLoading)
+                      IconButton(
+                        icon: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                        onPressed: _dismiss,
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                      ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }

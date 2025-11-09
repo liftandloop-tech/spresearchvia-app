@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 
 class FilterChipButton extends StatelessWidget {
   const FilterChipButton({
@@ -19,22 +20,24 @@ class FilterChipButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
-          color: isActive ? Color(0xff2C7F38) : Colors.white,
-          borderRadius: BorderRadius.circular(24),
+          color: isActive ? AppTheme.primaryGreen : Colors.white,
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? Color(0xff2C7F38) : Color(0xffE5E7EB),
-            width: 1,
+            color: isActive ? AppTheme.primaryGreen : Color(0xFFE2E8F0),
+            width: 1.5,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(
-              icon,
-              size: 18,
-              color: isActive ? Colors.white : Color(0xff6B7280),
+              icon == Icons.expand_more
+                  ? (isActive ? Icons.filter_alt : Icons.calendar_today)
+                  : icon,
+              size: 16,
+              color: isActive ? Colors.white : AppTheme.textGrey,
             ),
             SizedBox(width: 6),
             Text(
@@ -43,13 +46,15 @@ class FilterChipButton extends StatelessWidget {
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
-                color: isActive ? Colors.white : Color(0xff1F2937),
+                color: isActive ? Colors.white : AppTheme.primaryBlueDark,
               ),
             ),
-            if (isActive) ...[
-              SizedBox(width: 6),
-              Icon(Icons.keyboard_arrow_down, size: 18, color: Colors.white),
-            ],
+            SizedBox(width: 4),
+            Icon(
+              Icons.expand_more,
+              size: 18,
+              color: isActive ? Colors.white : AppTheme.textGrey,
+            ),
           ],
         ),
       ),

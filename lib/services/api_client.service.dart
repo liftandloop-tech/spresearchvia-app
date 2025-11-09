@@ -42,8 +42,6 @@ class ApiClient {
       options.headers['Authorization'] = token;
     }
 
-    print('🌐 REQUEST[${options.method}] => ${options.uri}');
-    print('📦 Headers: ${options.headers}');
     if (options.data != null) {
       print('📤 Body: ${options.data}');
     }
@@ -52,23 +50,26 @@ class ApiClient {
   }
 
   void _onResponse(Response response, ResponseInterceptorHandler handler) {
-    print(
-      '✅ RESPONSE[${response.statusCode}] => ${response.requestOptions.uri}',
-    );
-    print('📥 Data: ${response.data}');
     handler.next(response);
   }
 
   void _onError(DioException error, ErrorInterceptorHandler handler) {
-    print(
-      '❌ ERROR[${error.response?.statusCode}] => ${error.requestOptions.uri}',
-    );
-    print('🔴 Message: ${error.message}');
-    print('🔴 Response: ${error.response?.data}');
-
     if (error.response?.statusCode == 401) {
       _storage.clearAuthData();
-      getx.Get.offAllNamed('/login');
+
+      final currentRoute = getx.Get.currentRoute;
+      if (currentRoute != '/login' &&
+          currentRoute != '/signup' &&
+          currentRoute != '/get-started' &&
+          currentRoute != '/' &&
+          currentRoute != '/otp') {
+        getx.Get.offAllNamed('/get-started');
+      }
+
+      handler.resolve(
+        Response(requestOptions: error.requestOptions, statusCode: 401),
+      );
+      return;
     }
 
     handler.next(error);

@@ -83,7 +83,6 @@ class ReminderPopup extends StatelessWidget {
                 fontSize: 15,
                 fontWeight: FontWeight.w400,
                 color: Colors.grey.shade600,
-                height: 1.5,
               ),
             ),
             const SizedBox(height: 32),

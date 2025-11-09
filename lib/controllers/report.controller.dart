@@ -2,9 +2,11 @@ import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
 import 'package:path/path.dart' as path;
+import 'package:spresearchvia2/core/config/api.config.dart';
 import 'package:spresearchvia2/core/utils/file_validator.dart';
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 
 class Report {
   final String id;
@@ -80,7 +82,7 @@ class ReportController extends GetxController {
     try {
       isLoading.value = true;
 
-      final response = await _apiClient.get('/reports/report-list');
+      final response = await _apiClient.get(ApiConfig.reportList);
 
       if (response.statusCode == 200) {
         final data = response.data;
@@ -98,7 +100,6 @@ class ReportController extends GetxController {
         }
 
         if (reportList == null || reportList is! List) {
-          print('Warning: Expected List but got ${reportList?.runtimeType}');
           reportList = [];
         }
 
@@ -110,7 +111,7 @@ class ReportController extends GetxController {
       }
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
     } finally {
       isLoading.value = false;
     }
@@ -121,7 +122,7 @@ class ReportController extends GetxController {
       isLoading.value = true;
 
       final response = await _apiClient.get(
-        '/reports/download-report/$reportId',
+        ApiConfig.downloadReport(reportId),
         options: dio.Options(
           responseType: dio.ResponseType.bytes,
           followRedirects: false,
@@ -135,20 +136,12 @@ class ReportController extends GetxController {
         if (data is Map<String, dynamic>) {
           final downloadUrl = data['url'] ?? data['downloadUrl'];
           if (downloadUrl != null) {
-            Get.snackbar(
-              'Success',
-              'Report ready for download',
-              snackPosition: SnackPosition.BOTTOM,
-            );
+            SnackbarService.showSuccess('Report ready for download');
             return downloadUrl;
           }
         }
 
-        Get.snackbar(
-          'Success',
-          'Report downloaded successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Report downloaded successfully');
 
         return 'downloaded';
       }
@@ -156,7 +149,7 @@ class ReportController extends GetxController {
       return null;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return null;
     } finally {
       isLoading.value = false;
@@ -175,7 +168,7 @@ class ReportController extends GetxController {
 
       final fileValidation = FileValidator.validateDocumentFile(reportFile);
       if (fileValidation != null) {
-        Get.snackbar('Error', fileValidation);
+        SnackbarService.showError(fileValidation);
         return false;
       }
 
@@ -191,16 +184,12 @@ class ReportController extends GetxController {
       });
 
       final response = await _apiClient.uploadFile(
-        '/reports/create-report',
+        ApiConfig.createReport,
         formData: formData,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
-        Get.snackbar(
-          'Success',
-          'Report created successfully',
-          snackPosition: SnackPosition.BOTTOM,
-        );
+        SnackbarService.showSuccess('Report created successfully');
 
         await fetchReportList();
 
@@ -210,7 +199,7 @@ class ReportController extends GetxController {
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      Get.snackbar('Error', error.message, snackPosition: SnackPosition.BOTTOM);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;

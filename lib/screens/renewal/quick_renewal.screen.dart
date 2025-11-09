@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
 import 'package:spresearchvia2/controllers/user.controller.dart';
 import 'package:spresearchvia2/screens/tabs.screen.dart';
@@ -26,24 +26,23 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
   @override
   void initState() {
     super.initState();
-    // Check if there's an active plan, redirect if none
+
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!planController.hasActivePlan) {
         Get.off(() => TabsScreen(initialIndex: 2));
       }
     });
-    // Refresh plan data when screen opens
+
     planController.fetchUserPlan();
   }
 
   Future<void> _renewPlan() async {
     final plan = planController.currentPlan.value;
     if (plan == null) {
-      CustomSnackbar.showWarning('No active plan found');
+      SnackbarService.showWarning('No active plan found');
       return;
     }
 
-    // Show loading
     Get.dialog(
       Center(
         child: Container(
@@ -78,31 +77,27 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         amount: plan.amount,
       );
 
-      // Close loading dialog
       Get.back();
 
       if (orderData == null) {
-        CustomSnackbar.showError(
+        SnackbarService.showError(
           'Failed to create renewal order. Please try again.',
         );
         return;
       }
 
-      // Show success and inform about payment
-      CustomSnackbar.showSuccess(
+      SnackbarService.showSuccess(
         'Renewal order created successfully. You can now proceed with payment.',
         title: 'Order Created',
       );
 
-      // Refresh plan data
       await planController.fetchUserPlan();
     } catch (e) {
-      // Close loading dialog if still open
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
 
-      CustomSnackbar.showError('Failed to initiate renewal: ${e.toString()}');
+      SnackbarService.showError('Failed to initiate renewal: ${e.toString()}');
     }
   }
 
@@ -171,7 +166,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             ? '${plan.validityDays} days'
             : 'N/A';
 
-        // Format expiry date as dd/MM/yyyy
         String expiryDateText = 'N/A';
         if (plan.expiryDate != null) {
           final expiry = plan.expiryDate!;
@@ -179,7 +173,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
               '${expiry.day.toString().padLeft(2, '0')}/${expiry.month.toString().padLeft(2, '0')}/${expiry.year}';
         }
 
-        // Default benefits if none provided
         final benefits = plan.features.isNotEmpty
             ? plan.features
             : [
@@ -195,7 +188,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Show expiry warning - red if ≤7 days, neutral otherwise
                 if (daysRemaining >= 0)
                   ExpiryWarningCard(
                     daysRemaining: daysRemaining,
@@ -208,7 +200,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                 if (daysRemaining >= 0) SizedBox(height: 24),
                 SectionHeader(title: 'Current Plan'),
                 SizedBox(height: 8),
-                // Greeting with user name when available
+
                 if (userController.currentUser.value != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
@@ -233,7 +225,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   expiryDate: expiryDateText,
                 ),
                 SizedBox(height: 24),
-                // Amount to pay summary
+
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Row(

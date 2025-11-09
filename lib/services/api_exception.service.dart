@@ -43,7 +43,6 @@ class ApiErrorHandler {
           );
       }
     } else {
-      // Use error message handler for non-Dio errors
       ErrorMessageHandler.logError('API Error', error);
       return ApiException(
         message: ErrorMessageHandler.getUserFriendlyMessage(error),
@@ -64,7 +63,6 @@ class ApiErrorHandler {
       message = data;
     }
 
-    // Make message concise and user-friendly
     if (message.length > 50) {
       message = ErrorMessageHandler.getUserFriendlyMessage(message);
     }
@@ -87,7 +85,7 @@ class ApiErrorHandler {
 
       case 401:
         return ApiException(
-          message: 'Session Expired',
+          message: message.isNotEmpty ? message : 'Unauthorized',
           statusCode: statusCode,
           data: data,
         );

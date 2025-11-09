@@ -13,6 +13,7 @@ class TitleField extends StatefulWidget {
     this.inputFormatters,
     this.keyboardType,
     this.maxLength,
+    this.readOnly = false,
   });
 
   final String title;
@@ -24,6 +25,7 @@ class TitleField extends StatefulWidget {
   final List<TextInputFormatter>? inputFormatters;
   final TextInputType? keyboardType;
   final int? maxLength;
+  final bool readOnly;
 
   @override
   State<TitleField> createState() => _TitleFieldState();
@@ -71,6 +73,7 @@ class _TitleFieldState extends State<TitleField> {
                 inputFormatters: widget.inputFormatters,
                 keyboardType: widget.keyboardType,
                 maxLength: widget.maxLength,
+                readOnly: widget.readOnly,
                 style: const TextStyle(
                   fontSize: 14,
                   color: Color(0xff11416B),

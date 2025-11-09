@@ -159,4 +159,20 @@ abstract class ValidationService {
     }
     return null;
   }
+
+  static String? getPANError(String input) {
+    if (input.isEmpty) return 'Please enter PAN card number';
+    if (!validatePAN(input)) {
+      return 'Please enter a valid PAN number (e.g., ABCDE1234F)';
+    }
+    return null;
+  }
+
+  static String? getAadhaarError(String input) {
+    if (input.isEmpty) return 'Please enter Aadhar number';
+    if (!validateAadhaar(input)) {
+      return 'Please enter a valid 12-digit Aadhar number';
+    }
+    return null;
+  }
 }

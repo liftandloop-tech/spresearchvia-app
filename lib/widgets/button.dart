@@ -12,6 +12,7 @@ class Button extends StatelessWidget {
     this.onTap,
     this.icon,
     this.iconRight,
+    this.showLoading = false,
   });
 
   final String title;
@@ -19,6 +20,7 @@ class Button extends StatelessWidget {
   final GestureTapCallback? onTap;
   final IconData? icon;
   final IconData? iconRight;
+  final bool showLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -71,20 +73,22 @@ class Button extends StatelessWidget {
           border: borderColor != null
               ? Border.all(color: borderColor, width: 1.5)
               : null,
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.shadowMedium,
-              blurRadius: 10,
-              spreadRadius: 0,
-              offset: const Offset(0, 5),
-            ),
-            BoxShadow(
-              color: AppTheme.shadowMedium,
-              blurRadius: 3,
-              spreadRadius: 0,
-              offset: const Offset(0, 2),
-            ),
-          ],
+          boxShadow: buttonType == ButtonType.greyBorder
+              ? null
+              : [
+                  BoxShadow(
+                    color: AppTheme.shadowMedium,
+                    blurRadius: 10,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 5),
+                  ),
+                  BoxShadow(
+                    color: AppTheme.shadowMedium,
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -98,7 +102,7 @@ class Button extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(iconRight, color: iconColor, size: 20),
             ],
-            if (onTap == null) ...[
+            if (showLoading) ...[
               const SizedBox(width: 8),
               SizedBox(
                 width: 20,

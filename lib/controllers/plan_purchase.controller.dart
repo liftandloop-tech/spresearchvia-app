@@ -1,8 +1,9 @@
 import 'package:get/get.dart';
+import 'package:spresearchvia2/core/config/api.config.dart';
 import 'package:spresearchvia2/services/api_client.service.dart';
 import 'package:spresearchvia2/services/api_exception.service.dart';
 import 'package:spresearchvia2/services/storage.service.dart';
-import 'package:spresearchvia2/core/utils/custom_snackbar.dart';
+import 'package:spresearchvia2/services/snackbar.service.dart';
 
 class Plan {
   final String id;
@@ -86,38 +87,34 @@ class PlanPurchaseController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return null;
       }
 
       isLoading.value = true;
 
+      final requestData = {'packageName': packageName, 'amount': amount};
+
       final response = await _apiClient.post(
-        '/user/purchase/plan/$uid',
-        data: {'packageName': packageName, 'amount': amount},
+        ApiConfig.purchasePlan(uid),
+        data: requestData,
       );
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         final orderData = data['data'] ?? data;
 
-        // Extract order details from response
-        // Backend returns: { data: { orderCreate, userPlan } }
         final orderCreate = orderData['orderCreate'];
         final userPlan = orderData['userPlan'];
 
         if (orderCreate != null) {
-          // Return a flattened structure with razorpayOrderId at top level
           return {
             'razorpayOrderId': orderCreate['razorpayOrderId'],
-            'paymentId':
-                orderCreate['_id'], // Store payment document ID for verification
+            'paymentId': orderCreate['_id'],
             'orderCreate': orderCreate,
             'userPlan': userPlan,
           };
         }
-
-        CustomSnackbar.showSuccess('Order created successfully');
 
         return orderData as Map<String, dynamic>?;
       }
@@ -125,35 +122,10 @@ class PlanPurchaseController extends GetxController {
       return null;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      CustomSnackbar.showError(error.message);
+      SnackbarService.showError(error.message);
       return null;
     } finally {
       isLoading.value = false;
-    }
-  }
-
-  /// Mark payment as failed when user cancels or abandons payment
-  Future<bool> markPaymentFailed({
-    required String paymentId,
-    String? reason,
-  }) async {
-    try {
-      final response = await _apiClient.patch(
-        '/user/purchase/payment/failed/$paymentId',
-        data: {
-          'status': 'failed',
-          'reason': reason ?? 'Payment cancelled by user',
-        },
-      );
-
-      if (response.statusCode == 200) {
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      print('Error marking payment as failed: $e');
-      return false;
     }
   }
 
@@ -167,12 +139,12 @@ class PlanPurchaseController extends GetxController {
       isLoading.value = true;
 
       final response = await _apiClient.post(
-        '/user/purchase/razorpay/verify',
+        ApiConfig.verifyPayment,
         data: {
           'paymentId': paymentId,
           'razorpay_order_id': razorpayOrderId,
           'razorpay_payment_id': razorpayPaymentId,
-          'signature': razorpaySignature,
+          'razorpay_signature': razorpaySignature,
         },
       );
 
@@ -181,12 +153,12 @@ class PlanPurchaseController extends GetxController {
         final success = data['success'] ?? false;
 
         if (success) {
-          CustomSnackbar.showSuccess('Payment verified successfully');
+          SnackbarService.showSuccess('Payment verified successfully');
 
           await fetchUserPlan();
           return true;
         } else {
-          CustomSnackbar.showError(
+          SnackbarService.showError(
             data['message'] ?? 'Payment verification failed',
           );
           return false;
@@ -196,7 +168,7 @@ class PlanPurchaseController extends GetxController {
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      CustomSnackbar.showError(error.message);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -208,7 +180,7 @@ class PlanPurchaseController extends GetxController {
       final uid = userId;
       if (uid == null) return;
 
-      final response = await _apiClient.get('/user/purchase/user-plan/$uid');
+      final response = await _apiClient.get(ApiConfig.getUserPlan(uid));
       if (response.statusCode == 200) {
         final data = response.data;
         final planData = data['data'] ?? data['plan'];
@@ -226,7 +198,7 @@ class PlanPurchaseController extends GetxController {
       }
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      print('Error fetching user plan: ${error.message}');
+      print(error);
     }
   }
 
@@ -234,20 +206,20 @@ class PlanPurchaseController extends GetxController {
     try {
       final uid = userId;
       if (uid == null) {
-        CustomSnackbar.showWarning('User not logged in');
+        SnackbarService.showWarning('User not logged in');
         return false;
       }
 
       isLoading.value = true;
 
       final response = await _apiClient.patch(
-        '/user/purchase/expiry-reminders/$uid',
+        ApiConfig.toggleExpiryReminders(uid),
         data: {'expiryRemindersEnabled': enabled},
       );
 
       if (response.statusCode == 200) {
         expiryRemindersEnabled.value = enabled;
-        CustomSnackbar.showSuccess(
+        SnackbarService.showSuccess(
           'Expiry reminders ${enabled ? 'enabled' : 'disabled'}',
         );
         return true;
@@ -256,7 +228,7 @@ class PlanPurchaseController extends GetxController {
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      CustomSnackbar.showError(error.message);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -286,7 +258,7 @@ class PlanPurchaseController extends GetxController {
       if (uid == null) return [];
 
       final response = await _apiClient.get(
-        '/user/purchase/user-plan/$uid',
+        ApiConfig.getUserPlan(uid),
         queryParameters: {'page': page, 'pageSize': pageSize},
       );
 
@@ -302,7 +274,7 @@ class PlanPurchaseController extends GetxController {
       return [];
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-      print('Error fetching subscription history: ${error.message}');
+      print(error);
       return [];
     }
   }

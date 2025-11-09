@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import 'package:spresearchvia2/core/routes/app_routes.dart';
 import 'package:spresearchvia2/widgets/app_logo.dart';
 import 'package:spresearchvia2/screens/splash/widgets/animated_loading_dots.dart';
 import 'package:spresearchvia2/screens/splash/widgets/animated_loading_bar.dart';
 import 'package:spresearchvia2/screens/splash/widgets/info_item.dart';
-
-import '../auth/login.screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -27,9 +27,7 @@ class _SplashScreenState extends State<SplashScreen>
 
     Future.delayed(const Duration(seconds: 2), () {
       if (mounted) {
-        Navigator.of(context).pushReplacement(
-          MaterialPageRoute(builder: (context) => const LoginScreen()),
-        );
+        Get.offAllNamed(AppRoutes.getStarted);
       }
     });
   }

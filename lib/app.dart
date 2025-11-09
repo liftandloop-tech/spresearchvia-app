@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'screens/splash/splash.screen.dart';
-import 'screens/auth/login.screen.dart';
+import 'package:spresearchvia2/core/routes/app_routes.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
@@ -17,12 +16,8 @@ class App extends StatelessWidget {
         appBarTheme: AppBarTheme(color: AppTheme.backgroundWhite),
         fontFamily: 'Poppins',
       ),
-      initialRoute: '/',
-      getPages: [
-        GetPage(name: '/', page: () => SplashScreen()),
-        GetPage(name: '/login', page: () => LoginScreen()),
-      ],
-      home: SplashScreen(),
+      initialRoute: AppRoutes.splash,
+      getPages: AppRoutes.pages,
     );
   }
 }

@@ -1,13 +1,9 @@
-/// Error Message Handler
-/// Converts technical errors into user-friendly messages
 class ErrorMessageHandler {
-  /// Get user-friendly error message from exception
   static String getUserFriendlyMessage(dynamic error) {
     if (error == null) return 'Something went wrong';
 
     final errorString = error.toString().toLowerCase();
 
-    // Permission errors
     if (errorString.contains('camera_access_denied') ||
         errorString.contains('camera access') ||
         errorString.contains('camera permission')) {
@@ -27,7 +23,6 @@ class ErrorMessageHandler {
       return 'Permission Denied';
     }
 
-    // Network errors
     if (errorString.contains('network') ||
         errorString.contains('connection') ||
         errorString.contains('timeout') ||
@@ -35,7 +30,6 @@ class ErrorMessageHandler {
       return 'Network Error';
     }
 
-    // File/Upload errors
     if (errorString.contains('file not found')) {
       return 'File Not Found';
     }
@@ -48,9 +42,8 @@ class ErrorMessageHandler {
       return 'File Too Large';
     }
 
-    // Authentication errors
     if (errorString.contains('unauthorized') || errorString.contains('401')) {
-      return 'Session Expired';
+      return 'Unauthorized';
     }
     if (errorString.contains('forbidden') || errorString.contains('403')) {
       return 'Access Forbidden';
@@ -60,7 +53,6 @@ class ErrorMessageHandler {
       return 'Invalid Credentials';
     }
 
-    // Validation errors
     if (errorString.contains('invalid email')) {
       return 'Invalid Email';
     }
@@ -71,7 +63,6 @@ class ErrorMessageHandler {
       return 'Required Field Missing';
     }
 
-    // Payment errors
     if (errorString.contains('payment failed') ||
         errorString.contains('transaction failed')) {
       return 'Payment Failed';
@@ -81,7 +72,6 @@ class ErrorMessageHandler {
       return 'Payment Cancelled';
     }
 
-    // Server errors
     if (errorString.contains('500') ||
         errorString.contains('internal server')) {
       return 'Server Error';
@@ -94,21 +84,14 @@ class ErrorMessageHandler {
       return 'Not Found';
     }
 
-    // Generic fallback
     return 'Something Went Wrong';
   }
 
-  /// Log full error details for debugging (only in debug mode)
   static void logError(
     String context,
     dynamic error, [
     StackTrace? stackTrace,
   ]) {
-    print('❌ ERROR in $context:');
-    print('   Error: $error');
-    if (stackTrace != null) {
-      print('   Stack: $stackTrace');
-    }
-    // TODO: Send to crash reporting service (Firebase Crashlytics, Sentry, etc.)
+    if (stackTrace != null) {}
   }
 }

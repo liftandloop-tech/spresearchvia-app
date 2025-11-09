@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia2/core/theme/app_theme.dart';
 
 class ActiveFilterChip extends StatelessWidget {
   const ActiveFilterChip({super.key, required this.label});
@@ -10,8 +11,8 @@ class ActiveFilterChip extends StatelessWidget {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Color(0xff2C7F38),
-        borderRadius: BorderRadius.circular(16),
+        color: AppTheme.primaryGreen,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,

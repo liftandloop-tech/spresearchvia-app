@@ -1,39 +1,45 @@
 abstract class ApiConfig {
   static const String baseUrl = 'https://spresearchviaapp.koyeb.app/api';
 
-  static const String createUser = '$baseUrl/user/create-user';
-  static const String loginUser = '$baseUrl/user/login';
-  static const String changeImage = '$baseUrl/user/image-change';
-  static String resetPassword(String token) =>
-      '$baseUrl/user/reset-password/$token';
+  static const String createUser = '/user/create-user';
+  static const String loginUser = '/user/login';
+  static const String logoutUser = '/user/logout';
+  static const String verifyOTP = '/user/verify-otp';
+  static const String requestOTP = '/user/send-otp';
   static String forgotPassword(String email) =>
-      '$baseUrl/user/forget-password?email=$email';
-  static const String logoutUser = '$baseUrl/user/logout';
-  static String updateProfile(String userId) => '$baseUrl/user/update/$userId';
+      '/user/forget-password?email=$email';
+  static String resetPassword(String token) => '/user/reset-password/$token';
 
-  static const String verifyOTP = '$baseUrl/user/verify-otp';
-  static const String requestOTP = '$baseUrl/user/send-otp';
+  static String updateProfile(String userId) => '/user/update/$userId';
+  static const String changeImage = '/user/image-change';
+  static const String userList = '/user/user-list';
+  static String deleteUser(String userId) => '/user/delete/$userId';
 
   static String uploadAadhar(String userId) =>
-      '$baseUrl/user/kyc/aadhaar-upload/$userId?type=aadhaar';
+      '/user/kyc/aadhaar-upload/$userId?type=aadhaar';
   static String uploadPancard(String userId) =>
-      '$baseUrl/user/kyc/pancard-upload/$userId?type=pancard';
-  static String documentKYC(String userId) =>
-      '$baseUrl/user/kyc/document-kyc/$userId';
+      '/user/kyc/pancard-upload/$userId?type=pancard';
+  static String documentKYC(String userId) => '/user/kyc/document-kyc/$userId';
 
-  static const String purchasePlan = '$baseUrl/user/purchase/plan';
-  static const String createPackage = '$baseUrl/user/plan/package-create';
+  static String purchasePlan(String userId) => '/user/purchase/plan/$userId';
+  static const String verifyPayment = '/user/purchase/razorpay/verify';
+  static String getUserPlan(String userId) =>
+      '/user/purchase/user-plan/$userId';
+  static String toggleExpiryReminders(String userId) =>
+      '/user/purchase/expiry-reminders/$userId';
 
-  static const String createReport =
-      '$baseUrl/reports/create-report?type=report';
+  static const String createPackage = '/user/plan/package-create';
+
+  static const String createReport = '/reports/create-report?type=report';
+  static const String reportList = '/reports/report-list';
   static String downloadReport(String reportId) =>
-      '$baseUrl/reports/download-report/$reportId';
-  static String reportList({
+      '/reports/download-report/$reportId';
+  static String reportListWithFilters({
     String? category,
     String search = '',
     String? date,
   }) {
-    final buffer = StringBuffer('$baseUrl/reports/report-list?');
+    final buffer = StringBuffer('/reports/report-list?');
     if (category != null && category.isNotEmpty)
       buffer.write('category=$category&');
     buffer.write('search=${Uri.encodeComponent(search)}&');
