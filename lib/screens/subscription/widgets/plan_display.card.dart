@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../../../core/utils/responsive.dart';
+import '../../../core/constants/app_dimensions.dart';
+import '../../../core/theme/app_theme.dart';
 
 class PlanDisplayCard extends StatelessWidget {
   const PlanDisplayCard({
@@ -28,19 +31,21 @@ class PlanDisplayCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive.of(context);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(20),
+        padding: responsive.padding(all: AppDimensions.paddingLarge),
         decoration: BoxDecoration(
-          color: isDark ? Color(0xff163174) : Colors.white,
-          border: Border.all(color: Color(0xffE5E7EB), width: 1),
-          borderRadius: BorderRadius.circular(16),
+          color: isDark ? AppTheme.primaryBlueDark : Colors.white,
+          border: Border.all(color: AppTheme.borderGrey, width: AppDimensions.borderThin),
+          borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusLarge)),
           boxShadow: [
             BoxShadow(
-              offset: Offset(0, 2),
+              offset: const Offset(0, 2),
               blurRadius: 8,
-              color: Colors.black.withValues(alpha: 0.05),
+              color: AppTheme.shadowLight,
             ),
           ],
         ),
@@ -51,32 +56,35 @@ class PlanDisplayCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 20,
-                        fontWeight: FontWeight.w600,
-                        color: isDark ? Colors.white : Color(0xff163174),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: responsive.sp(20),
+                          fontWeight: FontWeight.w600,
+                          color: isDark ? Colors.white : AppTheme.primaryBlueDark,
+                        ),
                       ),
-                    ),
-                    SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 14,
-                        fontWeight: FontWeight.w400,
-                        color: isDark
-                            ? Colors.white.withValues(alpha: 0.7)
-                            : Color(0xff6B7280),
+                      SizedBox(height: responsive.spacing(AppDimensions.spacing4)),
+                      Text(
+                        subtitle,
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: responsive.sp(14),
+                          fontWeight: FontWeight.w400,
+                          color: isDark
+                              ? Colors.white.withValues(alpha: 0.7)
+                              : AppTheme.textGrey,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
+                SizedBox(width: responsive.spacing(AppDimensions.spacing12)),
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.end,
                   children: [
@@ -85,67 +93,75 @@ class PlanDisplayCard extends StatelessWidget {
                         originalPrice!,
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: 14,
+                          fontSize: responsive.sp(14),
                           fontWeight: FontWeight.w400,
                           color: Colors.white.withValues(alpha: 0.5),
                           decoration: TextDecoration.lineThrough,
                         ),
                       ),
-                      SizedBox(height: 2),
+                      SizedBox(height: responsive.spacing(2)),
                     ],
                     Text(
                       price,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 28,
+                        fontSize: responsive.sp(28),
                         fontWeight: FontWeight.w700,
-                        color: isDark ? Colors.white : Color(0xff163174),
+                        color: isDark ? Colors.white : AppTheme.primaryBlueDark,
                       ),
                     ),
                     Text(
                       priceUnit,
                       style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 12,
+                        fontSize: responsive.sp(12),
                         fontWeight: FontWeight.w400,
                         color: isDark
                             ? Colors.white.withValues(alpha: 0.7)
-                            : Color(0xff6B7280),
+                            : AppTheme.textGrey,
                       ),
                     ),
                   ],
                 ),
               ],
             ),
-            SizedBox(height: 16),
-            Row(
+            SizedBox(height: responsive.spacing(AppDimensions.spacing16)),
+            Wrap(
+              crossAxisAlignment: WrapCrossAlignment.center,
+              spacing: responsive.spacing(AppDimensions.spacing8),
               children: [
-                Icon(Icons.check_circle, color: Color(0xff2C7F38), size: 18),
-                SizedBox(width: 8),
+                Icon(
+                  Icons.check_circle,
+                  color: AppTheme.primaryGreen,
+                  size: responsive.spacing(AppDimensions.iconMedium),
+                ),
                 Text(
                   validity,
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14,
+                    fontSize: responsive.sp(14),
                     fontWeight: FontWeight.w500,
-                    color: isDark ? Colors.white : Color(0xff163174),
+                    color: isDark ? Colors.white : AppTheme.primaryBlueDark,
                   ),
                 ),
               ],
             ),
             if (badge != null) ...[
-              SizedBox(height: 12),
+              SizedBox(height: responsive.spacing(AppDimensions.spacing12)),
               Container(
-                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding: responsive.padding(
+                  horizontal: AppDimensions.spacing12,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
-                  color: Color(0xff1E4A7C),
-                  borderRadius: BorderRadius.circular(8),
+                  color: const Color(0xff1E4A7C),
+                  borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusSmall)),
                 ),
                 child: Text(
                   badge!,
                   style: TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 12,
+                    fontSize: responsive.sp(12),
                     fontWeight: FontWeight.w500,
                     color: Colors.white,
                   ),

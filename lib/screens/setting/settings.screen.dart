@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/setting/plan.row.dart';
-import 'package:spresearchvia2/screens/setting/setting.tile.dart';
+import 'plan.row.dart';
+import 'setting.tile.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});

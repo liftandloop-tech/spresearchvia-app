@@ -1,13 +1,28 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/routes/app_routes.dart';
+import 'core/theme/app_theme.dart';
+import 'core/routes/app_routes.dart';
+import 'core/config/app.config.dart';
+import 'controllers/auth.controller.dart';
+import 'controllers/user.controller.dart';
+import 'services/secure_storage.service.dart';
 
 class App extends StatelessWidget {
   const App({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Initialize core services and controllers
+    Get.put(SecureStorageService(), permanent: true);
+    Get.put(AuthController(), permanent: true);
+    Get.put(UserController(), permanent: true);
+    
+    // Log current app mode
+    if (AppConfig.isDevelopment) {
+      print('🔧 Running in DEVELOPMENT mode');
+      print('🔧 Payment Mock: ${AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled)}');
+    }
+    
     return GetMaterialApp(
       title: "spresearchvia",
       debugShowCheckedModeBanner: false,
@@ -16,6 +31,18 @@ class App extends StatelessWidget {
         appBarTheme: AppBarTheme(color: AppTheme.backgroundWhite),
         fontFamily: 'Poppins',
       ),
+      builder: (context, child) {
+        final mediaQueryData = MediaQuery.of(context);
+        final scale = mediaQueryData.size.width / 375.0;
+        final scaleFactor = scale.clamp(0.85, 1.15);
+
+        return MediaQuery(
+          data: mediaQueryData.copyWith(
+            textScaler: TextScaler.linear(scaleFactor),
+          ),
+          child: child!,
+        );
+      },
       initialRoute: AppRoutes.splash,
       getPages: AppRoutes.pages,
     );

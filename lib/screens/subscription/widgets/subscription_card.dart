@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/models/subscription_history.dart';
-import 'package:spresearchvia2/screens/subscription/widgets/status_badge.dart';
+import '../../../core/models/subscription_history.dart';
+import 'status_badge.dart';
 
 class SubscriptionCard extends StatelessWidget {
   const SubscriptionCard({
@@ -11,6 +11,7 @@ class SubscriptionCard extends StatelessWidget {
     required this.expiryDate,
     required this.headerStatus,
     required this.footerStatus,
+    this.onTap,
   });
 
   final String paymentDate;
@@ -19,10 +20,14 @@ class SubscriptionCard extends StatelessWidget {
   final String expiryDate;
   final SubscriptionStatus headerStatus;
   final SubscriptionStatus footerStatus;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
       margin: EdgeInsets.only(bottom: 16),
       padding: EdgeInsets.all(16),
       decoration: BoxDecoration(
@@ -155,6 +160,7 @@ class SubscriptionCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }

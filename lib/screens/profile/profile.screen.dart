@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/controllers/user.controller.dart';
-import 'package:spresearchvia2/controllers/auth.controller.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/screens/notification/notification_settings.screen.dart';
-import 'package:spresearchvia2/screens/profile/edit_profile.screen.dart';
-import 'package:spresearchvia2/screens/profile/widgets/KycStatus.Item.dart';
-import 'package:spresearchvia2/screens/profile/widgets/profile.image.dart';
-import 'package:spresearchvia2/screens/profile/widgets/profile.tile.dart';
-import 'package:spresearchvia2/screens/subscription/subscription_history.screen.dart';
-import 'package:spresearchvia2/widgets/button.dart';
+import '../../controllers/user.controller.dart';
+import '../../controllers/auth.controller.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_styles.dart';
+import '../notification/notification_settings.screen.dart';
+import 'edit_profile.screen.dart';
+import 'widgets/KycStatus.Item.dart';
+import 'widgets/profile.image.dart';
+import 'widgets/profile.tile.dart';
+import '../subscription/subscription_history.screen.dart';
+import '../../widgets/button.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -76,26 +76,14 @@ class ProfileScreen extends StatelessWidget {
                 style: AppStyles.bodySmall.copyWith(color: AppTheme.textGrey),
               ),
               SizedBox(height: 20),
-              ProfileTile(
-                icon: Icons.phone,
-                title: 'Phone Number',
-                value:
-                    user.contactDetails?.phone?.toString() ??
-                    user.phone ??
-                    'N/A',
-              ),
-              SizedBox(height: 10),
-              ProfileTile(
-                icon: Icons.credit_card,
-                title: 'PAN Number',
-                value: 'Not Available',
-              ),
-              SizedBox(height: 10),
-              ProfileTile(
-                icon: Icons.fingerprint,
-                title: 'Aadhar Number',
-                value: 'Not Available',
-              ),
+              if (user.contactDetails?.phone != null || user.phone != null)
+                ProfileTile(
+                  icon: Icons.phone,
+                  title: 'Phone Number',
+                  value: user.contactDetails?.phone?.toString() ?? user.phone!,
+                ),
+              if (user.contactDetails?.phone != null || user.phone != null)
+                SizedBox(height: 10),
               SizedBox(height: 10),
               KycStatusItem(
                 icon: Icons.verified_user,

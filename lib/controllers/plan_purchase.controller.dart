@@ -1,68 +1,11 @@
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/config/api.config.dart';
-import 'package:spresearchvia2/services/api_client.service.dart';
-import 'package:spresearchvia2/services/api_exception.service.dart';
-import 'package:spresearchvia2/services/storage.service.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-
-class Plan {
-  final String id;
-  final String name;
-  final String description;
-  final double amount;
-  final int validityDays;
-  final List<String> features;
-  final bool isActive;
-  final DateTime? purchaseDate;
-  final DateTime? expiryDate;
-
-  Plan({
-    required this.id,
-    required this.name,
-    required this.description,
-    required this.amount,
-    required this.validityDays,
-    required this.features,
-    this.isActive = false,
-    this.purchaseDate,
-    this.expiryDate,
-  });
-
-  factory Plan.fromJson(Map<String, dynamic> json) {
-    return Plan(
-      id: json['_id']?.toString() ?? json['id']?.toString() ?? '',
-      name: json['name']?.toString() ?? json['planName']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
-      amount: (json['amount'] is num)
-          ? (json['amount'] as num).toDouble()
-          : double.tryParse(json['amount']?.toString() ?? '') ?? 0.0,
-      validityDays: json['validityDays'] ?? json['validity'] ?? 0,
-      features:
-          (json['features'] as List?)?.map((e) => e.toString()).toList() ?? [],
-      isActive: json['isActive'] ?? json['active'] ?? false,
-      purchaseDate: json['purchaseDate'] != null
-          ? DateTime.tryParse(json['purchaseDate'].toString())
-          : null,
-      expiryDate: json['expiryDate'] != null
-          ? DateTime.tryParse(json['expiryDate'].toString())
-          : null,
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'name': name,
-      'description': description,
-      'amount': amount,
-      'validityDays': validityDays,
-      'features': features,
-      'isActive': isActive,
-      'purchaseDate': purchaseDate?.toIso8601String(),
-      'expiryDate': expiryDate?.toIso8601String(),
-    };
-  }
-}
+import '../core/config/api.config.dart';
+import '../core/models/plan.dart';
+import '../services/api_client.service.dart';
+import '../services/api_exception.service.dart';
+import '../services/storage.service.dart';
+import '../services/snackbar.service.dart';
+import '../core/config/app_mode.dart';
 
 class PlanPurchaseController extends GetxController {
   final ApiClient _apiClient = ApiClient();
@@ -85,41 +28,51 @@ class PlanPurchaseController extends GetxController {
     required double amount,
   }) async {
     try {
-      final uid = userId;
-      if (uid == null) {
-        SnackbarService.showWarning('User not logged in');
-        return null;
-      }
-
       isLoading.value = true;
-
-      final requestData = {'packageName': packageName, 'amount': amount};
-
-      final response = await _apiClient.post(
-        ApiConfig.purchasePlan(uid),
-        data: requestData,
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-        final orderData = data['data'] ?? data;
-
-        final orderCreate = orderData['orderCreate'];
-        final userPlan = orderData['userPlan'];
-
-        if (orderCreate != null) {
-          return {
-            'razorpayOrderId': orderCreate['razorpayOrderId'],
-            'paymentId': orderCreate['_id'],
-            'orderCreate': orderCreate,
-            'userPlan': userPlan,
-          };
+      
+      if (AppMode.isDevelopment) {
+        await Future.delayed(Duration(seconds: 1));
+        return {
+          'paymentId': 'mock_payment_${DateTime.now().millisecondsSinceEpoch}',
+          'razorpayOrderId': 'order_mock_${DateTime.now().millisecondsSinceEpoch}',
+          'amount': amount,
+          'packageName': packageName,
+        };
+      } else {
+        final uid = userId;
+        if (uid == null) {
+          SnackbarService.showWarning('User not logged in');
+          return null;
         }
 
-        return orderData as Map<String, dynamic>?;
-      }
+        final requestData = {'packageName': packageName, 'amount': amount};
 
-      return null;
+        final response = await _apiClient.post(
+          ApiConfig.purchasePlan(uid),
+          data: requestData,
+        );
+
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final orderData = data['data'] ?? data;
+
+          final orderCreate = orderData['orderCreate'];
+          final userPlan = orderData['userPlan'];
+
+          if (orderCreate != null) {
+            return {
+              'razorpayOrderId': orderCreate['razorpayOrderId'],
+              'paymentId': orderCreate['_id'],
+              'orderCreate': orderCreate,
+              'userPlan': userPlan,
+            };
+          }
+
+          return orderData as Map<String, dynamic>?;
+        }
+
+        return null;
+      }
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
@@ -154,7 +107,6 @@ class PlanPurchaseController extends GetxController {
 
         if (success) {
           SnackbarService.showSuccess('Payment verified successfully');
-
           await fetchUserPlan();
           return true;
         } else {
@@ -177,23 +129,40 @@ class PlanPurchaseController extends GetxController {
 
   Future<void> fetchUserPlan() async {
     try {
-      final uid = userId;
-      if (uid == null) return;
+      if (AppMode.isDevelopment) {
+        await Future.delayed(Duration(seconds: 1));
+        currentPlan.value = Plan(
+          id: 'mock_plan_id',
+          userId: 'mock_user_id',
+          packageName: 'Annual Plan',
+          validity: 365,
+          startDate: DateTime.now().subtract(Duration(days: 30)),
+          endDate: DateTime.now().add(Duration(days: 335)),
+          status: 'active',
+          name: 'Annual Plan',
+          description: 'Full access to all research reports',
+          amount: 5900.0,
+          validityDays: 365,
+          purchaseDate: DateTime.now().subtract(Duration(days: 30)),
+          expiryDate: DateTime.now().add(Duration(days: 335)),
+          features: ['Premium Reports', 'Market Analysis', 'Expert Support'],
+        );
+        expiryRemindersEnabled.value = true;
+      } else {
+        final uid = userId;
+        if (uid == null) return;
 
-      final response = await _apiClient.get(ApiConfig.getUserPlan(uid));
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final planData = data['data'] ?? data['plan'];
+        final response = await _apiClient.get(ApiConfig.getUserPlan(uid));
+        if (response.statusCode == 200) {
+          final data = response.data;
+          final planData = data['data']?['plan'];
 
-        if (planData != null) {
-          currentPlan.value = Plan.fromJson(planData);
-
-          if (planData['expiryRemindersEnabled'] != null) {
-            expiryRemindersEnabled.value =
-                planData['expiryRemindersEnabled'] == true;
+          if (planData != null) {
+            currentPlan.value = Plan.fromJson(planData);
+            expiryRemindersEnabled.value = planData['expiryReminder'] ?? false;
+          } else {
+            currentPlan.value = null;
           }
-        } else {
-          currentPlan.value = null;
         }
       }
     } catch (e) {
@@ -211,20 +180,18 @@ class PlanPurchaseController extends GetxController {
       }
 
       isLoading.value = true;
-
       final response = await _apiClient.patch(
         ApiConfig.toggleExpiryReminders(uid),
-        data: {'expiryRemindersEnabled': enabled},
+        data: {'expiryReminder': enabled},
       );
 
       if (response.statusCode == 200) {
-        expiryRemindersEnabled.value = enabled;
-        SnackbarService.showSuccess(
-          'Expiry reminders ${enabled ? 'enabled' : 'disabled'}',
-        );
+        final data = response.data;
+        final reminderStatus = data['data']?['expiryReminderOnOff'];
+        expiryRemindersEnabled.value = reminderStatus ?? enabled;
+        SnackbarService.showSuccess('Expiry reminders ${enabled ? 'enabled' : 'disabled'}');
         return true;
       }
-
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
@@ -238,7 +205,7 @@ class PlanPurchaseController extends GetxController {
   bool get hasActivePlan => currentPlan.value?.isActive ?? false;
 
   int get daysRemaining {
-    final expiry = currentPlan.value?.expiryDate;
+    final expiry = currentPlan.value?.endDate;
     if (expiry == null) return 0;
     final now = DateTime.now();
     return expiry.difference(now).inDays;
@@ -249,7 +216,7 @@ class PlanPurchaseController extends GetxController {
 
   bool get isPlanExpired => hasActivePlan && daysRemaining <= 0;
 
-  Future<List<Map<String, dynamic>>> fetchSubscriptionHistory({
+  Future<List<Plan>> fetchSubscriptionHistory({
     int page = 1,
     int pageSize = 20,
   }) async {
@@ -264,10 +231,10 @@ class PlanPurchaseController extends GetxController {
 
       if (response.statusCode == 200) {
         final data = response.data;
-        final userPlan = data['data']?['userPlan'] ?? data['userPlan'] ?? [];
+        final userPlan = data['data']?['userPlan'] ?? [];
 
         if (userPlan is List) {
-          return userPlan.cast<Map<String, dynamic>>();
+          return userPlan.map<Plan>((json) => Plan.fromJson(json)).toList();
         }
       }
 

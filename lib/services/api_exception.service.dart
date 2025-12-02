@@ -1,5 +1,5 @@
 import 'package:dio/dio.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
+import '../core/utils/error_message_handler.dart';
 
 class ApiException implements Exception {
   final String message;

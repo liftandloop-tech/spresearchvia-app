@@ -1,46 +1,62 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
-import 'package:spresearchvia2/core/models/subscription_history.dart';
+import '../../controllers/plan_purchase.controller.dart';
+import '../../core/models/subscription_history.dart';
 import 'widgets/subscription_card.dart';
+import '../../services/snackbar.service.dart';
 
-class SubscriptionHistoryScreen extends StatefulWidget {
-  const SubscriptionHistoryScreen({super.key});
+class SubscriptionHistoryController extends GetxController {
+  final planController = Get.put(PlanPurchaseController());
 
-  @override
-  State<SubscriptionHistoryScreen> createState() =>
-      _SubscriptionHistoryScreenState();
-}
-
-class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
-  final planController = Get.find<PlanPurchaseController>();
-  String selectedFilter = 'Latest';
-  List<SubscriptionHistory> subscriptions = [];
-  bool isLoading = true;
+  final RxString selectedFilter = 'Latest'.obs;
+  final RxList<SubscriptionHistory> subscriptions = <SubscriptionHistory>[].obs;
+  final RxList<SubscriptionHistory> _allSubscriptions =
+      <SubscriptionHistory>[].obs;
+  final RxBool isLoading = true.obs;
 
   @override
-  void initState() {
-    super.initState();
-    _loadSubscriptionHistory();
+  void onInit() {
+    super.onInit();
+    loadSubscriptionHistory();
+
+    // Use worker to automatically filter when filter changes
+    ever(selectedFilter, (_) => _applyFilter());
   }
 
-  Future<void> _loadSubscriptionHistory() async {
-    setState(() => isLoading = true);
+  Future<void> loadSubscriptionHistory() async {
+    isLoading.value = true;
 
     try {
-      final data = await planController.fetchSubscriptionHistory();
-      final loadedSubscriptions = data
-          .map((json) => SubscriptionHistory.fromJson(json))
+      final plans = await planController.fetchSubscriptionHistory();
+      final loadedSubscriptions = plans
+          .map((plan) => SubscriptionHistory(
+                id: plan.id,
+                paymentDate: plan.startDate.toString().split(' ')[0],
+                amountPaid: '₹${(plan.validity * 10).toString()}',
+                validityDays: '${plan.validity} days',
+                expiryDate: plan.endDate.toString().split(' ')[0],
+                headerStatus: plan.isActive
+                    ? SubscriptionStatus.active
+                    : plan.isExpired
+                        ? SubscriptionStatus.expired
+                        : SubscriptionStatus.pending,
+                footerStatus: plan.isFailed
+                    ? SubscriptionStatus.failed
+                    : SubscriptionStatus.success,
+              ))
           .toList();
 
-      setState(() {
-        subscriptions = _filterSubscriptions(loadedSubscriptions);
-        isLoading = false;
-      });
+      _allSubscriptions.value = loadedSubscriptions;
+      _applyFilter();
     } catch (e) {
-      setState(() => isLoading = false);
-      Get.snackbar('Error', 'Failed to load subscription history');
+      SnackbarService.showError('Failed to load subscription history');
+    } finally {
+      isLoading.value = false;
     }
+  }
+
+  void _applyFilter() {
+    subscriptions.value = _filterSubscriptions(_allSubscriptions);
   }
 
   List<SubscriptionHistory> _filterSubscriptions(
@@ -48,7 +64,7 @@ class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
   ) {
     List<SubscriptionHistory> filtered = List.from(subs);
 
-    switch (selectedFilter) {
+    switch (selectedFilter.value) {
       case 'Latest':
         break;
       case 'Oldest':
@@ -69,18 +85,36 @@ class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
     return filtered;
   }
 
+  void changeFilter(String? newFilter) {
+    if (newFilter != null) {
+      selectedFilter.value = newFilter;
+    }
+  }
+}
+
+class SubscriptionHistoryScreen extends StatelessWidget {
+  const SubscriptionHistoryScreen({super.key});
+
+  void _showReceiptDialog(BuildContext context, SubscriptionHistory subscription) {
+    Get.toNamed('/receipt');
+  }
+
+
+
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(SubscriptionHistoryController());
+
     return Scaffold(
-      backgroundColor: Color(0xffF9FAFB),
+      backgroundColor: const Color(0xffF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xff163174)),
+          icon: const Icon(Icons.arrow_back, color: Color(0xff163174)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Subscription History',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -91,85 +125,85 @@ class _SubscriptionHistoryScreenState extends State<SubscriptionHistoryScreen> {
         ),
         actions: [
           Container(
-            margin: EdgeInsets.only(right: 16, top: 8, bottom: 8),
-            padding: EdgeInsets.symmetric(horizontal: 12),
+            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
             decoration: BoxDecoration(
-              border: Border.all(color: Color(0xffE5E7EB), width: 1),
+              border: Border.all(color: const Color(0xffE5E7EB), width: 1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: DropdownButton<String>(
-              value: selectedFilter,
-              underline: SizedBox(),
-              icon: Icon(
-                Icons.keyboard_arrow_down,
-                color: Color(0xff6B7280),
-                size: 20,
+            child: Obx(
+              () => DropdownButton<String>(
+                value: controller.selectedFilter.value,
+                underline: const SizedBox(),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: Color(0xff6B7280),
+                  size: 20,
+                ),
+                style: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xff374151),
+                ),
+                items: ['Latest', 'Oldest', 'Active', 'Expired'].map((
+                  String value,
+                ) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: controller.changeFilter,
               ),
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-                color: Color(0xff374151),
-              ),
-              items: ['Latest', 'Oldest', 'Active', 'Expired'].map((
-                String value,
-              ) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (String? newValue) {
-                if (newValue != null) {
-                  setState(() {
-                    selectedFilter = newValue;
-                    _loadSubscriptionHistory();
-                  });
-                }
-              },
             ),
           ),
         ],
       ),
-      body: isLoading
-          ? Center(child: CircularProgressIndicator())
-          : subscriptions.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.history, size: 64, color: Color(0xffD1D5DB)),
-                  SizedBox(height: 16),
-                  Text(
-                    'No subscription history',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                      color: Color(0xff6B7280),
+      body: Obx(
+        () => controller.isLoading.value
+            ? const Center(child: CircularProgressIndicator())
+            : controller.subscriptions.isEmpty
+            ? Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: const [
+                    Icon(Icons.history, size: 64, color: Color(0xffD1D5DB)),
+                    SizedBox(height: 16),
+                    Text(
+                      'No subscription history',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 16,
+                        fontWeight: FontWeight.w500,
+                        color: Color(0xff6B7280),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
+              )
+            : RefreshIndicator(
+                onRefresh: controller.loadSubscriptionHistory,
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(16),
+                  itemCount: controller.subscriptions.length,
+                  itemBuilder: (context, index) {
+                    final subscription = controller.subscriptions[index];
+                    return SubscriptionCard(
+                      paymentDate: subscription.paymentDate,
+                      amountPaid: subscription.amountPaid,
+                      validityDays: subscription.validityDays,
+                      expiryDate: subscription.expiryDate,
+                      headerStatus: subscription.headerStatus,
+                      footerStatus: subscription.footerStatus,
+                      onTap: () {
+                        _showReceiptDialog(context, subscription);
+                      },
+                    );
+                  },
+                ),
               ),
-            )
-          : RefreshIndicator(
-              onRefresh: _loadSubscriptionHistory,
-              child: ListView.builder(
-                padding: EdgeInsets.all(16),
-                itemCount: subscriptions.length,
-                itemBuilder: (context, index) {
-                  final subscription = subscriptions[index];
-                  return SubscriptionCard(
-                    paymentDate: subscription.paymentDate,
-                    amountPaid: subscription.amountPaid,
-                    validityDays: subscription.validityDays,
-                    expiryDate: subscription.expiryDate,
-                    headerStatus: subscription.headerStatus,
-                    footerStatus: subscription.footerStatus,
-                  );
-                },
-              ),
-            ),
+      ),
     );
   }
 }

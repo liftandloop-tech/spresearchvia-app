@@ -1,10 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
-import 'package:spresearchvia2/controllers/user.controller.dart';
-import 'package:spresearchvia2/screens/tabs.screen.dart';
+import '../../core/theme/app_theme.dart';
+import '../../services/snackbar.service.dart';
+import '../../controllers/plan_purchase.controller.dart';
+import '../../controllers/user.controller.dart';
 import 'widgets/benefits.section.dart';
 import 'widgets/current_plan_card.dart';
 import 'widgets/expiry_warning_card.dart';
@@ -26,13 +25,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!planController.hasActivePlan) {
-        Get.off(() => TabsScreen(initialIndex: 2));
-      }
-    });
-
     planController.fetchUserPlan();
   }
 
@@ -73,8 +65,8 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
 
     try {
       final orderData = await planController.purchasePlan(
-        packageName: plan.name,
-        amount: plan.amount,
+        packageName: plan.name ?? 'Plan',
+        amount: plan.amount ?? 0.0,
       );
 
       Get.back();
@@ -153,7 +145,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                 ),
                 SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => Get.off(() => TabsScreen(initialIndex: 2)),
+                  onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
                   child: Text('Browse Plans'),
                 ),
               ],
@@ -162,7 +154,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         }
 
         final daysRemaining = planController.daysRemaining;
-        final validityText = plan.validityDays > 0
+        final validityText = (plan.validityDays ?? 0) > 0
             ? '${plan.validityDays} days'
             : 'N/A';
 
@@ -173,8 +165,8 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
               '${expiry.day.toString().padLeft(2, '0')}/${expiry.month.toString().padLeft(2, '0')}/${expiry.year}';
         }
 
-        final benefits = plan.features.isNotEmpty
-            ? plan.features
+        final benefits = (plan.features?.isNotEmpty ?? false)
+            ? plan.features!
             : [
                 'Access to all premium research reports',
                 'Real-time market alerts and notifications',
@@ -216,11 +208,11 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   ),
                 SizedBox(height: 12),
                 CurrentPlanCard(
-                  planName: plan.name.isNotEmpty ? plan.name : 'Premium Plan',
-                  description: plan.description.isNotEmpty
-                      ? plan.description
+                  planName: (plan.name?.isNotEmpty ?? false) ? plan.name! : 'Premium Plan',
+                  description: (plan.description?.isNotEmpty ?? false)
+                      ? plan.description!
                       : 'Full access to all reports',
-                  price: '₹${plan.amount.toStringAsFixed(2)}/$validityText',
+                  price: '₹${(plan.amount ?? 0.0).toStringAsFixed(2)}/$validityText',
                   validity: validityText,
                   expiryDate: expiryDateText,
                 ),
@@ -241,8 +233,8 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                         ),
                       ),
                       Text(
-                        plan.amount > 0
-                            ? '₹${plan.amount.toStringAsFixed(2)}'
+                        (plan.amount ?? 0.0) > 0
+                            ? '₹${(plan.amount ?? 0.0).toStringAsFixed(2)}'
                             : 'Free',
                         style: TextStyle(
                           fontFamily: 'Poppins',

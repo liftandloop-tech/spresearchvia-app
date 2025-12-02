@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/renewal/widgets/card_type_logo.dart';
+import 'card_type_logo.dart';
 
 class PaymentMethodCard extends StatelessWidget {
   const PaymentMethodCard({

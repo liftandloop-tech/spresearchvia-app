@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import '../../../core/theme/app_theme.dart';
 
 class ActiveFilterChip extends StatelessWidget {
   const ActiveFilterChip({super.key, required this.label});

@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 
-/// Individual summary line item
 class SummaryItem extends StatelessWidget {
   final String title;
   final int amount;
@@ -49,7 +48,6 @@ class SummaryItem extends StatelessWidget {
   }
 }
 
-/// Payment summary card showing breakdown
 class PaymentSummaryCard extends StatelessWidget {
   final int basePrice;
   final int cgstAmount;

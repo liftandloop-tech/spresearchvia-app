@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 
-/// Header section for subscription screens
 class SubscriptionHeader extends StatelessWidget {
   final String title;
   final String subtitle;

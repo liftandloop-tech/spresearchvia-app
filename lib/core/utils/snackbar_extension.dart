@@ -1,5 +1,5 @@
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
+import 'error_message_handler.dart';
 
 extension GetXSnackbarExtension on GetInterface {
   SnackbarController showErrorSnackbar(

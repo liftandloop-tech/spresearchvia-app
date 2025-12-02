@@ -1,7 +1,6 @@
 import '../../../core/config/razorpay.config.dart';
 import '../../../core/models/payment.options.dart';
 
-/// Payment options for Razorpay
 class RazorpayOptions {
   final String orderId;
   final double amount;
@@ -33,7 +32,6 @@ class RazorpayOptions {
       'theme': {'color': RazorpayConfig.themeColor},
     };
 
-    // Hide payment methods if specified
     if (hiddenMethod != null) {
       final hideMethods = <String>[];
       switch (hiddenMethod!) {

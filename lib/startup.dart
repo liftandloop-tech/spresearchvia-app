@@ -1,20 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/controllers/auth.controller.dart';
-import 'package:spresearchvia2/controllers/user.controller.dart';
-import 'package:spresearchvia2/controllers/kyc.controller.dart';
-import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
-import 'package:spresearchvia2/controllers/report.controller.dart';
-import 'package:spresearchvia2/services/storage.service.dart';
+import 'controllers/auth.controller.dart';
+import 'controllers/user.controller.dart';
+import 'controllers/kyc.controller.dart';
+import 'controllers/plan_purchase.controller.dart';
+import 'controllers/report.controller.dart';
+import 'services/secure_storage.service.dart';
+import 'services/payment.service.dart';
+import 'core/config/app.config.dart';
 
 Future<void> startup() async {
   await WidgetsFlutterBinding.ensureInitialized();
 
-  await StorageService.init();
+  // Initialize storage
+  await SecureStorageService.init();
 
-  Get.put(AuthController());
-  Get.put(UserController());
-  Get.put(KycController());
-  Get.put(PlanPurchaseController());
-  Get.put(ReportController());
+  // Initialize core services
+  Get.put(SecureStorageService(), permanent: true);
+  Get.put(PaymentService(), permanent: true);
+
+  // Use lazyPut for controllers - instantiated only when first accessed
+  Get.lazyPut<AuthController>(() => AuthController(), fenix: true);
+  Get.lazyPut<UserController>(() => UserController(), fenix: true);
+  Get.lazyPut<KycController>(() => KycController(), fenix: true);
+  Get.lazyPut<PlanPurchaseController>(() => PlanPurchaseController(), fenix: true);
+  Get.lazyPut<ReportController>(() => ReportController(), fenix: true);
+
+  // Preload critical data in production
+  if (AppConfig.isProduction) {
+    final authController = Get.find<AuthController>();
+    await authController.checkAuthStatus();
+  }
 }

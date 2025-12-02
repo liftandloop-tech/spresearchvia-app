@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/models/research_report.dart';
-import 'package:spresearchvia2/screens/research/widgets/report_header_card.dart';
-import 'package:spresearchvia2/screens/research/widgets/key_highlight_item.dart';
-import 'package:spresearchvia2/screens/research/widgets/report_detail_row.dart';
-import 'package:spresearchvia2/screens/research/widgets/subscriber_badge.dart';
-import 'package:spresearchvia2/widgets/button.dart';
+import '../../core/models/research_report.dart';
+import 'widgets/report_header_card.dart';
+import 'widgets/key_highlight_item.dart';
+import 'widgets/report_detail_row.dart';
+import 'widgets/subscriber_badge.dart';
+import '../../widgets/button.dart';
 
 class ResearchReportDetailScreen extends StatelessWidget {
   const ResearchReportDetailScreen({super.key, required this.report});
@@ -41,7 +41,7 @@ class ResearchReportDetailScreen extends StatelessWidget {
               child: ReportHeaderCard(
                 category: 'Market Analysis',
                 title: report.title,
-                publishedDate: report.publishedDate,
+                publishedDate: report.publishedDate ?? 'Not available',
               ),
             ),
             Container(
@@ -61,7 +61,7 @@ class ResearchReportDetailScreen extends StatelessWidget {
                   ),
                   SizedBox(height: 12),
                   Text(
-                    report.executiveSummary,
+                    report.executiveSummary ?? 'No summary available',
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
@@ -90,7 +90,7 @@ class ResearchReportDetailScreen extends StatelessWidget {
                     ),
                   ),
                   SizedBox(height: 16),
-                  ...report.keyHighlights.map((highlight) {
+                  ...(report.keyHighlights ?? []).map((highlight) {
                     return Padding(
                       padding: EdgeInsets.only(bottom: 12),
                       child: KeyHighlightItem(text: highlight),
@@ -129,13 +129,13 @@ class ResearchReportDetailScreen extends StatelessWidget {
                             Expanded(
                               child: ReportDetailRow(
                                 label: 'Pages',
-                                value: report.pages.toString(),
+                                value: (report.pages ?? 0).toString(),
                               ),
                             ),
                             Expanded(
                               child: ReportDetailRow(
                                 label: 'File Size',
-                                value: report.fileSize,
+                                value: report.fileSize ?? 'Unknown size',
                               ),
                             ),
                           ],
@@ -146,13 +146,13 @@ class ResearchReportDetailScreen extends StatelessWidget {
                             Expanded(
                               child: ReportDetailRow(
                                 label: 'Research Team',
-                                value: report.researchTeam,
+                                value: report.researchTeam ?? 'Research Team',
                               ),
                             ),
                             Expanded(
                               child: ReportDetailRow(
                                 label: 'Language',
-                                value: report.language,
+                                value: report.language ?? 'English',
                               ),
                             ),
                           ],

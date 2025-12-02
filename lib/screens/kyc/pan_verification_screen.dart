@@ -1,20 +1,15 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:spresearchvia2/controllers/kyc.controller.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-import 'package:spresearchvia2/core/utils/validators.dart';
-import 'package:spresearchvia2/core/utils/file_validator.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/screens/kyc/aadhar_verification_screen.dart';
-import 'package:spresearchvia2/widgets/button.dart';
-import 'package:spresearchvia2/widgets/kyc_step_indicator.dart';
-import 'package:spresearchvia2/widgets/file_upload_section.dart';
-import 'package:spresearchvia2/widgets/data_protection_footer.dart';
-import 'package:spresearchvia2/widgets/title_field.dart';
+import '../../controllers/kyc.controller.dart';
+import '../../services/snackbar.service.dart';
+import '../../core/utils/validators.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_styles.dart';
+import 'aadhar_verification_screen.dart';
+import '../../widgets/button.dart';
+import '../../widgets/kyc_step_indicator.dart';
+import '../../widgets/data_protection_footer.dart';
+import '../../widgets/title_field.dart';
 
 class PanVerificationScreen extends StatefulWidget {
   const PanVerificationScreen({super.key});
@@ -26,27 +21,6 @@ class PanVerificationScreen extends StatefulWidget {
 class _PanVerificationScreenState extends State<PanVerificationScreen> {
   final kycController = Get.find<KycController>();
   final TextEditingController _panController = TextEditingController();
-  String? _selectedFileName;
-  File? _selectedFile;
-
-  Future<void> _pickFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
-
-      if (result != null && result.files.single.path != null) {
-        setState(() {
-          _selectedFile = File(result.files.single.path!);
-          _selectedFileName = result.files.single.name;
-        });
-      }
-    } catch (e) {
-      ErrorMessageHandler.logError('Pick PAN File', e);
-      SnackbarService.showErrorFromException(e, title: 'Failed to Pick File');
-    }
-  }
 
   Future<void> _submitVerification() async {
     final panNumber = _panController.text.trim();
@@ -56,31 +30,13 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
       return;
     }
 
-    if (_selectedFile == null) {
-      SnackbarService.showWarning('Please select PAN card file');
-      return;
-    }
-
     final panValidation = Validators.validatePAN(panNumber);
     if (panValidation != null) {
       SnackbarService.showWarning(panValidation);
       return;
     }
 
-    final fileError = FileValidator.validateDocumentFile(_selectedFile!);
-    if (fileError != null) {
-      SnackbarService.showWarning(fileError);
-      return;
-    }
-
-    final success = await kycController.uploadPanCard(
-      panFile: _selectedFile!,
-      panNumber: panNumber,
-    );
-
-    if (success) {
-      Get.to(() => const AadharVerificationScreen());
-    }
+    Get.to(() => const AadharVerificationScreen());
   }
 
   @override
@@ -147,16 +103,6 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
                       controller: _panController,
                       icon: Icons.credit_card,
                     ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.maxFinite,
-                      child: FilePickerContainer(
-                        title: 'Upload PAN Front Side',
-                        subtitle: 'click to upload',
-                        onTap: _pickFile,
-                        fileName: _selectedFileName,
-                      ),
-                    ),
                   ],
                 ),
               ),
@@ -195,5 +141,3 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
     );
   }
 }
-
-

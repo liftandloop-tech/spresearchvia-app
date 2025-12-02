@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
-import 'package:spresearchvia2/core/config/api.config.dart';
-import 'package:spresearchvia2/services/storage.service.dart';
+import '../core/config/api.config.dart';
+import 'storage.service.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();

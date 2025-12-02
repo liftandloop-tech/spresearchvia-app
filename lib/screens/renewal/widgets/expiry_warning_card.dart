@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import '../../../core/theme/app_theme.dart';
 
 class ExpiryWarningCard extends StatelessWidget {
   const ExpiryWarningCard({

@@ -1,21 +1,56 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/notification/widgets/notification_setting_item.dart';
-import 'package:spresearchvia2/widgets/button.dart';
+import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import 'widgets/notification_setting_item.dart';
+import '../../widgets/button.dart';
+import '../../services/snackbar.service.dart';
 
-class NotificationSettingScreen extends StatefulWidget {
+class NotificationSettingsController extends GetxController {
+  final RxBool researchAlert = false.obs;
+  final RxBool paymentAlerts = true.obs;
+  final RxBool isSaving = false.obs;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _loadPreferences();
+  }
+
+  void _loadPreferences() {
+    final storage = GetStorage();
+    researchAlert.value = storage.read('notification_research') ?? false;
+    paymentAlerts.value = storage.read('notification_payment') ?? true;
+  }
+
+  Future<void> savePreferences() async {
+    if (isSaving.value) return;
+
+    try {
+      isSaving.value = true;
+
+      final storage = GetStorage();
+      await storage.write('notification_research', researchAlert.value);
+      await storage.write('notification_payment', paymentAlerts.value);
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      SnackbarService.showSuccess('Notification preferences saved');
+
+      Get.back();
+    } catch (e) {
+      SnackbarService.showError('Failed to save preferences');
+    } finally {
+      isSaving.value = false;
+    }
+  }
+}
+
+class NotificationSettingScreen extends StatelessWidget {
   const NotificationSettingScreen({super.key});
 
   @override
-  State<NotificationSettingScreen> createState() =>
-      _NotificationSettingsScrenState();
-}
-
-class _NotificationSettingsScrenState extends State<NotificationSettingScreen> {
-  bool researchAlert = false;
-  bool paymentAlerts = true;
-
-  @override
   Widget build(BuildContext context) {
+    final controller = Get.put(NotificationSettingsController());
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
@@ -69,28 +104,34 @@ class _NotificationSettingsScrenState extends State<NotificationSettingScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 30),
-              NotificationSettingItem(
-                value: researchAlert,
-                icon: Icons.show_chart_rounded,
-                title: 'Research Updates',
-                description:
-                    'Receive market insights and investment research reports',
-                onChanged: (newVal) => setState(() => researchAlert = newVal),
+              Obx(
+                () => NotificationSettingItem(
+                  value: controller.researchAlert.value,
+                  icon: Icons.show_chart_rounded,
+                  title: 'Research Updates',
+                  description:
+                      'Receive market insights and investment research reports',
+                  onChanged: (newVal) =>
+                      controller.researchAlert.value = newVal,
+                ),
               ),
               SizedBox(height: 5),
-              NotificationSettingItem(
-                value: paymentAlerts,
-                icon: Icons.credit_card,
-                title: 'Payment Alerts',
-                description:
-                    'Instant notifications for all transactions and payments',
-                onChanged: (newVal) => setState(() => paymentAlerts = newVal),
+              Obx(
+                () => NotificationSettingItem(
+                  value: controller.paymentAlerts.value,
+                  icon: Icons.credit_card,
+                  title: 'Payment Alerts',
+                  description:
+                      'Instant notifications for all transactions and payments',
+                  onChanged: (newVal) =>
+                      controller.paymentAlerts.value = newVal,
+                ),
               ),
               SizedBox(height: 20),
               Button(
                 title: 'Save Preferences',
                 buttonType: ButtonType.blue,
-                onTap: () => setState(() => Navigator.of(context).pop()),
+                onTap: controller.savePreferences,
               ),
             ],
           ),

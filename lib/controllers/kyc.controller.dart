@@ -1,14 +1,14 @@
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/config/api.config.dart';
-import 'package:spresearchvia2/core/utils/file_validator.dart';
-import 'package:spresearchvia2/core/utils/validators.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
+import '../core/config/api.config.dart';
+import '../core/utils/file_validator.dart';
+import '../core/utils/validators.dart';
+import '../services/snackbar.service.dart';
 import 'package:path/path.dart' as path;
-import 'package:spresearchvia2/services/api_client.service.dart';
-import 'package:spresearchvia2/services/api_exception.service.dart';
-import 'package:spresearchvia2/services/storage.service.dart';
+import '../services/api_client.service.dart';
+import '../services/api_exception.service.dart';
+import '../services/storage.service.dart';
 
 class KycController extends GetxController {
   final ApiClient _apiClient = ApiClient();
@@ -59,7 +59,7 @@ class KycController extends GetxController {
         formData: formData,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         isPanUploaded.value = true;
         SnackbarService.showSuccess('PAN card uploaded successfully');
         return true;
@@ -108,14 +108,16 @@ class KycController extends GetxController {
       isLoading.value = true;
 
       final formData = dio.FormData.fromMap({
-        'frontFile': await dio.MultipartFile.fromFile(
-          frontFile.path,
-          filename: 'aadhar_front_${path.basename(frontFile.path)}',
-        ),
-        'backFile': await dio.MultipartFile.fromFile(
-          backFile.path,
-          filename: 'aadhar_back_${path.basename(backFile.path)}',
-        ),
+        'files': [
+          await dio.MultipartFile.fromFile(
+            frontFile.path,
+            filename: path.basename(frontFile.path),
+          ),
+          await dio.MultipartFile.fromFile(
+            backFile.path,
+            filename: path.basename(backFile.path),
+          ),
+        ],
         'aadhaarNumber': Validators.cleanAadhar(aadharNumber),
       });
 
@@ -124,7 +126,7 @@ class KycController extends GetxController {
         formData: formData,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         isAadharUploaded.value = true;
         SnackbarService.showSuccess('Aadhar card uploaded successfully');
         return true;
@@ -159,7 +161,7 @@ class KycController extends GetxController {
         data: {'email': email, 'name': name, 'sign_type': signType},
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         isKycCompleted.value = true;
         SnackbarService.showSuccess('KYC verification initiated successfully');
         return true;

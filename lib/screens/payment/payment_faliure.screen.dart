@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
-
+import 'package:get/get.dart';
+import '../../core/routes/app_routes.dart';
 import '../../widgets/button.dart';
 
 class PaymentFaliureScreen extends StatelessWidget {
@@ -7,6 +8,9 @@ class PaymentFaliureScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> errorData = Get.arguments ?? {};
+    final String errorMessage = errorData['message'] ?? 'Something went wrong, please try again';
+    
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -32,22 +36,31 @@ class PaymentFaliureScreen extends StatelessWidget {
             ),
           ),
           SizedBox(height: 10),
-          Text(
-            'Something went wrong, please try again',
-            overflow: TextOverflow.clip,
-            style: TextStyle(fontSize: 14, fontFamily: 'Poppins'),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              errorMessage,
+              overflow: TextOverflow.clip,
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, fontFamily: 'Poppins'),
+            ),
           ),
           SizedBox(height: 20),
           Button(
             title: 'Retry Payment',
-            onTap: () {},
+            onTap: () {
+              Get.back();
+            },
             icon: Icons.refresh,
             buttonType: ButtonType.green,
           ),
+          SizedBox(height: 10),
           Button(
-            title: 'Change Method',
-            onTap: () {},
-            icon: Icons.credit_card,
+            title: 'Go to Dashboard',
+            onTap: () {
+              Get.offAllNamed(AppRoutes.tabs);
+            },
+            icon: Icons.home,
             buttonType: ButtonType.greyBorder,
           ),
 

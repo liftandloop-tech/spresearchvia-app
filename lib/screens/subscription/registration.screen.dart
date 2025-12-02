@@ -1,67 +1,51 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
-import 'package:spresearchvia2/controllers/payment_option.controller.dart';
-import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
-import 'package:spresearchvia2/controllers/plan_selection.controller.dart';
-import 'package:spresearchvia2/controllers/user.controller.dart';
-import 'package:spresearchvia2/core/config/razorpay.config.dart';
-import 'package:spresearchvia2/core/models/payment.options.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/screens/subscription/widgets/plan.card.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-import 'package:spresearchvia2/widgets/app_logo.dart';
-import 'package:spresearchvia2/widgets/button.dart';
+import '../../controllers/plan_purchase.controller.dart';
+import '../../controllers/user.controller.dart';
+import '../../core/models/payment.options.dart';
+import '../../core/config/app_mode.dart';
+import '../../core/theme/app_theme.dart';
+import 'widgets/plan.card.dart';
+import '../../services/snackbar.service.dart';
+import '../../services/storage.service.dart';
+import '../../widgets/app_logo.dart';
+import '../../widgets/button.dart';
+import '../../widgets/payment_option_selector.dart';
 
-class SubscriptionConfirmScreen extends StatefulWidget {
-  SubscriptionConfirmScreen({super.key});
+class RegistrationController extends GetxController {
+  final RxBool agreedToTerms = false.obs;
+  final RxBool authorizedPayment = false.obs;
+  final RxBool isProcessing = false.obs;
+  final Rxn<String> currentPaymentId = Rxn<String>();
 
-  @override
-  State<SubscriptionConfirmScreen> createState() =>
-      _SubscriptionConfirmScreenState();
-}
+  late Razorpay razorpay;
 
-class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
-  final PaymentOptionController paymentController = Get.put(
-    PaymentOptionController(),
-  );
-
-  final PlanSelectionController planController = Get.put(
-    PlanSelectionController(),
-  );
-
-  final planPurchaseController = Get.put(PlanPurchaseController());
-  final userController = Get.put(UserController());
-
-  late Razorpay _razorpay;
-  bool _isProcessing = false;
-  String? _currentPaymentId;
-  bool _agreedToTerms = false;
-  bool _authorizedPayment = false;
-
-  final BoxDecoration decoration = BoxDecoration(
-    border: Border.all(color: AppTheme.borderGrey),
-    borderRadius: BorderRadius.circular(12),
-  );
+  late final PlanPurchaseController planPurchaseController;
+  late final UserController userController;
 
   @override
-  void initState() {
-    super.initState();
-    _razorpay = Razorpay();
-    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, _handlePaymentSuccess);
-    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, _handlePaymentError);
-    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, _handleExternalWallet);
+  void onInit() {
+    super.onInit();
+
+    planPurchaseController = Get.find<PlanPurchaseController>();
+    userController = Get.find<UserController>();
+
+    razorpay = Razorpay();
+    razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
+    razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
+    razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
   }
 
   @override
-  void dispose() {
-    _razorpay.clear();
-    super.dispose();
+  void onClose() {
+    razorpay.clear();
+    super.onClose();
   }
 
-  void _handlePaymentSuccess(PaymentSuccessResponse response) async {
+  void handlePaymentSuccess(PaymentSuccessResponse response) async {
     try {
-      final paymentId = _currentPaymentId;
+      final paymentId = currentPaymentId.value;
       if (paymentId == null) {
         throw Exception('Payment ID not found');
       }
@@ -74,62 +58,51 @@ class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
       );
 
       if (success) {
-        await paymentController.saveCurrentPaymentMethod();
-
         SnackbarService.showSuccess('Payment completed successfully!');
-        await Future.delayed(const Duration(milliseconds: 1500));
-        Get.back();
+        await Future.delayed(const Duration(milliseconds: 500));
+        Get.offAllNamed('/payment-success');
       } else {
         SnackbarService.showError(
           'Payment verification failed. Please contact support.',
         );
+        Get.offAllNamed('/payment-failure');
       }
     } catch (e) {
       SnackbarService.showError('Payment verification failed: ${e.toString()}');
     } finally {
-      setState(() {
-        _isProcessing = false;
-        _currentPaymentId = null;
-      });
+      isProcessing.value = false;
+      currentPaymentId.value = null;
     }
   }
 
-  void _handlePaymentError(PaymentFailureResponse response) async {
-    setState(() {
-      _isProcessing = false;
-      _currentPaymentId = null;
-    });
+  void handlePaymentError(PaymentFailureResponse response) async {
+    isProcessing.value = false;
+    currentPaymentId.value = null;
     SnackbarService.showError(response.message ?? 'Payment was not completed');
+    Get.offAllNamed('/payment-failure');
   }
 
-  void _handleExternalWallet(ExternalWalletResponse response) async {
-    setState(() {
-      _isProcessing = false;
-      _currentPaymentId = null;
-    });
+  void handleExternalWallet(ExternalWalletResponse response) async {
+    isProcessing.value = false;
+    currentPaymentId.value = null;
     SnackbarService.showInfo('Payment via ${response.walletName}');
   }
 
-  Future<void> _proceedToPay() async {
-    if (_isProcessing) return;
+  Future<void> proceedToPay() async {
+    if (isProcessing.value) return;
 
-    if (!_agreedToTerms || !_authorizedPayment) {
+    if (!agreedToTerms.value || !authorizedPayment.value) {
       SnackbarService.showWarning(
         'Please agree to the terms and authorize payment to proceed',
       );
       return;
     }
 
-    if (!paymentController.hasSelectedPaymentMethod) {
-      SnackbarService.showWarning('Please select a payment method');
-      return;
-    }
-
-    setState(() => _isProcessing = true);
+    isProcessing.value = true;
 
     try {
-      final planName = planController.selectedPlanName;
-      final amount = planController.totalAmount.toDouble();
+      final planName = 'Annual Plan';
+      final amount = 5900.0;
 
       final orderData = await planPurchaseController.purchasePlan(
         packageName: planName,
@@ -140,197 +113,169 @@ class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
         throw Exception('Failed to create order');
       }
 
-      _currentPaymentId = orderData['paymentId'];
+      currentPaymentId.value = orderData['paymentId'];
       final razorpayOrderId = orderData['razorpayOrderId'];
 
       if (razorpayOrderId == null) {
         throw Exception('Order ID not received from backend');
       }
 
-      final user = userController.currentUser.value;
-      final userEmail = user?.email ?? '';
-      final userPhone = user?.phone ?? '';
-      final userName = user?.name ?? 'User';
+      if (AppMode.isDevelopment) {
+        // Mock payment flow
+        await Future.delayed(Duration(seconds: 2));
+        isProcessing.value = false;
+        currentPaymentId.value = null;
 
-      Map<String, dynamic> options = {
-        'key': RazorpayConfig.keyId,
-        'amount': (amount * 100).round(),
-        'name': RazorpayConfig.companyName,
-        'order_id': razorpayOrderId,
-        'description': planName,
-        'timeout': RazorpayConfig.timeout,
-        'prefill': {'contact': userPhone, 'email': userEmail, 'name': userName},
-        'theme': {'color': RazorpayConfig.themeColor},
-        'readonly': {
-          'email': userEmail.isNotEmpty,
-          'contact': userPhone.isNotEmpty,
-        },
-        'modal': {
-          'ondismiss': () {
-            setState(() {
-              _isProcessing = false;
-              _currentPaymentId = null;
-            });
+        // Save login state and user data
+        final storage = StorageService();
+        await storage.setLoggedIn(true);
+        await storage.saveAuthToken(
+          'mock_token_${DateTime.now().millisecondsSinceEpoch}',
+        );
+        await storage.saveUserData({
+          'id': 'user_${DateTime.now().millisecondsSinceEpoch}',
+          'name': userController.currentUser.value?.name ?? 'User',
+          'email': userController.currentUser.value?.email ?? '',
+          'phone': userController.currentUser.value?.phone ?? '',
+        });
+
+        SnackbarService.showSuccess('Payment completed successfully!');
+        Get.offAllNamed('/payment-success');
+      } else {
+        // Production: Use actual Razorpay
+        final user = userController.currentUser.value;
+        final userEmail = user?.email ?? '';
+        final userPhone = user?.phone ?? '';
+        final userName = user?.name ?? 'User';
+
+        Map<String, dynamic> options = {
+          'key': 'rzp_test_your_key_id', // Replace with actual key
+          'amount': (amount * 100).round(),
+          'name': 'SP ResearchVia',
+          'order_id': razorpayOrderId,
+          'description': planName,
+          'timeout': 300,
+          'prefill': {'contact': userPhone, 'email': userEmail, 'name': userName},
+          'theme': {'color': '#163174'},
+          'readonly': {
+            'email': userEmail.isNotEmpty,
+            'contact': userPhone.isNotEmpty,
           },
-          'confirm_close': true,
-        },
-      };
-
-      final selectedMethod = paymentController.selectedPaymentMethod.value;
-      if (selectedMethod != null) {
-        List<Map<String, String>> hiddenMethods = [];
-
-        switch (selectedMethod) {
-          case PaymentMethod.card:
-            hiddenMethods = [
-              {'method': 'upi'},
-              {'method': 'netbanking'},
-              {'method': 'wallet'},
-              {'method': 'emi'},
-              {'method': 'cardless_emi'},
-              {'method': 'paylater'},
-            ];
-            break;
-          case PaymentMethod.upi:
-            hiddenMethods = [
-              {'method': 'card'},
-              {'method': 'netbanking'},
-              {'method': 'wallet'},
-              {'method': 'emi'},
-              {'method': 'cardless_emi'},
-              {'method': 'paylater'},
-            ];
-            break;
-          case PaymentMethod.netBanking:
-            hiddenMethods = [
-              {'method': 'card'},
-              {'method': 'upi'},
-              {'method': 'wallet'},
-              {'method': 'emi'},
-              {'method': 'cardless_emi'},
-              {'method': 'paylater'},
-            ];
-            break;
-          case PaymentMethod.wallet:
-            hiddenMethods = [
-              {'method': 'card'},
-              {'method': 'upi'},
-              {'method': 'netbanking'},
-              {'method': 'emi'},
-              {'method': 'cardless_emi'},
-              {'method': 'paylater'},
-            ];
-            break;
-        }
-
-        options['config'] = {
-          'display': {
-            'hide': hiddenMethods,
-            'preferences': {'show_default_blocks': false},
+          'modal': {
+            'ondismiss': () {
+              isProcessing.value = false;
+              currentPaymentId.value = null;
+            },
+            'confirm_close': true,
           },
         };
-      }
 
-      _razorpay.open(options);
+        razorpay.open(options);
+      }
     } catch (e) {
-      setState(() {
-        _isProcessing = false;
-        _currentPaymentId = null;
-      });
+      isProcessing.value = false;
+      currentPaymentId.value = null;
       SnackbarService.showError('Failed to initiate payment: ${e.toString()}');
     }
   }
+}
+
+class SubscriptionConfirmScreen extends StatelessWidget {
+  const SubscriptionConfirmScreen({super.key});
+
+  final BoxDecoration decoration = const BoxDecoration(
+    border: Border(top: BorderSide(color: AppTheme.borderGrey)),
+    borderRadius: BorderRadius.all(Radius.circular(12)),
+  );
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(RegistrationController());
+
     return Scaffold(
+      backgroundColor: AppTheme.backgroundWhite,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          padding: const EdgeInsets.all(20),
           child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 100, child: AppLogo()),
-              SizedBox(height: 10),
-              Text(
+              SizedBox(height: 60, child: AppLogo()),
+              const SizedBox(height: 24),
+              const Text(
                 'Confirm Your Subscription',
-                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryBlue,
+                ),
               ),
-              SizedBox(height: 10),
-              Text(
-                'Complete your payment to activate your ResearchVia account.',
+              const SizedBox(height: 8),
+              const Text(
+                'Complete your payment to activate your\nResearchVia account.',
                 textAlign: TextAlign.center,
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                style: TextStyle(fontSize: 14, color: AppTheme.textGrey),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.lock, color: AppTheme.primaryGreen, size: 16),
-                  SizedBox(width: 4),
+                children: const [
+                  Icon(Icons.lock, color: AppTheme.primaryGreen, size: 14),
+                  SizedBox(width: 6),
                   Text(
                     'SSL Secured & PCI-DSS Compliant',
-                    style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
+                    style: TextStyle(fontSize: 12, color: AppTheme.textGrey),
                   ),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 24),
               Obx(
                 () => Container(
-                  decoration: decoration,
-                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppTheme.borderGrey),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(15),
                   child: Column(
                     children: [
                       PlanCard(
-                        planName: planController
-                            .planDetails[PlanType.annual]!['name'],
-                        amount: planController
-                            .planDetails[PlanType.annual]!['amount'],
-                        validity: planController
-                            .planDetails[PlanType.annual]!['validity'],
-                        selected: planController.isSelected(PlanType.annual),
-                        onTap: () => planController.selectPlan(PlanType.annual),
+                        planName: 'Annual Plan',
+                        amount: 5000,
+                        validity: '1 Year Access – Renew Annually',
+                        selected: true,
+                        onTap: () {},
                       ),
-                      SizedBox(height: 10),
+                      const SizedBox(height: 10),
                       PlanCard(
-                        planName: planController
-                            .planDetails[PlanType.oneTime]!['name'],
-                        amount: planController
-                            .planDetails[PlanType.oneTime]!['amount'],
-                        validity: planController
-                            .planDetails[PlanType.oneTime]!['validity'],
-                        selected: planController.isSelected(PlanType.oneTime),
-                        onTap: () =>
-                            planController.selectPlan(PlanType.oneTime),
+                        planName: 'One-Time Plan',
+                        amount: 10000,
+                        validity: 'Lifetime Access – Pay Once',
+                        selected: false,
+                        onTap: () {},
                       ),
                     ],
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 24),
               Obx(
                 () => Container(
-                  decoration: decoration,
-                  padding: EdgeInsets.all(15),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: AppTheme.borderGrey),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  padding: const EdgeInsets.all(15),
                   child: Column(
                     children: [
-                      SummaryTile(
-                        title: 'Base Price',
-                        amount: planController.basePrice,
-                      ),
-                      SummaryTile(
-                        title: 'CGST (9%)',
-                        amount: planController.cgstAmount,
-                      ),
-                      SummaryTile(
-                        title: 'SGST (9%)',
-                        amount: planController.sgstAmount,
-                      ),
-                      SizedBox(height: 10),
-                      Divider(color: AppTheme.textGrey),
-                      SizedBox(height: 5),
+                      SummaryTile(title: 'Base Price', amount: 5000),
+                      SummaryTile(title: 'CGST (9%)', amount: 450),
+                      SummaryTile(title: 'SGST (9%)', amount: 450),
+                      const SizedBox(height: 10),
+                      const Divider(color: AppTheme.textGrey),
+                      const SizedBox(height: 5),
                       Row(
                         children: [
-                          Expanded(
+                          const Expanded(
                             child: Text(
                               'Total Payable',
                               style: TextStyle(
@@ -340,10 +285,10 @@ class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
                               ),
                             ),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            '₹${planController.formattedTotal}',
-                            style: TextStyle(
+                            '₹5,900',
+                            style: const TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.w600,
                               color: AppTheme.primaryGreen,
@@ -355,57 +300,33 @@ class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 24),
               Container(
-                decoration: decoration,
-                padding: EdgeInsets.all(15),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Payment Method',
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlue,
-                      ),
-                    ),
-                    SizedBox(height: 15),
-                    ...PaymentOption.options.map((option) {
-                      return Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
-                        child: Obx(
-                          () => PaymentMethodTile(
-                            icon: option.icon,
-                            title: option.title,
-                            selected: paymentController.isSelected(
-                              option.method,
-                            ),
-                            onTap: () => paymentController.selectPaymentMethod(
-                              option.method,
-                            ),
-                          ),
-                        ),
-                      );
-                    }).toList(),
-                  ],
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppTheme.borderGrey),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.all(15),
+                child: Obx(
+                  () => PaymentOptionSelector(
+                    selectedMethod: null,
+                    onChoose: (PaymentMethod method) {},
+                  ),
                 ),
               ),
-              SizedBox(height: 20),
-              Container(
-                child: Column(
-                  children: [
-                    Row(
+              const SizedBox(height: 24),
+              Column(
+                children: [
+                  Obx(
+                    () => Row(
                       children: [
                         Checkbox(
-                          value: _agreedToTerms,
+                          value: controller.agreedToTerms.value,
                           onChanged: (bool? val) {
-                            setState(() {
-                              _agreedToTerms = val ?? false;
-                            });
+                            controller.agreedToTerms.value = val ?? false;
                           },
                         ),
-                        Expanded(
+                        const Expanded(
                           child: Text(
                             'I agree to the "Terms Refund Policy" and "Service Agreement"',
                             style: TextStyle(
@@ -416,18 +337,18 @@ class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
                         ),
                       ],
                     ),
-                    SizedBox(height: 10),
-                    Row(
+                  ),
+                  const SizedBox(height: 10),
+                  Obx(
+                    () => Row(
                       children: [
                         Checkbox(
-                          value: _authorizedPayment,
+                          value: controller.authorizedPayment.value,
                           onChanged: (bool? val) {
-                            setState(() {
-                              _authorizedPayment = val ?? false;
-                            });
+                            controller.authorizedPayment.value = val ?? false;
                           },
                         ),
-                        Expanded(
+                        const Expanded(
                           child: Text(
                             'I authorize SP ResearchVia Pvt. Ltd. to process this payment.',
                             style: TextStyle(
@@ -438,37 +359,41 @@ class _SubscriptionConfirmScreenState extends State<SubscriptionConfirmScreen> {
                         ),
                       ],
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Obx(
                 () => Button(
-                  title: _isProcessing
+                  title: controller.isProcessing.value
                       ? 'Processing...'
-                      : 'Proceed to Pay ₹${planController.formattedTotal}',
+                      : 'Proceed to Pay ₹5,900',
                   buttonType: ButtonType.green,
-                  onTap: _isProcessing ? null : _proceedToPay,
-                  showLoading: _isProcessing,
+                  onTap: controller.isProcessing.value
+                      ? null
+                      : controller.proceedToPay,
+                  showLoading: controller.isProcessing.value,
                 ),
               ),
-              SizedBox(height: 5),
-              Text(
+              const SizedBox(height: 5),
+              const Text(
                 "You'll receive a digital invoice after successful payment.",
+                textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: AppTheme.textGrey),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
-                children: [
+                children: const [
                   PaymentCardIcon(image: 'assets/icons/visa.png'),
                   SizedBox(width: 10),
                   PaymentCardIcon(image: 'assets/icons/mastercard.png'),
                 ],
               ),
-              SizedBox(height: 20),
-              Text(
+              const SizedBox(height: 20),
+              const Text(
                 "All payments are processed securely by Razorpay",
+                textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 12, color: AppTheme.textGrey),
               ),
             ],
@@ -508,91 +433,15 @@ class SummaryTile extends StatelessWidget {
         Expanded(
           child: Text(
             '$title:',
-            style: TextStyle(fontSize: 14, color: AppTheme.textGrey),
+            style: const TextStyle(fontSize: 14, color: AppTheme.textGrey),
           ),
         ),
-        SizedBox(width: 10),
-        Text('₹$amount', style: TextStyle(fontSize: 14, color: Colors.black)),
+        const SizedBox(width: 10),
+        Text(
+          '₹$amount',
+          style: const TextStyle(fontSize: 14, color: Colors.black),
+        ),
       ],
-    );
-  }
-}
-
-class PaymentMethodTile extends StatelessWidget {
-  const PaymentMethodTile({
-    super.key,
-    required this.icon,
-    required this.title,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String title;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          color: selected ? AppTheme.backgroundLightBlue : Colors.white,
-          border: Border.all(
-            width: 2,
-            color: selected ? AppTheme.primaryBlue : AppTheme.borderGrey,
-          ),
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              size: 24,
-              color: selected ? AppTheme.primaryBlue : AppTheme.textGrey,
-            ),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                title,
-                style: TextStyle(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w500,
-                  color: selected
-                      ? AppTheme.primaryBlueDark
-                      : AppTheme.textGrey,
-                ),
-              ),
-            ),
-            Container(
-              width: 20,
-              height: 20,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: selected ? AppTheme.primaryBlue : Colors.white,
-                border: Border.all(
-                  color: selected ? AppTheme.primaryBlue : AppTheme.borderGrey,
-                  width: 2,
-                ),
-              ),
-              child: selected
-                  ? Center(
-                      child: Container(
-                        width: 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                        ),
-                      ),
-                    )
-                  : null,
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

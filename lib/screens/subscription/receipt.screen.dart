@@ -1,0 +1,721 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+import '../../services/snackbar.service.dart';
+
+class ReceiptScreen extends StatelessWidget {
+  const ReceiptScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final Map<String, dynamic> receiptData = Get.arguments ?? {};
+    final String invoiceNo = receiptData['invoiceNo'];
+    final String date = receiptData['date'];
+    final String paymentMode = receiptData['paymentMode'];
+    final String status = receiptData['status'];
+    final String clientName = receiptData['clientName'];
+    final String fatherName = receiptData['fatherName'];
+    final String address = receiptData['address'];
+    final String mobile = receiptData['mobile'];
+    final String pan = receiptData['pan'];
+    final String email = receiptData['email'];
+    final String aadhaar = receiptData['aadhaar'];
+    final String subtotal = receiptData['subtotal'];
+    final String cgst = receiptData['cgst'];
+    final String sgst = receiptData['sgst'];
+    final String totalGst = receiptData['totalGst'];
+    final String totalPayable = receiptData['totalPayable'];
+    final String amountPaid = receiptData['amountPaid'];
+    final String balance = receiptData['balance'];
+    final String validity = receiptData['validity'];
+    final String paymentRefId = receiptData['paymentRefId'];
+
+    return Scaffold(
+      backgroundColor: Color(0xffF9FAFB),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Color(0xff163174)),
+          onPressed: () => Get.back(),
+        ),
+        title: Text(
+          'Receipt',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: Color(0xff163174),
+          ),
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.print, color: Color(0xff163174)),
+            onPressed: () {
+              SnackbarService.showInfo('Print functionality coming soon');
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.picture_as_pdf, color: Color(0xff163174)),
+            onPressed: () {
+              SnackbarService.showInfo('PDF download coming soon');
+            },
+          ),
+        ],
+      ),
+      body: SingleChildScrollView(
+        padding: EdgeInsets.all(16),
+        child: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Header Section
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Color(0xff163174),
+                  borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(12),
+                    topRight: Radius.circular(12),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'SP RESEARCHVIA',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          'PRIVATE LIMITED',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          '129 A, Kalani Bagh, AB Road',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        Text(
+                          'Dewas, MP - 455001',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        Text(
+                          'info@researchvia.in',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        Text(
+                          'www.researchvia.in',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            color: Colors.white.withValues(alpha: 0.8),
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'GSTIN: [Enter GST Number]',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                        Text(
+                          'SEBI RA No: [Enter SEBI Number]',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.white.withValues(alpha: 0.9),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Container(
+                      width: 60,
+                      height: 60,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Center(
+                        child: Text(
+                          'SP',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 24,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff163174),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              // Invoice Title
+              Padding(
+                padding: EdgeInsets.all(20),
+                child: Text(
+                  'INVOICE',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 24,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xff163174),
+                  ),
+                ),
+              ),
+
+              // Invoice Details
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Invoice No:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: Color(0xff6B7280),
+                          ),
+                        ),
+                        Text(
+                          invoiceNo,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff163174),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Date:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: Color(0xff6B7280),
+                          ),
+                        ),
+                        Text(
+                          date,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff163174),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 16),
+
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Payment Mode:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: Color(0xff6B7280),
+                          ),
+                        ),
+                        Text(
+                          paymentMode,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff163174),
+                          ),
+                        ),
+                      ],
+                    ),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        Text(
+                          'Status:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 12,
+                            color: Color(0xff6B7280),
+                          ),
+                        ),
+                        Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 12,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Color(0xff10B981),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            status,
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Client Information
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9FAFB),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'CLIENT INFORMATION',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff163174),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    _buildInfoRow('Name:', clientName),
+                    SizedBox(height: 8),
+                    _buildInfoRow('Father\'s Name:', fatherName),
+                    SizedBox(height: 8),
+                    _buildInfoRow('Address:', address),
+                    SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Expanded(child: _buildInfoRow('Mobile:', mobile)),
+                        SizedBox(width: 16),
+                        Expanded(child: _buildInfoRow('PAN:', pan)),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    _buildInfoRow('Email:', email),
+                    SizedBox(height: 8),
+                    _buildInfoRow('Aadhaar:', aadhaar),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Service Details
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9FAFB),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'SERVICE DETAILS',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff163174),
+                      ),
+                    ),
+                    SizedBox(height: 16),
+                    _buildServiceItem(
+                      '1.',
+                      'Research Subscription - Index Option',
+                      'Splendid Plan | 1 Year',
+                      '₹1,51,000',
+                    ),
+                    SizedBox(height: 12),
+                    _buildServiceItem(
+                      '2.',
+                      'Research Subscription - Stock Future',
+                      'Spark Plan | 1 Year',
+                      '₹99,000',
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Pricing Details
+              Padding(
+                padding: EdgeInsets.symmetric(horizontal: 20),
+                child: Column(
+                  children: [
+                    _buildPriceRow('Subtotal:', subtotal),
+                    SizedBox(height: 8),
+                    _buildPriceRow('CGST (9%):', cgst),
+                    SizedBox(height: 8),
+                    _buildPriceRow('SGST (9%):', sgst),
+                    SizedBox(height: 8),
+                    _buildPriceRow('Total GST (18%):', totalGst),
+                    SizedBox(height: 16),
+                    Divider(color: Color(0xffE5E7EB), thickness: 1),
+                    SizedBox(height: 16),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Total Payable:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff163174),
+                          ),
+                        ),
+                        Text(
+                          totalPayable,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                            color: Color(0xff163174),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Amount Paid:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff10B981),
+                          ),
+                        ),
+                        Text(
+                          amountPaid,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff10B981),
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Balance:',
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff10B981),
+                          ),
+                        ),
+                        Text(
+                          balance,
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: 16,
+                            fontWeight: FontWeight.w600,
+                            color: Color(0xff10B981),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Additional Information
+              Container(
+                margin: EdgeInsets.symmetric(horizontal: 20),
+                padding: EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9FAFB),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'ADDITIONAL INFORMATION',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xff163174),
+                      ),
+                    ),
+                    SizedBox(height: 12),
+                    _buildInfoRow('Service Validity:', validity),
+                    SizedBox(height: 8),
+                    _buildInfoRow('Payment Ref ID:', paymentRefId),
+                    SizedBox(height: 8),
+                    _buildInfoRow('Generated By:', 'ResearchVia Admin'),
+                    SizedBox(height: 12),
+                    Text(
+                      'Authorized Signatory:',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        color: Color(0xff6B7280),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      '[Digital Signature]',
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 12,
+                        fontStyle: FontStyle.italic,
+                        color: Color(0xff9CA3AF),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
+              SizedBox(height: 24),
+
+              // Footer
+              Container(
+                padding: EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  color: Color(0xffF9FAFB),
+                  borderRadius: BorderRadius.only(
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'This is a computer-generated invoice. No physical signature required.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 11,
+                        color: Color(0xff6B7280),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Disclaimer: SP ResearchVia Pvt. Ltd. is a SEBI-registered Research Analyst entity. All services provided are subject to SEBI guidelines and market risks.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 10,
+                        color: Color(0xff9CA3AF),
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Support: For billing queries, contact support@researchvia.in',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 10,
+                        color: Color(0xff9CA3AF),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              color: Color(0xff6B7280),
+            ),
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: Color(0xff163174),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildServiceItem(
+    String number,
+    String title,
+    String subtitle,
+    String amount,
+  ) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              number,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: Color(0xff163174),
+              ),
+            ),
+            SizedBox(width: 8),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xff163174),
+                    ),
+                  ),
+                  Text(
+                    subtitle,
+                    style: TextStyle(
+                      fontFamily: 'Poppins',
+                      fontSize: 11,
+                      color: Color(0xff6B7280),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Text(
+              amount,
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+                color: Color(0xff163174),
+              ),
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPriceRow(String label, String amount) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            color: Color(0xff6B7280),
+          ),
+        ),
+        Text(
+          amount,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Color(0xff163174),
+          ),
+        ),
+      ],
+    );
+  }
+}

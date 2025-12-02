@@ -1,7 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:get/get.dart';
+import '../core/utils/responsive.dart';
+import '../core/constants/app_dimensions.dart';
+import '../core/theme/app_theme.dart';
 
-class TitleField extends StatefulWidget {
+class TitleFieldController extends GetxController {
+  final RxBool obscure;
+
+  TitleFieldController({required bool isPasswordField})
+    : obscure = isPasswordField.obs;
+
+  void toggleObscure() {
+    obscure.value = !obscure.value;
+  }
+}
+
+class TitleField extends StatelessWidget {
   const TitleField({
     super.key,
     required this.title,
@@ -28,87 +43,102 @@ class TitleField extends StatefulWidget {
   final bool readOnly;
 
   @override
-  State<TitleField> createState() => _TitleFieldState();
-}
-
-class _TitleFieldState extends State<TitleField> {
-  late bool _obscure;
-
-  @override
-  void initState() {
-    super.initState();
-    _obscure = widget.isPasswordField;
-  }
-
-  @override
   Widget build(BuildContext context) {
-    return Container(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            widget.title,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              color: Color(0xff11416B),
-              fontSize: 14,
-              fontWeight: FontWeight.w500,
-            ),
+    final responsive = Responsive.of(context);
+    final fieldController = Get.put(
+      TitleFieldController(isPasswordField: isPasswordField),
+      tag: controller.hashCode.toString(),
+    );
+
+    final textStyle = TextStyle(
+      fontSize: responsive.sp(14),
+      color: AppTheme.primaryBlue,
+      fontFamily: 'Poppins',
+      fontWeight: FontWeight.w400,
+    );
+
+    final hintStyle = TextStyle(
+      fontSize: responsive.sp(14),
+      color: AppTheme.textGreyLight,
+      fontFamily: 'Poppins',
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            color: AppTheme.primaryBlue,
+            fontSize: responsive.sp(14),
+            fontWeight: FontWeight.w500,
           ),
-          SizedBox(height: 5),
-          Container(
-            height: 50,
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            decoration: BoxDecoration(
-              color: const Color(0xffF9FAFB),
-              border: Border.all(width: 1, color: const Color(0xffE5E7EB)),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: TextField(
-                controller: widget.controller,
-                focusNode: widget.focusNode,
-                obscureText: widget.isPasswordField ? _obscure : false,
-                inputFormatters: widget.inputFormatters,
-                keyboardType: widget.keyboardType,
-                maxLength: widget.maxLength,
-                readOnly: widget.readOnly,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: Color(0xff11416B),
-                  fontFamily: 'Poppins',
-                  fontWeight: FontWeight.w400,
-                ),
-                decoration: InputDecoration(
-                  hintText: widget.hint,
-                  hintStyle: const TextStyle(
-                    fontSize: 14,
-                    color: Color(0xffADAEBC),
-                    fontFamily: 'Poppins',
-                  ),
-                  border: InputBorder.none,
-                  counterText: '',
-                  suffixIcon: widget.isPasswordField
-                      ? GestureDetector(
+        ),
+        SizedBox(height: responsive.spacing(5)),
+        Container(
+          height: responsive.spacing(AppDimensions.containerSmall),
+          padding: responsive.padding(horizontal: AppDimensions.spacing10),
+          decoration: BoxDecoration(
+            color: const Color(0xffF9FAFB),
+            border: Border.all(width: AppDimensions.borderThin, color: AppTheme.borderGrey),
+            borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+          ),
+          child: Align(
+            alignment: Alignment.centerLeft,
+            child: isPasswordField
+                ? Obx(
+                    () => TextField(
+                      controller: controller,
+                      focusNode: focusNode,
+                      obscureText: fieldController.obscure.value,
+                      inputFormatters: inputFormatters,
+                      keyboardType: keyboardType,
+                      maxLength: maxLength,
+                      readOnly: readOnly,
+                      style: textStyle,
+                      decoration: InputDecoration(
+                        hintText: hint,
+                        hintStyle: hintStyle,
+                        border: InputBorder.none,
+                        counterText: '',
+                        suffixIcon: GestureDetector(
                           child: Icon(
-                            _obscure
+                            fieldController.obscure.value
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
+                            size: responsive.spacing(AppDimensions.iconMedium),
                           ),
-                          onTap: () {
-                            setState(() {
-                              _obscure = !_obscure;
-                            });
-                          },
-                        )
-                      : (widget.icon != null ? Icon(widget.icon) : null),
-                ),
-              ),
-            ),
+                          onTap: fieldController.toggleObscure,
+                        ),
+                      ),
+                    ),
+                  )
+                : TextField(
+                    controller: controller,
+                    focusNode: focusNode,
+                    obscureText: false,
+                    inputFormatters: inputFormatters,
+                    keyboardType: keyboardType,
+                    maxLength: maxLength,
+                    readOnly: readOnly,
+                    style: textStyle,
+                    decoration: InputDecoration(
+                      hintText: hint,
+                      hintStyle: hintStyle,
+                      border: InputBorder.none,
+                      counterText: '',
+                      suffixIcon: icon != null
+                          ? Icon(
+                              icon,
+                              size: responsive.spacing(AppDimensions.iconMedium),
+                            )
+                          : null,
+                    ),
+                  ),
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

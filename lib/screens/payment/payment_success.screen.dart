@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
-
-import 'package:spresearchvia2/widgets/button.dart';
+import 'package:get/get.dart';
+import '../../core/routes/app_routes.dart';
+import '../../widgets/button.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   const PaymentSuccessScreen({super.key});
@@ -63,6 +64,12 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
 
   @override
   Widget build(BuildContext context) {
+    final Map<String, dynamic> paymentData = Get.arguments ?? {};
+    final String? validUntil = paymentData['validUntil'];
+    final String? planName = paymentData['planName'];
+    final String? amount = paymentData['amount'];
+    final String? nextBilling = paymentData['nextBilling'];
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(
@@ -115,8 +122,8 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                       ),
                       children: [
                         TextSpan(text: 'Your subscription is valid until\n'),
-                        TextSpan(
-                          text: '25/08/2025',
+                        if (validUntil != null) TextSpan(
+                          text: validUntil,
                           style: TextStyle(
                             fontWeight: FontWeight.w600,
                             color: Color(0xff2563EB),
@@ -135,11 +142,11 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                     ),
                     child: Column(
                       children: [
-                        DetailRow(label: 'Plan', value: 'Premium Monthly'),
-                        SizedBox(height: 16),
-                        DetailRow(label: 'Amount', value: '\$29.99'),
-                        SizedBox(height: 16),
-                        DetailRow(label: 'Next billing', value: '25/09/2024'),
+                        if (planName != null) DetailRow(label: 'Plan', value: planName),
+                        if (planName != null) SizedBox(height: 16),
+                        if (amount != null) DetailRow(label: 'Amount', value: amount),
+                        if (amount != null) SizedBox(height: 16),
+                        if (nextBilling != null) DetailRow(label: 'Next billing', value: nextBilling),
                       ],
                     ),
                   ),
@@ -147,13 +154,18 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                   Button(
                     title: 'Go To Dashboard',
                     buttonType: ButtonType.blue,
-                    onTap: () {},
+                    onTap: () {
+                      print('\n.\n|\n.\nGo To Dashboard tapped\n.\n|\n.\n');
+                      Get.offAllNamed(AppRoutes.tabs);
+                    },
                   ),
                   SizedBox(height: 15),
                   Button(
-                    title: 'View Reciept',
-                    buttonType: ButtonType.blue,
-                    onTap: () {},
+                    title: 'View Receipt',
+                    buttonType: ButtonType.blueBorder,
+                    onTap: () {
+                      Get.toNamed(AppRoutes.receipt);
+                    },
                   ),
                   SizedBox(height: 15),
                   GestureDetector(
@@ -187,19 +199,21 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
               ),
             ),
           ),
-
-          AnimatedBuilder(
-            animation: _confettiController,
-            builder: (context, child) {
-              return CustomPaint(
-                painter: ConfettiPainter(
-                  particles: _confettiParticles,
-                  progress: _confettiController.value,
-                ),
-                size: Size.infinite,
-              );
-            },
-          ),
+          if (_confettiController.value < 1.0)
+            AnimatedBuilder(
+              animation: _confettiController,
+              builder: (context, child) {
+                return IgnorePointer(
+                  child: CustomPaint(
+                    painter: ConfettiPainter(
+                      particles: _confettiParticles,
+                      progress: _confettiController.value,
+                    ),
+                    size: Size.infinite,
+                  ),
+                );
+              },
+            ),
         ],
       ),
     );

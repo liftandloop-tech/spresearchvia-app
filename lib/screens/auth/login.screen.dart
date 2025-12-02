@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/controllers/auth.controller.dart';
-import 'package:spresearchvia2/core/routes/app_routes.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/core/utils/input_formatters.dart';
-import 'package:spresearchvia2/widgets/app_logo.dart';
-import 'package:spresearchvia2/widgets/button.dart';
-import 'package:spresearchvia2/widgets/title_field.dart';
+import '../../controllers/auth.controller.dart';
+import '../../core/routes/app_routes.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_styles.dart';
+import '../../core/utils/input_formatters.dart';
+import '../../core/utils/responsive.dart';
+import '../../core/constants/app_dimensions.dart';
+import '../../core/constants/app_strings.dart';
+import '../../widgets/app_logo.dart';
+import '../../widgets/button.dart';
+import '../../widgets/title_field.dart';
+import '../../services/snackbar.service.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -40,15 +44,27 @@ class _LoginScreenState extends State<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    void toGetStarted() {
-      Get.back();
+    final responsive = Responsive.of(context);
+
+    Future<void> handleLogin() async {
+      final input = phoneOrMailController.text.trim();
+      final mpin = mpinController.text.trim();
+      if (input.isEmpty || mpin.isEmpty) {
+        SnackbarService.showError(AppStrings.pleaseEnterCredentials);
+        return;
+      }
+
+      final success = await authController.verifyOtp(input);
+      if (success) {
+        Get.offAllNamed(AppRoutes.tabs);
+      }
     }
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundWhite,
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          padding: responsive.padding(horizontal: AppDimensions.paddingMedium, vertical: AppDimensions.paddingSmall),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -56,44 +72,45 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlue),
+                      icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlue, size: responsive.spacing(AppDimensions.iconLarge)),
                       onPressed: () => Get.back(),
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
                 SizedBox(
-                  height: 100,
+                  height: responsive.spacing(AppDimensions.logoHeight),
                   width: double.maxFinite,
                   child: AppLogo(),
                 ),
-                SizedBox(height: 20),
-                Text("Welcome Back", style: AppStyles.welcomeText),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
                 Text(
-                  "Sign in to access your portfolio",
-                  style: AppStyles.bodyLarge,
+                  AppStrings.welcomeBack,
+                  style: AppStyles.welcomeText.copyWith(fontSize: responsive.sp(24)),
                 ),
-                SizedBox(height: 40),
+                Text(
+                  AppStrings.signInToAccess,
+                  style: AppStyles.bodyLarge.copyWith(fontSize: responsive.sp(16)),
+                ),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing40)),
                 TitleField(
-                  title: 'Email or Phone',
-                  hint: 'Enter your email or phone',
+                  title: AppStrings.emailOrPhone,
+                  hint: AppStrings.enterEmailOrPhone,
                   controller: phoneOrMailController,
                   icon: Icons.phone_outlined,
-
-                  keyboardType: TextInputType.phone,
-                  maxLength: 11,
+                  keyboardType: TextInputType.text,
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
                 TitleField(
-                  title: 'MPin',
-                  hint: 'Enter your MPin',
+                  title: AppStrings.mpin,
+                  hint: AppStrings.enterMpin,
                   controller: mpinController,
                   icon: Icons.lock_outline,
                   inputFormatters: [OTPInputFormatter()],
                   keyboardType: TextInputType.number,
                   maxLength: 6,
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
                 Align(
                   alignment: Alignment.centerRight,
                   child: GestureDetector(
@@ -101,29 +118,28 @@ class _LoginScreenState extends State<LoginScreen> {
                       Get.toNamed(AppRoutes.forgotMpin);
                     },
                     child: Text(
-                      'Forgot MPIN?',
+                      AppStrings.forgotMpin,
                       style: TextStyle(
                         color: AppTheme.primaryBlue,
-                        fontSize: 14,
+                        fontSize: responsive.sp(14),
                         fontWeight: FontWeight.w500,
                       ),
                     ),
                   ),
                 ),
-                SizedBox(height: 40),
-
+                SizedBox(height: responsive.spacing(AppDimensions.spacing40)),
                 Button(
-                  title: 'Login',
+                  title: AppStrings.login,
                   buttonType: ButtonType.blue,
-                  onTap: toGetStarted,
+                  onTap: handleLogin,
                 ),
-                SizedBox(height: 10),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
                 Button(
-                  title: 'Back',
+                  title: AppStrings.back,
                   buttonType: ButtonType.greyBorder,
-                  onTap: toGetStarted,
+                  onTap: () => Get.offAllNamed(AppRoutes.getStarted),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
                 DataProtection(),
               ],
             ),
@@ -139,15 +155,24 @@ class DataProtection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive.of(context);
+
     return SizedBox(
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          Icon(Icons.shield_outlined, color: AppTheme.textGrey),
-          Text(
-            " Your data is protected with bank-level security",
-            style: AppStyles.caption,
+          Icon(
+            Icons.shield_outlined,
+            color: AppTheme.textGrey,
+            size: responsive.spacing(AppDimensions.iconMedium),
+          ),
+          Flexible(
+            child: Text(
+              " ${AppStrings.dataProtection}",
+              style: AppStyles.caption.copyWith(fontSize: responsive.sp(12)),
+              textAlign: TextAlign.center,
+            ),
           ),
         ],
       ),

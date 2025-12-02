@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'app_theme.dart';
 
 abstract class AppStyles {
   static const String _fontFamily = 'Poppins';

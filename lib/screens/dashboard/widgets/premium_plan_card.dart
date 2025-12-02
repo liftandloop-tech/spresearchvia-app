@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
-import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
-import 'package:spresearchvia2/screens/subscription/quick_renewal.screen.dart';
-
+import '../../../controllers/plan_purchase.controller.dart';
+import '../../subscription/quick_renewal.screen.dart';
 import '../../../widgets/button.dart';
 
 class PremiumPlanCard extends StatelessWidget {
@@ -63,7 +62,7 @@ class PremiumPlanCard extends StatelessWidget {
         final expiryDate = plan.expiryDate;
         final formattedExpiry = expiryDate != null
             ? DateFormat('MMMM dd, yyyy').format(expiryDate)
-            : 'N/A';
+            : null;
 
         return Container(
           padding: EdgeInsets.all(24),
@@ -82,8 +81,9 @@ class PremiumPlanCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    plan.name.isNotEmpty ? plan.name : 'Premium Plan',
+                  if (plan.name != null && plan.name!.isNotEmpty)
+                    Text(
+                      plan.name!,
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 18,
@@ -138,16 +138,17 @@ class PremiumPlanCard extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 8),
-              Text(
-                'Expires on $formattedExpiry',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  fontWeight: FontWeight.w400,
-                  color: Colors.white.withValues(alpha: 0.7),
+              if (formattedExpiry != null) SizedBox(height: 8),
+              if (formattedExpiry != null)
+                Text(
+                  'Expires on $formattedExpiry',
+                  style: TextStyle(
+                    fontFamily: 'Poppins',
+                    fontSize: 12,
+                    fontWeight: FontWeight.w400,
+                    color: Colors.white.withValues(alpha: 0.7),
+                  ),
                 ),
-              ),
               SizedBox(height: 24),
               Button(
                 title: 'Renew Now',

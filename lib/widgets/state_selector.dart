@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
 final List<String> indianStates = [
   'Andhra Pradesh',
@@ -31,57 +32,57 @@ final List<String> indianStates = [
   'West Bengal',
 ];
 
-class StateSelector extends StatefulWidget {
-  StateSelector({
-    super.key,
-    required this.label,
-    this.hint,
-    this.value,
-    required this.onChanged,
-  });
-
-  final String label;
-  final String? hint;
-  final String? value;
-  final ValueChanged<String?> onChanged;
+class StateSelectorController extends GetxController {
+  final RxBool isOpen = false.obs;
+  final Rxn<String> selectedValue = Rxn<String>();
+  OverlayEntry? overlayEntry;
 
   @override
-  State<StateSelector> createState() => _StateSelectorState();
-}
-
-class _StateSelectorState extends State<StateSelector> {
-  bool _isOpen = false;
-  final LayerLink _layerLink = LayerLink();
-  OverlayEntry? _overlayEntry;
-  String? _selectedValue;
-
-  @override
-  void dispose() {
-    _overlayEntry?.remove();
-    super.dispose();
+  void onClose() {
+    overlayEntry?.remove();
+    super.onClose();
   }
 
-  void _toggleDropdown() {
-    if (_isOpen) {
-      _closeDropdown();
+  void toggleDropdown(
+    BuildContext context,
+    LayerLink layerLink,
+    ValueChanged<String?> onChanged,
+    String? value,
+    String? hint,
+    String label,
+  ) {
+    if (isOpen.value) {
+      closeDropdown();
     } else {
-      _openDropdown();
+      openDropdown(context, layerLink, onChanged, value, hint, label);
     }
   }
 
-  void _openDropdown() {
-    _overlayEntry = _createOverlayEntry();
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() => _isOpen = true);
+  void openDropdown(
+    BuildContext context,
+    LayerLink layerLink,
+    ValueChanged<String?> onChanged,
+    String? value,
+    String? hint,
+    String label,
+  ) {
+    overlayEntry = _createOverlayEntry(context, layerLink, onChanged, value);
+    Overlay.of(context).insert(overlayEntry!);
+    isOpen.value = true;
   }
 
-  void _closeDropdown() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    setState(() => _isOpen = false);
+  void closeDropdown() {
+    overlayEntry?.remove();
+    overlayEntry = null;
+    isOpen.value = false;
   }
 
-  OverlayEntry _createOverlayEntry() {
+  OverlayEntry _createOverlayEntry(
+    BuildContext context,
+    LayerLink layerLink,
+    ValueChanged<String?> onChanged,
+    String? value,
+  ) {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     Size size = renderBox.size;
     Offset offset = renderBox.localToGlobal(Offset.zero);
@@ -89,7 +90,7 @@ class _StateSelectorState extends State<StateSelector> {
     return OverlayEntry(
       builder: (context) => GestureDetector(
         behavior: HitTestBehavior.translucent,
-        onTap: _closeDropdown,
+        onTap: closeDropdown,
         child: Stack(
           children: [
             Positioned(
@@ -97,7 +98,7 @@ class _StateSelectorState extends State<StateSelector> {
               top: offset.dy + size.height + 4,
               width: size.width,
               child: CompositedTransformFollower(
-                link: _layerLink,
+                link: layerLink,
                 showWhenUnlinked: false,
                 child: Material(
                   elevation: 6.0,
@@ -127,14 +128,12 @@ class _StateSelectorState extends State<StateSelector> {
                             itemBuilder: (context, index) {
                               final item = indianStates[index];
                               final selected =
-                                  (_selectedValue ?? widget.value) == item;
+                                  (selectedValue.value ?? value) == item;
                               return InkWell(
                                 onTap: () {
-                                  setState(() {
-                                    _selectedValue = item;
-                                  });
-                                  widget.onChanged(item);
-                                  _closeDropdown();
+                                  selectedValue.value = item;
+                                  onChanged(item);
+                                  closeDropdown();
                                 },
                                 child: Container(
                                   padding: const EdgeInsets.symmetric(
@@ -172,62 +171,96 @@ class _StateSelectorState extends State<StateSelector> {
       ),
     );
   }
+}
+
+class StateSelector extends StatelessWidget {
+  StateSelector({
+    super.key,
+    required this.label,
+    this.hint,
+    this.value,
+    required this.onChanged,
+  });
+
+  final String label;
+  final String? hint;
+  final String? value;
+  final ValueChanged<String?> onChanged;
+
+  final LayerLink _layerLink = LayerLink();
 
   @override
   Widget build(BuildContext context) {
-    final displayValue = _selectedValue ?? widget.value;
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          widget.label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontWeight: FontWeight.w500,
-            fontSize: 14,
-            color: Colors.black,
+    final controller = Get.put(
+      StateSelectorController(),
+      tag: label.hashCode.toString(),
+    );
+
+    return Obx(() {
+      final displayValue = controller.selectedValue.value ?? value;
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            label,
+            style: const TextStyle(
+              fontFamily: 'Poppins',
+              fontWeight: FontWeight.w500,
+              fontSize: 14,
+              color: Colors.black,
+            ),
           ),
-        ),
-        const SizedBox(height: 6),
-        CompositedTransformTarget(
-          link: _layerLink,
-          child: GestureDetector(
-            onTap: _toggleDropdown,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
+          const SizedBox(height: 6),
+          CompositedTransformTarget(
+            link: _layerLink,
+            child: GestureDetector(
+              onTap: () => controller.toggleDropdown(
+                context,
+                _layerLink,
+                onChanged,
+                value,
+                hint,
+                label,
               ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      displayValue ?? widget.hint ?? 'Select ${widget.label}',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: displayValue != null
-                            ? Colors.black87
-                            : Colors.grey,
-                        fontSize: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        displayValue ?? hint ?? 'Select $label',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: displayValue != null
+                              ? Colors.black87
+                              : Colors.grey,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Icon(
-                    _isOpen
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.grey,
-                  ),
-                ],
+                    Icon(
+                      controller.isOpen.value
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ],
-    );
+        ],
+      );
+    });
   }
 }

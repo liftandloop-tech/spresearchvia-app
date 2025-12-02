@@ -2,26 +2,19 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:spresearchvia2/controllers/user.controller.dart';
-import 'package:spresearchvia2/core/models/user.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/core/utils/input_formatters.dart';
-import 'package:spresearchvia2/screens/profile/widgets/profile.image.dart';
-import 'package:spresearchvia2/widgets/button.dart';
-import 'package:spresearchvia2/widgets/state_selector.dart';
-import 'package:spresearchvia2/widgets/title_field.dart';
+import '../../controllers/user.controller.dart';
+import '../../core/models/user.dart';
+import '../../core/utils/error_message_handler.dart';
+import '../../services/snackbar.service.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_styles.dart';
+import '../../core/utils/input_formatters.dart';
+import 'widgets/profile.image.dart';
+import '../../widgets/button.dart';
+import '../../widgets/state_selector.dart';
+import '../../widgets/title_field.dart';
 
-class EditProfileScreen extends StatefulWidget {
-  const EditProfileScreen({super.key});
-
-  @override
-  State<EditProfileScreen> createState() => _EditProfileScreenState();
-}
-
-class _EditProfileScreenState extends State<EditProfileScreen> {
+class EditProfileController extends GetxController {
   final userController = Get.find<UserController>();
 
   final firstNameController = TextEditingController();
@@ -36,53 +29,127 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
 
-  String? selectedState;
-  File? _selectedImage;
+  final Rxn<String> selectedState = Rxn<String>();
+  final Rxn<File> selectedImage = Rxn<File>();
 
   @override
-  void initState() {
-    super.initState();
-    _loadUserData();
+  void onInit() {
+    super.onInit();
+    loadUserData();
   }
 
-  void _loadUserData() {
+  void loadUserData() {
     final user = userController.currentUser.value;
 
     if (user != null) {
-      setState(() {
-        String firstName = user.personalInformation?.firstName ?? '';
-        String lastName = user.personalInformation?.lastName ?? '';
+      String firstName = user.personalInformation?.firstName ?? '';
+      String lastName = user.personalInformation?.lastName ?? '';
 
-        if (firstName.isEmpty &&
-            user.fullName != null &&
-            user.fullName!.isNotEmpty) {
-          final nameParts = user.fullName!.split(' ');
-          firstName = nameParts.first;
-          if (nameParts.length > 1) {
-            lastName = nameParts.last;
-          }
+      if (firstName.isEmpty &&
+          user.fullName != null &&
+          user.fullName!.isNotEmpty) {
+        final nameParts = user.fullName!.split(' ');
+        firstName = nameParts.first;
+        if (nameParts.length > 1) {
+          lastName = nameParts.last;
         }
+      }
 
-        firstNameController.text = firstName;
-        middleNameController.text = user.personalInformation?.middleName ?? '';
-        lastNameController.text = lastName;
-        fatherNameController.text = user.personalInformation?.fatherName ?? '';
+      firstNameController.text = firstName;
+      middleNameController.text = user.personalInformation?.middleName ?? '';
+      lastNameController.text = lastName;
+      fatherNameController.text = user.personalInformation?.fatherName ?? '';
 
-        houseNoController.text = user.addressDetails?.houseNo ?? '';
-        streetAddressController.text = user.addressDetails?.streetAddress ?? '';
-        areaController.text = user.addressDetails?.area ?? '';
-        landmarkController.text = user.addressDetails?.landmark ?? '';
-        pincodeController.text = user.addressDetails?.pincode?.toString() ?? '';
-        selectedState = user.addressDetails?.state;
+      houseNoController.text = user.addressDetails?.houseNo ?? '';
+      streetAddressController.text = user.addressDetails?.streetAddress ?? '';
+      areaController.text = user.addressDetails?.area ?? '';
+      landmarkController.text = user.addressDetails?.landmark ?? '';
+      pincodeController.text = user.addressDetails?.pincode?.toString() ?? '';
+      selectedState.value = user.addressDetails?.state;
 
-        phoneController.text =
-            user.phone ?? user.contactDetails?.phone?.toString() ?? '';
-        emailController.text = user.email ?? user.contactDetails?.email ?? '';
-      });
-    } else {}
+      phoneController.text =
+          user.phone ?? user.contactDetails?.phone?.toString() ?? '';
+      emailController.text = user.email ?? user.contactDetails?.email ?? '';
+    }
   }
 
-  void _pickImage() {
+  Future<void> pickImageFromSource(ImageSource source) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? image = await picker.pickImage(
+        source: source,
+        maxWidth: 1024,
+        maxHeight: 1024,
+        imageQuality: 85,
+      );
+
+      if (image != null) {
+        selectedImage.value = File(image.path);
+        await userController.changeProfileImage(selectedImage.value!);
+      }
+    } catch (e) {
+      ErrorMessageHandler.logError('Pick Image', e);
+      SnackbarService.showErrorFromException(e, title: 'Failed to Pick Image');
+    }
+  }
+
+  Future<void> saveChanges() async {
+    final personalInfo = PersonalInformation(
+      firstName: firstNameController.text.trim(),
+      middleName: middleNameController.text.trim(),
+      lastName: lastNameController.text.trim(),
+      fatherName: fatherNameController.text.trim(),
+    );
+
+    final addressDetails = AddressDetails(
+      houseNo: houseNoController.text.trim(),
+      streetAddress: streetAddressController.text.trim(),
+      area: areaController.text.trim(),
+      landmark: landmarkController.text.trim(),
+      pincode: pincodeController.text.trim(),
+      state: selectedState.value,
+    );
+
+    final contactDetails = ContactDetails(
+      email: emailController.text.trim(),
+      phone: phoneController.text.trim(),
+    );
+
+    final success = await userController.updateProfile(
+      personalInformation: personalInfo,
+      addressDetails: addressDetails,
+      contactDetails: contactDetails,
+    );
+
+    if (success) {
+      Get.back();
+    }
+  }
+
+  @override
+  void onClose() {
+    firstNameController.dispose();
+    middleNameController.dispose();
+    lastNameController.dispose();
+    fatherNameController.dispose();
+    houseNoController.dispose();
+    streetAddressController.dispose();
+    areaController.dispose();
+    landmarkController.dispose();
+    pincodeController.dispose();
+    phoneController.dispose();
+    emailController.dispose();
+    super.onClose();
+  }
+}
+
+class EditProfileScreen extends StatelessWidget {
+  const EditProfileScreen({super.key});
+
+  void _showImagePickerBottomSheet(
+    BuildContext context,
+    EditProfileController controller,
+  ) {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
@@ -118,7 +185,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
-                    _pickImageFromSource(ImageSource.camera);
+                    controller.pickImageFromSource(ImageSource.camera);
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
@@ -159,7 +226,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
-                    _pickImageFromSource(ImageSource.gallery);
+                    controller.pickImageFromSource(ImageSource.gallery);
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
@@ -228,80 +295,10 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Future<void> _pickImageFromSource(ImageSource source) async {
-    try {
-      final ImagePicker picker = ImagePicker();
-      final XFile? image = await picker.pickImage(
-        source: source,
-        maxWidth: 1024,
-        maxHeight: 1024,
-        imageQuality: 85,
-      );
-
-      if (image != null) {
-        setState(() {
-          _selectedImage = File(image.path);
-        });
-
-        await userController.changeProfileImage(_selectedImage!);
-      }
-    } catch (e) {
-      ErrorMessageHandler.logError('Pick Image', e);
-      SnackbarService.showErrorFromException(e, title: 'Failed to Pick Image');
-    }
-  }
-
-  Future<void> _saveChanges() async {
-    final personalInfo = PersonalInformation(
-      firstName: firstNameController.text.trim(),
-      middleName: middleNameController.text.trim(),
-      lastName: lastNameController.text.trim(),
-      fatherName: fatherNameController.text.trim(),
-    );
-
-    final addressDetails = AddressDetails(
-      houseNo: houseNoController.text.trim(),
-      streetAddress: streetAddressController.text.trim(),
-      area: areaController.text.trim(),
-      landmark: landmarkController.text.trim(),
-      pincode: pincodeController.text.trim(),
-      state: selectedState,
-    );
-
-    final contactDetails = ContactDetails(
-      email: emailController.text.trim(),
-      phone: phoneController.text.trim(),
-    );
-
-    final success = await userController.updateProfile(
-      personalInformation: personalInfo,
-      addressDetails: addressDetails,
-      contactDetails: contactDetails,
-    );
-
-    if (success) {
-      Get.back();
-    }
-  }
-
-  @override
-  void dispose() {
-    firstNameController.dispose();
-    middleNameController.dispose();
-    lastNameController.dispose();
-    fatherNameController.dispose();
-    houseNoController.dispose();
-    streetAddressController.dispose();
-    areaController.dispose();
-    landmarkController.dispose();
-    pincodeController.dispose();
-    phoneController.dispose();
-    emailController.dispose();
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(EditProfileController());
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundWhite,
       appBar: AppBar(
@@ -314,15 +311,16 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
           child: Column(
             children: [
               GestureDetector(
-                onTap: _pickImage,
+                onTap: () => _showImagePickerBottomSheet(context, controller),
                 child: Container(
                   child: Column(
                     children: [
                       Obx(() {
-                        final user = userController.currentUser.value;
+                        final user =
+                            controller.userController.currentUser.value;
                         return ProfileImageAvatar(
                           imagePath:
-                              _selectedImage?.path ??
+                              controller.selectedImage.value?.path ??
                               user?.profileImage ??
                               'assets/images/profile_placeholder.jpg',
                         );
@@ -335,77 +333,79 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
               ),
               TitleField(
                 title: 'First Name',
-                controller: firstNameController,
+                controller: controller.firstNameController,
                 hint: 'Enter first name',
                 inputFormatters: [NameInputFormatter()],
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Middle Name',
-                controller: middleNameController,
+                controller: controller.middleNameController,
                 hint: 'Enter middle name (optional)',
                 inputFormatters: [NameInputFormatter()],
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Last Name',
-                controller: lastNameController,
+                controller: controller.lastNameController,
                 hint: 'Enter last name',
                 inputFormatters: [NameInputFormatter()],
               ),
               SizedBox(height: 5),
               TitleField(
                 title: "Father's Name",
-                controller: fatherNameController,
+                controller: controller.fatherNameController,
                 hint: "Enter father's name (optional)",
                 inputFormatters: [NameInputFormatter()],
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'House No',
-                controller: houseNoController,
+                controller: controller.houseNoController,
                 hint: 'Enter house number (optional)',
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Street Address',
-                controller: streetAddressController,
+                controller: controller.streetAddressController,
                 hint: 'Enter street address',
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Area',
-                controller: areaController,
+                controller: controller.areaController,
                 hint: 'Enter area (optional)',
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Landmark',
-                controller: landmarkController,
+                controller: controller.landmarkController,
                 hint: 'Enter landmark (optional)',
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Pincode',
-                controller: pincodeController,
+                controller: controller.pincodeController,
                 hint: 'Enter pincode',
               ),
               SizedBox(height: 5),
-              StateSelector(
-                label: selectedState ?? 'Select State',
-                onChanged: (newState) =>
-                    setState(() => selectedState = newState!),
+              Obx(
+                () => StateSelector(
+                  label: controller.selectedState.value ?? 'Select State',
+                  onChanged: (newState) =>
+                      controller.selectedState.value = newState!,
+                ),
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Mobile Number',
-                controller: phoneController,
+                controller: controller.phoneController,
                 hint: 'Enter mobile number',
               ),
               SizedBox(height: 5),
               TitleField(
                 title: 'Email',
-                controller: emailController,
+                controller: controller.emailController,
                 hint: 'Enter email (optional)',
               ),
               SizedBox(height: 15),
@@ -413,7 +413,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                 () => Button(
                   title: 'Save Changes',
                   buttonType: ButtonType.green,
-                  onTap: userController.isLoading.value ? null : _saveChanges,
+                  onTap: controller.userController.isLoading.value
+                      ? null
+                      : controller.saveChanges,
                 ),
               ),
 

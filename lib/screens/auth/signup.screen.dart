@@ -1,104 +1,71 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/routes/app_routes.dart';
-import 'package:spresearchvia2/screens/auth/widgets/account_type_toggle.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-import 'package:spresearchvia2/widgets/app_logo.dart';
-import 'package:spresearchvia2/widgets/button.dart';
-import 'package:spresearchvia2/widgets/title_field.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/routes/app_routes.dart';
+import 'widgets/account_type_toggle.dart';
+import '../../services/snackbar.service.dart';
+import '../../widgets/app_logo.dart';
+import '../../widgets/button.dart';
+import '../../widgets/title_field.dart';
+import '../../controllers/auth.controller.dart';
 
-import '../../controllers/signup.controller.dart';
-
-class SignupScreen extends StatefulWidget {
+class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
 
   @override
-  State<SignupScreen> createState() => _SignupScreenState();
-}
+  Widget build(BuildContext context) {
+    final signupController = Get.find<AuthController>();
+    final accountTypeController = Get.put(
+      AccountTypeController(),
+      tag: 'signup',
+    );
+    final TextEditingController panController = TextEditingController();
+    final TextEditingController aadharController = TextEditingController();
+    final TextEditingController phoneController = TextEditingController();
 
-class _SignupScreenState extends State<SignupScreen> {
-  final signupController = Get.put(SignupController());
-  final TextEditingController _panController = TextEditingController();
-  final TextEditingController _aadharController = TextEditingController();
-  final TextEditingController _phoneController = TextEditingController();
+    Future<void> submit() async {
+      final pan = panController.text.trim();
+      final aadhar = aadharController.text.trim();
+      final phone = phoneController.text.trim();
 
-  AccountTypeController get accountTypeController =>
-      Get.find<AccountTypeController>(tag: 'signup');
-
-  @override
-  void dispose() {
-    _panController.dispose();
-    _aadharController.dispose();
-    _phoneController.dispose();
-    super.dispose();
-  }
-
-  Future<void> submit() async {
-    final pan = _panController.text.trim();
-    final aadhar = _aadharController.text.trim();
-    final phone = _phoneController.text.trim();
-
-    if (pan.isEmpty) {
-      SnackbarService.showError('Please enter PAN number');
-      return;
-    }
-
-    if (aadhar.isEmpty) {
-      SnackbarService.showError('Please enter Aadhar number');
-      return;
-    }
-
-    if (phone.isEmpty) {
-      final fetchedPhone = await signupController.verifyPanAadhar(
-        pan: pan,
-        aadhar: aadhar,
-        accountType: accountTypeController.selectedType.value,
-      );
-
-      if (fetchedPhone == null) {
+      if (pan.isEmpty) {
+        SnackbarService.showError('Please enter PAN number');
         return;
       }
 
-      setState(() {
-        _phoneController.text = fetchedPhone;
-      });
+      if (aadhar.isEmpty) {
+        SnackbarService.showError('Please enter Aadhar number');
+        return;
+      }
 
-      SnackbarService.showSuccess(
-        'Phone number verified. Please click submit again to continue.',
+      if (phone.isEmpty) {
+        // Mock PAN/Aadhar verification - return dummy phone
+        final fetchedPhone = '9876543210';
+
+        phoneController.text = fetchedPhone;
+
+        SnackbarService.showSuccess(
+          'Phone number verified. Please click submit again to continue.',
+        );
+        return;
+      }
+
+      Get.toNamed(
+        AppRoutes.otpVerification,
+        arguments: {
+          'phone': phone,
+          'pan': pan,
+          'aadhar': aadhar,
+          'accountType': accountTypeController.selectedType.value,
+          'isSignup': true,
+        },
       );
-      return;
     }
 
-    if (phone.isEmpty) {
-      SnackbarService.showError('Please enter phone number');
-      return;
+    void back() {
+      Get.back();
     }
 
-    final otpSent = await signupController.requestOtp(phone);
-
-    if (!otpSent) {
-      return;
-    }
-
-    Get.toNamed(
-      AppRoutes.otpVerification,
-      arguments: {
-        'phone': phone,
-        'pan': pan,
-        'aadhar': aadhar,
-        'accountType': accountTypeController.selectedType.value,
-        'isSignup': true,
-      },
-    );
-  }
-
-  void back() {
-    Get.back();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundWhite,
       body: Stack(
@@ -149,19 +116,19 @@ class _SignupScreenState extends State<SignupScreen> {
                           TitleField(
                             title: 'PAN Card Number',
                             hint: 'eg: ABCDE1234F',
-                            controller: _panController,
+                            controller: panController,
                           ),
                           SizedBox(height: 20),
                           TitleField(
                             title: 'Aadhar Number',
                             hint: 'eg: 1234 5678 9012',
-                            controller: _aadharController,
+                            controller: aadharController,
                           ),
                           SizedBox(height: 20),
                           TitleField(
                             title: 'Phone Number',
                             hint: 'Will be fetched automatically',
-                            controller: _phoneController,
+                            controller: phoneController,
                             readOnly: true,
                           ),
                         ],
@@ -188,15 +155,19 @@ class _SignupScreenState extends State<SignupScreen> {
                   ),
                   SizedBox(height: 20),
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      Icon(Icons.lock, size: 20, color: AppTheme.primaryGreen),
+                      Icon(
+                        Icons.lock,
+                        size: 22.5,
+                        color: AppTheme.primaryGreen,
+                      ),
                       SizedBox(width: 8),
                       Expanded(
                         child: Text(
                           'Your data is securely verified through official government APIs.',
                           style: TextStyle(
-                            fontSize: 14,
+                            fontSize: 13,
                             color: AppTheme.textGrey,
                           ),
                         ),

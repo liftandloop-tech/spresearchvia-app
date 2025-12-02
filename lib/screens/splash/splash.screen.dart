@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/routes/app_routes.dart';
-import 'package:spresearchvia2/widgets/app_logo.dart';
-import 'package:spresearchvia2/screens/splash/widgets/animated_loading_dots.dart';
-import 'package:spresearchvia2/screens/splash/widgets/animated_loading_bar.dart';
-import 'package:spresearchvia2/screens/splash/widgets/info_item.dart';
+import '../../core/routes/app_routes.dart';
+import '../../widgets/app_logo.dart';
+import 'widgets/animated_loading_dots.dart';
+import 'widgets/animated_loading_bar.dart';
+import 'widgets/info_item.dart';
+import '../../controllers/auth.controller.dart';
+import '../../services/storage.service.dart';
+import '../../core/models/user.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -25,11 +28,41 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(milliseconds: 1500),
     )..repeat();
 
-    Future.delayed(const Duration(seconds: 2), () {
+    _handleStartup();
+  }
+
+  Future<void> _handleStartup() async {
+    try {
+      await Future.delayed(const Duration(milliseconds: 800));
+
+      AuthController authController;
+      if (Get.isRegistered<AuthController>()) {
+        authController = Get.find<AuthController>();
+      } else {
+        authController = Get.put(AuthController());
+      }
+
+      final storage = StorageService();
+      final isLoggedIn = storage.isLoggedIn();
+      final hasToken = storage.hasAuthToken();
+      final userData = storage.getUserData();
+
+      await Future.delayed(const Duration(milliseconds: 500));
+
+      if (!mounted) return;
+
+      if (isLoggedIn && hasToken && userData != null) {
+        authController.currentUser.value = User.fromJson(userData);
+        Get.offAllNamed(AppRoutes.tabs);
+      } else {
+        Get.offAllNamed(AppRoutes.getStarted);
+      }
+    } catch (e) {
+      print('Splash error: $e');
       if (mounted) {
         Get.offAllNamed(AppRoutes.getStarted);
       }
-    });
+    }
   }
 
   @override

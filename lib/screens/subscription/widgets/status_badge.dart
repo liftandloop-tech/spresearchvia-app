@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/models/subscription_history.dart';
+import '../../../core/models/subscription_history.dart';
 
 class StatusBadge extends StatelessWidget {
   const StatusBadge({super.key, required this.status});
@@ -37,6 +37,12 @@ class StatusBadge extends StatelessWidget {
         textColor = Color(0xff6B7280);
         label = 'Success';
         icon = Icons.check_circle;
+        break;
+      case SubscriptionStatus.pending:
+        bgColor = Color(0xffFEF3C7);
+        textColor = Color(0xff92400E);
+        label = 'Pending';
+        icon = null;
         break;
     }
 

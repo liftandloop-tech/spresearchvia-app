@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import '../../../core/theme/app_theme.dart';
 
 enum AccountType { trader, investor, both }
 
@@ -29,7 +29,7 @@ class AccountTypeToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.put(AccountTypeController(), tag: 'signup');
+    final controller = Get.find<AccountTypeController>(tag: 'signup');
 
     return Container(
       height: 55,
@@ -135,6 +135,7 @@ class _ToggleButton extends StatelessWidget {
       return GestureDetector(
         onTap: () => controller.selectAccountType(type),
         child: Container(
+          width: double.maxFinite,
           alignment: Alignment.center,
           child: AnimatedDefaultTextStyle(
             duration: const Duration(milliseconds: 250),

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/renewal/widgets/benefit_item.dart';
+import 'benefit_item.dart';
 
 class BenefitsSection extends StatelessWidget {
   const BenefitsSection({super.key, required this.benefits});

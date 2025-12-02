@@ -1,119 +1,137 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/screens/dashboard/dashboard.screen.dart';
-import 'package:spresearchvia2/screens/profile/profile.screen.dart';
-import 'package:spresearchvia2/screens/research/research_reports.screen.dart';
-import 'package:spresearchvia2/screens/subscription/choose_plan.screen.dart';
+import 'package:get/get.dart';
+import '../core/theme/app_theme.dart';
+import '../core/theme/app_styles.dart';
+import '../controllers/report.controller.dart';
+import '../controllers/plan_purchase.controller.dart';
+import 'dashboard/dashboard.screen.dart';
+import 'profile/profile.screen.dart';
+import 'research/research_reports.screen.dart';
+import 'subscription/choose_plan.screen.dart';
 
-class TabsScreen extends StatefulWidget {
-  final int initialIndex;
+class TabsController extends GetxController {
+  final RxInt currentIndex = 0.obs;
 
-  const TabsScreen({super.key, this.initialIndex = 0});
+  // Cache screens to avoid rebuilding
+  late final List<Widget> screens;
 
   @override
-  State<TabsScreen> createState() => _TabsScreenState();
+  void onInit() {
+    super.onInit();
+    screens = [
+      const DashboardScreen(),
+      const ResearchReportsScreen(),
+      const ChoosePlanScreen(),
+      const ProfileScreen(),
+    ];
+  }
+
+  void changeTab(int index) {
+    if (index != currentIndex.value) {
+      currentIndex.value = index;
+    }
+  }
 }
 
-class _TabsScreenState extends State<TabsScreen> {
-  late int currentScreenIndex;
-  final List<Widget> screens = [
-    DashboardScreen(),
-    ResearchReportsScreen(),
-    ChoosePlanScreen(),
-    ProfileScreen(),
-  ];
-
-  @override
-  void initState() {
-    super.initState();
-    currentScreenIndex = widget.initialIndex;
-  }
+class TabsScreen extends StatelessWidget {
+  const TabsScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: screens[currentScreenIndex],
-      bottomNavigationBar: Container(
-        decoration: BoxDecoration(
-          color: AppTheme.backgroundWhite,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppTheme.shadowMedium,
-              blurRadius: 10,
-              offset: Offset(0, -3),
+    final controller = Get.put(TabsController());
+    
+    // Initialize required controllers
+    Get.put(ReportController());
+    Get.put(PlanPurchaseController());
+
+    // Set initial index from Get.arguments
+    final int initialIndex = Get.arguments ?? 0;
+    controller.currentIndex.value = initialIndex;
+
+    return Obx(
+      () => Scaffold(
+        body: controller.screens[controller.currentIndex.value],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: AppTheme.backgroundWhite,
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-          ],
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(24),
-            topRight: Radius.circular(24),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.shadowMedium,
+                blurRadius: 10,
+                offset: const Offset(0, -3),
+              ),
+            ],
           ),
-          child: Theme(
-            data: Theme.of(context).copyWith(
-              splashColor: Colors.transparent,
-              highlightColor: Colors.transparent,
+          child: ClipRRect(
+            borderRadius: const BorderRadius.only(
+              topLeft: Radius.circular(24),
+              topRight: Radius.circular(24),
             ),
-            child: BottomNavigationBar(
-              currentIndex: currentScreenIndex,
-              onTap: (index) => setState(() => currentScreenIndex = index),
-              type: BottomNavigationBarType.fixed,
-              backgroundColor: AppTheme.backgroundWhite,
-              selectedItemColor: AppTheme.primaryGreen,
-              unselectedItemColor: AppTheme.iconGrey,
-              selectedLabelStyle: AppStyles.tabLabel,
-              unselectedLabelStyle: AppStyles.tabLabelInactive,
-              showSelectedLabels: true,
-              showUnselectedLabels: true,
-              enableFeedback: false,
-              elevation: 0,
-              items: [
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: BottomNavbarIcon(
-                      iconPath: 'assets/icons/home.png',
-                      isSelected: currentScreenIndex == 0,
+            child: Theme(
+              data: Theme.of(context).copyWith(
+                splashColor: Colors.transparent,
+                highlightColor: Colors.transparent,
+              ),
+              child: BottomNavigationBar(
+                currentIndex: controller.currentIndex.value,
+                onTap: controller.changeTab,
+                type: BottomNavigationBarType.fixed,
+                backgroundColor: AppTheme.backgroundWhite,
+                selectedItemColor: AppTheme.primaryGreen,
+                unselectedItemColor: AppTheme.iconGrey,
+                selectedLabelStyle: AppStyles.tabLabel,
+                unselectedLabelStyle: AppStyles.tabLabelInactive,
+                showSelectedLabels: true,
+                showUnselectedLabels: true,
+                enableFeedback: false,
+                elevation: 0,
+                items: [
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: BottomNavbarIcon(
+                        iconPath: 'assets/icons/home.png',
+                        isSelected: controller.currentIndex.value == 0,
+                      ),
                     ),
+                    label: 'Home',
                   ),
-                  label: 'Home',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: BottomNavbarIcon(
-                      iconPath: 'assets/icons/analytics.png',
-                      isSelected: currentScreenIndex == 1,
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: BottomNavbarIcon(
+                        iconPath: 'assets/icons/analytics.png',
+                        isSelected: controller.currentIndex.value == 1,
+                      ),
                     ),
+                    label: 'Research',
                   ),
-                  label: 'Research',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: BottomNavbarIcon(
-                      iconPath: 'assets/icons/premium.png',
-                      isSelected: currentScreenIndex == 2,
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: BottomNavbarIcon(
+                        iconPath: 'assets/icons/premium.png',
+                        isSelected: controller.currentIndex.value == 2,
+                      ),
                     ),
+                    label: 'Premium',
                   ),
-                  label: 'Premium',
-                ),
-                BottomNavigationBarItem(
-                  icon: Padding(
-                    padding: const EdgeInsets.only(bottom: 4),
-                    child: BottomNavbarIcon(
-                      iconPath: 'assets/icons/person.png',
-                      isSelected: currentScreenIndex == 3,
+                  BottomNavigationBarItem(
+                    icon: Padding(
+                      padding: const EdgeInsets.only(bottom: 4),
+                      child: BottomNavbarIcon(
+                        iconPath: 'assets/icons/person.png',
+                        isSelected: controller.currentIndex.value == 3,
+                      ),
                     ),
+                    label: 'Profile',
                   ),
-                  label: 'Profile',
-                ),
-              ],
+                ],
+              ),
             ),
           ),
         ),

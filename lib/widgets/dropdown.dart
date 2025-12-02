@@ -1,6 +1,45 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 
-class StateSelector extends StatefulWidget {
+class _DropdownController extends GetxController {
+  final isOpen = false.obs;
+  final LayerLink layerLink = LayerLink();
+  OverlayEntry? overlayEntry;
+
+  @override
+  void onClose() {
+    overlayEntry?.remove();
+    super.onClose();
+  }
+
+  void toggleDropdown(
+    BuildContext context,
+    Widget Function(BuildContext) overlayBuilder,
+  ) {
+    if (isOpen.value) {
+      closeDropdown();
+    } else {
+      openDropdown(context, overlayBuilder);
+    }
+  }
+
+  void openDropdown(
+    BuildContext context,
+    Widget Function(BuildContext) overlayBuilder,
+  ) {
+    overlayEntry = OverlayEntry(builder: overlayBuilder);
+    Overlay.of(context).insert(overlayEntry!);
+    isOpen.value = true;
+  }
+
+  void closeDropdown() {
+    overlayEntry?.remove();
+    overlayEntry = null;
+    isOpen.value = false;
+  }
+}
+
+class StateSelector extends StatelessWidget {
   StateSelector({
     super.key,
     required this.label,
@@ -45,136 +84,104 @@ class StateSelector extends StatefulWidget {
     'West Bengal',
   ];
 
-  @override
-  State<StateSelector> createState() => _StateSelectorState();
-}
-
-class _StateSelectorState extends State<StateSelector> {
-  bool _isOpen = false;
-  final LayerLink _layerLink = LayerLink();
-  OverlayEntry? _overlayEntry;
-
-  @override
-  void dispose() {
-    _overlayEntry?.remove();
-    super.dispose();
-  }
-
-  void _toggleDropdown() {
-    if (_isOpen) {
-      _closeDropdown();
-    } else {
-      _openDropdown();
-    }
-  }
-
-  void _openDropdown() {
-    _overlayEntry = _createOverlayEntry();
-    Overlay.of(context).insert(_overlayEntry!);
-    setState(() => _isOpen = true);
-  }
-
-  void _closeDropdown() {
-    _overlayEntry?.remove();
-    _overlayEntry = null;
-    setState(() => _isOpen = false);
-  }
-
-  OverlayEntry _createOverlayEntry() {
+  Widget _createOverlayWidget(
+    BuildContext context,
+    _DropdownController controller,
+  ) {
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     Size size = renderBox.size;
     Offset offset = renderBox.localToGlobal(Offset.zero);
 
-    return OverlayEntry(
-      builder: (context) => GestureDetector(
-        behavior: HitTestBehavior.translucent,
-        onTap: _closeDropdown,
-        child: Stack(
-          children: [
-            Positioned(
-              left: offset.dx,
-              top: offset.dy + size.height + 4,
-              width: size.width,
-              child: CompositedTransformFollower(
-                link: _layerLink,
-                showWhenUnlinked: false,
-                child: Material(
-                  elevation: 6.0,
-                  borderRadius: BorderRadius.circular(12),
-                  child: Container(
-                    constraints: BoxConstraints(maxHeight: 220),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.grey.shade300),
-                    ),
-                    child: widget.indianStates.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.all(16.0),
-                            child: Text(
-                              'No options',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                color: Colors.grey,
-                              ),
+    return GestureDetector(
+      behavior: HitTestBehavior.translucent,
+      onTap: controller.closeDropdown,
+      child: Stack(
+        children: [
+          Positioned(
+            left: offset.dx,
+            top: offset.dy + size.height + 4,
+            width: size.width,
+            child: CompositedTransformFollower(
+              link: controller.layerLink,
+              showWhenUnlinked: false,
+              child: Material(
+                elevation: 6.0,
+                borderRadius: BorderRadius.circular(12),
+                child: Container(
+                  constraints: BoxConstraints(maxHeight: 220),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: indianStates.isEmpty
+                      ? Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Text(
+                            'No options',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              color: Colors.grey,
                             ),
-                          )
-                        : ListView.builder(
-                            padding: EdgeInsets.zero,
-                            shrinkWrap: true,
-                            itemCount: widget.indianStates.length,
-                            itemBuilder: (context, index) {
-                              final item = widget.indianStates[index];
-                              final selected = widget.value == item;
-                              return InkWell(
-                                onTap: () {
-                                  widget.onChanged(item);
-                                  _closeDropdown();
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                    vertical: 14,
-                                  ),
-                                  decoration: BoxDecoration(
+                          ),
+                        )
+                      : ListView.builder(
+                          padding: EdgeInsets.zero,
+                          shrinkWrap: true,
+                          itemCount: indianStates.length,
+                          itemBuilder: (context, index) {
+                            final item = indianStates[index];
+                            final selected = value == item;
+                            return InkWell(
+                              onTap: () {
+                                onChanged(item);
+                                controller.closeDropdown();
+                              },
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 14,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: selected
+                                      ? Colors.blue.shade50
+                                      : Colors.transparent,
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  item,
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
                                     color: selected
-                                        ? Colors.blue.shade50
-                                        : Colors.transparent,
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Text(
-                                    item,
-                                    style: TextStyle(
-                                      fontFamily: 'Poppins',
-                                      color: selected
-                                          ? Colors.blue
-                                          : Colors.black87,
-                                      fontWeight: selected
-                                          ? FontWeight.w600
-                                          : FontWeight.normal,
-                                    ),
+                                        ? Colors.blue
+                                        : Colors.black87,
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                  ),
+                              ),
+                            );
+                          },
+                        ),
                 ),
               ),
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    final controller = Get.put(_DropdownController(), tag: '$label-$hashCode');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          widget.label,
+          label,
           style: const TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w500,
@@ -184,39 +191,45 @@ class _StateSelectorState extends State<StateSelector> {
         ),
         const SizedBox(height: 6),
         CompositedTransformTarget(
-          link: _layerLink,
+          link: controller.layerLink,
           child: GestureDetector(
-            onTap: _toggleDropdown,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-              decoration: BoxDecoration(
-                color: Colors.grey.shade100,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey.shade300),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      widget.value ?? widget.hint ?? 'Select ${widget.label}',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        color: widget.value != null
-                            ? Colors.black87
-                            : Colors.grey,
-                        fontSize: 16,
+            onTap: () => controller.toggleDropdown(
+              context,
+              (ctx) => _createOverlayWidget(context, controller),
+            ),
+            child: Obx(
+              () => Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 14,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        value ?? hint ?? 'Select $label',
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          color: value != null ? Colors.black87 : Colors.grey,
+                          fontSize: 16,
+                        ),
+                        overflow: TextOverflow.ellipsis,
                       ),
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Icon(
-                    _isOpen
-                        ? Icons.keyboard_arrow_up
-                        : Icons.keyboard_arrow_down,
-                    color: Colors.grey,
-                  ),
-                ],
+                    Icon(
+                      controller.isOpen.value
+                          ? Icons.keyboard_arrow_up
+                          : Icons.keyboard_arrow_down,
+                      color: Colors.grey,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

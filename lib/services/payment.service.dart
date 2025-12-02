@@ -1,91 +1,114 @@
-import 'package:get_storage/get_storage.dart';
-import 'package:spresearchvia2/core/models/payment.options.dart';
+import '../core/config/app.config.dart';
+import '../services/api_client.service.dart';
+import '../services/mock_payment.service.dart';
+import '../core/config/api.config.dart';
 
-class SavedPaymentMethod {
-  final PaymentMethod method;
-  final String? cardLast4;
-  final String? cardBrand;
-  final String? upiId;
-  final String? walletName;
-  final DateTime savedAt;
-
-  SavedPaymentMethod({
-    required this.method,
-    this.cardLast4,
-    this.cardBrand,
-    this.upiId,
-    this.walletName,
-    required this.savedAt,
+abstract class PaymentServiceInterface {
+  Future<Map<String, dynamic>?> createOrder({
+    required String userId,
+    required String packageName,
+    required double amount,
   });
-
-  Map<String, dynamic> toJson() {
-    return {
-      'method': method.toString(),
-      'cardLast4': cardLast4,
-      'cardBrand': cardBrand,
-      'upiId': upiId,
-      'walletName': walletName,
-      'savedAt': savedAt.toIso8601String(),
-    };
-  }
-
-  factory SavedPaymentMethod.fromJson(Map<String, dynamic> json) {
-    return SavedPaymentMethod(
-      method: PaymentMethod.values.firstWhere(
-        (e) => e.toString() == json['method'],
-        orElse: () => PaymentMethod.card,
-      ),
-      cardLast4: json['cardLast4'],
-      cardBrand: json['cardBrand'],
-      upiId: json['upiId'],
-      walletName: json['walletName'],
-      savedAt: DateTime.parse(json['savedAt']),
-    );
-  }
-
-  String get displayText {
-    switch (method) {
-      case PaymentMethod.card:
-        return cardBrand != null && cardLast4 != null
-            ? '$cardBrand •••• $cardLast4'
-            : 'Credit / Debit Card';
-      case PaymentMethod.upi:
-        return upiId != null ? upiId! : 'UPI';
-      case PaymentMethod.netBanking:
-        return 'Net Banking';
-      case PaymentMethod.wallet:
-        return walletName != null ? walletName! : 'Wallet';
-    }
-  }
+  
+  Future<bool> verifyPayment({
+    required String paymentId,
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  });
 }
 
-class PaymentService {
+class PaymentService implements PaymentServiceInterface {
   static final PaymentService _instance = PaymentService._internal();
   factory PaymentService() => _instance;
   PaymentService._internal();
 
-  final _storage = GetStorage();
-  static const String _savedPaymentKey = 'saved_payment_method';
+  final ApiClient _apiClient = ApiClient();
+  final MockPaymentService _mockService = MockPaymentService();
 
-  Future<void> savePaymentMethod(SavedPaymentMethod paymentMethod) async {
-    await _storage.write(_savedPaymentKey, paymentMethod.toJson());
-  }
+  bool get _useMockService => 
+      AppConfig.isDevelopment || AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled);
 
-  SavedPaymentMethod? getSavedPaymentMethod() {
-    final data = _storage.read(_savedPaymentKey);
-    if (data == null) return null;
+  @override
+  Future<Map<String, dynamic>?> createOrder({
+    required String userId,
+    required String packageName,
+    required double amount,
+  }) async {
+    if (_useMockService) {
+      // Use mock service for development
+      final result = await _mockService.processPayment(
+        amount: amount,
+        paymentMethodId: 'mock_payment',
+        planId: packageName,
+      );
+      
+      return {
+        'razorpayOrderId': 'mock_order_${DateTime.now().millisecondsSinceEpoch}',
+        'paymentId': 'mock_payment_${DateTime.now().millisecondsSinceEpoch}',
+        'amount': amount,
+        'currency': 'INR',
+        'success': result['success'],
+      };
+    }
+
+    // Use real backend service for production
     try {
-      return SavedPaymentMethod.fromJson(data);
+      final response = await _apiClient.post(
+        ApiConfig.purchasePlan(userId),
+        data: {
+          'packageName': packageName,
+          'amount': amount,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        return {
+          'razorpayOrderId': data['orderCreate']['razorpayOrderId'],
+          'paymentId': data['orderCreate']['_id'],
+          'amount': amount,
+          'currency': data['orderCreate']['razorpayCurrency'] ?? 'INR',
+          'success': true,
+        };
+      }
+      return null;
     } catch (e) {
       return null;
     }
   }
 
-  Future<void> clearSavedPaymentMethod() async {
-    await _storage.remove(_savedPaymentKey);
-  }
+  @override
+  Future<bool> verifyPayment({
+    required String paymentId,
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  }) async {
+    if (_useMockService) {
+      // Mock verification always succeeds in development
+      await Future.delayed(const Duration(milliseconds: 500));
+      return true;
+    }
 
-  bool hasSavedPaymentMethod() {
-    return _storage.hasData(_savedPaymentKey);
+    // Use real backend verification for production
+    try {
+      final response = await _apiClient.post(
+        ApiConfig.verifyPayment,
+        data: {
+          'paymentId': paymentId,
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        return response.data['success'] ?? false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
   }
 }

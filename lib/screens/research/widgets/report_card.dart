@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/research/widgets/category_chip.dart';
+import 'category_chip.dart';
 
 class ReportCard extends StatelessWidget {
   const ReportCard({

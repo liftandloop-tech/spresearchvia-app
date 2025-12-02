@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_theme.dart';
 
-/// Terms and conditions checkbox section
 class TermsSection extends StatelessWidget {
   final bool agreedToTerms;
   final bool authorizedPayment;

@@ -1,15 +1,15 @@
 import 'dart:io';
 import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/config/api.config.dart';
-import 'package:spresearchvia2/core/models/user.dart';
-import 'package:spresearchvia2/core/utils/file_validator.dart';
+import '../core/config/api.config.dart';
+import '../core/models/user.dart';
+import '../core/utils/file_validator.dart';
 import 'package:path/path.dart' as path;
-import 'package:spresearchvia2/services/api_client.service.dart';
-import 'package:spresearchvia2/services/api_exception.service.dart';
-import 'package:spresearchvia2/services/storage.service.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
+import '../services/api_client.service.dart';
+import '../services/api_exception.service.dart';
+import '../services/storage.service.dart';
+import '../core/utils/error_message_handler.dart';
+import '../services/snackbar.service.dart';
 
 class UserController extends GetxController {
   final ApiClient _apiClient = ApiClient();
@@ -66,9 +66,9 @@ class UserController extends GetxController {
         data: requestData,
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final data = response.data;
-        final userData = data['user'] ?? data['data']?['user'] ?? data['data'];
+        final userData = data['data']?['user'] ?? data['user'];
 
         if (userData != null) {
           final user = User.fromJson(userData);
@@ -114,31 +114,31 @@ class UserController extends GetxController {
       });
 
       final response = await _apiClient.patch(
-        ApiConfig.changeImage,
+        ApiConfig.changeImage(uid),
         data: formData,
         options: dio.Options(contentType: 'multipart/form-data'),
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final data = response.data;
-        final imageUrl =
-            data['imageUrl'] ??
-            data['data']?['imageUrl'] ??
-            data['data']?['files']?.filesObj?.path;
+        final files = data['data']?['files'];
+        
+        if (files != null && currentUser.value != null) {
+          final filePath = files['filesObj']?['path'];
+          if (filePath != null) {
+            String fullImageUrl = filePath;
+            if (!filePath.startsWith('http')) {
+              final baseUrl = _apiClient.dio.options.baseUrl.replaceAll('/api', '');
+              fullImageUrl = '$baseUrl/$filePath';
+            }
 
-        if (imageUrl != null && currentUser.value != null) {
-          String fullImageUrl = imageUrl;
-          if (!imageUrl.startsWith('http')) {
-            final baseUrl = _apiClient.dio.options.baseUrl;
-            fullImageUrl = '$baseUrl$imageUrl';
+            currentUser.value = currentUser.value!.copyWith(
+              profileImage: fullImageUrl,
+            );
+
+            final userData = currentUser.value!.toJson();
+            await _storage.saveUserData(userData);
           }
-
-          currentUser.value = currentUser.value!.copyWith(
-            profileImage: fullImageUrl,
-          );
-
-          final userData = currentUser.value!.toJson();
-          await _storage.saveUserData(userData);
         }
 
         SnackbarService.showSuccess('Profile image updated successfully');

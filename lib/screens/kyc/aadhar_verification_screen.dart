@@ -1,18 +1,14 @@
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:file_picker/file_picker.dart';
-import 'package:spresearchvia2/controllers/kyc.controller.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/screens/kyc/digio_connect_screen.dart';
-import 'package:spresearchvia2/widgets/button.dart';
-import 'package:spresearchvia2/widgets/kyc_step_indicator.dart';
-import 'package:spresearchvia2/widgets/file_upload_section.dart';
-import 'package:spresearchvia2/widgets/data_protection_footer.dart';
-import 'package:spresearchvia2/widgets/title_field.dart';
+import '../../controllers/kyc.controller.dart';
+import '../../services/snackbar.service.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_styles.dart';
+import 'digio_connect_screen.dart';
+import '../../widgets/button.dart';
+import '../../widgets/kyc_step_indicator.dart';
+import '../../widgets/data_protection_footer.dart';
+import '../../widgets/title_field.dart';
 
 class AadharVerificationScreen extends StatefulWidget {
   const AadharVerificationScreen({super.key});
@@ -25,48 +21,6 @@ class AadharVerificationScreen extends StatefulWidget {
 class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
   final kycController = Get.find<KycController>();
   final TextEditingController _aadharController = TextEditingController();
-  String? _selectedAadharFrontName;
-  String? _selectedAadharBackName;
-  File? _frontFile;
-  File? _backFile;
-
-  Future<void> _pickFrontFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
-
-      if (result != null && result.files.single.path != null) {
-        setState(() {
-          _frontFile = File(result.files.single.path!);
-          _selectedAadharFrontName = result.files.single.name;
-        });
-      }
-    } catch (e) {
-      ErrorMessageHandler.logError('Pick Aadhar Front File', e);
-      SnackbarService.showErrorFromException(e, title: 'Failed to Pick File');
-    }
-  }
-
-  Future<void> _pickBackFile() async {
-    try {
-      FilePickerResult? result = await FilePicker.platform.pickFiles(
-        type: FileType.custom,
-        allowedExtensions: ['pdf', 'jpg', 'jpeg', 'png'],
-      );
-
-      if (result != null && result.files.single.path != null) {
-        setState(() {
-          _backFile = File(result.files.single.path!);
-          _selectedAadharBackName = result.files.single.name;
-        });
-      }
-    } catch (e) {
-      ErrorMessageHandler.logError('Pick Aadhar Back File', e);
-      SnackbarService.showErrorFromException(e, title: 'Failed to Pick File');
-    }
-  }
 
   Future<void> _submitVerification() async {
     final aadharNumber = _aadharController.text.trim();
@@ -81,20 +35,7 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
       return;
     }
 
-    if (_frontFile == null || _backFile == null) {
-      SnackbarService.showWarning('Please select both front and back images');
-      return;
-    }
-
-    final success = await kycController.uploadAadharCard(
-      frontFile: _frontFile!,
-      backFile: _backFile!,
-      aadharNumber: aadharNumber,
-    );
-
-    if (success) {
-      Get.to(() => const DigioConnectScreen());
-    }
+    Get.to(() => const DigioConnectScreen());
   }
 
   @override
@@ -160,26 +101,6 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
                       hint: 'Enter 12-digit Aadhar number',
                       controller: _aadharController,
                       icon: Icons.credit_card,
-                    ),
-                    const SizedBox(height: 24),
-                    SizedBox(
-                      width: double.maxFinite,
-                      child: FilePickerContainer(
-                        title: 'Upload Aadhar Front Side',
-                        subtitle: 'click to upload',
-                        onTap: _pickFrontFile,
-                        fileName: _selectedAadharFrontName,
-                      ),
-                    ),
-                    const SizedBox(height: 10),
-                    SizedBox(
-                      width: double.maxFinite,
-                      child: FilePickerContainer(
-                        title: 'Upload Aadhar Back Side',
-                        subtitle: 'click to upload',
-                        onTap: _pickBackFile,
-                        fileName: _selectedAadharBackName,
-                      ),
                     ),
                   ],
                 ),

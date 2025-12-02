@@ -1,10 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/controllers/plan_purchase.controller.dart';
-import 'package:spresearchvia2/controllers/user.controller.dart';
-import 'package:spresearchvia2/screens/tabs.screen.dart';
-import 'package:spresearchvia2/widgets/button.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/utils/date_formatter.dart';
+import '../../controllers/plan_purchase.controller.dart';
+import '../../controllers/user.controller.dart';
+import '../../services/mock_payment.service.dart';
+import '../../services/snackbar.service.dart';
+import '../../widgets/button.dart';
+import '../../widgets/active_plan_card.dart';
+import '../../widgets/expiry_warning_banner.dart';
+import '../../widgets/payment_method_card.dart';
+import '../../widgets/benefits_card.dart';
+import '../../widgets/secure_payment_footer.dart';
+import '../../widgets/section_header.dart';
 
 class QuickRenewalScreen extends StatefulWidget {
   const QuickRenewalScreen({super.key});
@@ -16,42 +24,61 @@ class QuickRenewalScreen extends StatefulWidget {
 class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
   final planController = Get.find<PlanPurchaseController>();
   final userController = Get.find<UserController>();
+  final mockPaymentService = MockPaymentService();
+
+  PaymentMethodData? savedPaymentMethod;
+  bool isLoadingPayment = true;
 
   @override
   void initState() {
     super.initState();
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!planController.hasActivePlan) {
-        Get.off(() => TabsScreen(initialIndex: 2));
-      }
-    });
-
+    _loadPaymentMethod();
     planController.fetchUserPlan();
+  }
+
+  /// Load saved payment method from mock backend
+  Future<void> _loadPaymentMethod() async {
+    try {
+      final paymentMethod = await mockPaymentService.getSavedPaymentMethod();
+      setState(() {
+        savedPaymentMethod = paymentMethod;
+        isLoadingPayment = false;
+      });
+    } catch (e) {
+      setState(() {
+        isLoadingPayment = false;
+      });
+      SnackbarService.showError('Failed to load payment method');
+    }
   }
 
   Future<void> _renewPlan() async {
     final plan = planController.currentPlan.value;
     if (plan == null) {
-      Get.snackbar('Error', 'No active plan found');
+      SnackbarService.showError('No active plan found');
+      return;
+    }
+
+    if (savedPaymentMethod == null) {
+      SnackbarService.showError('Please add a payment method first');
       return;
     }
 
     Get.dialog(
       Center(
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppTheme.backgroundWhite,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(),
               SizedBox(height: 16),
               Text(
-                'Creating order...',
+                'Processing payment...',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
@@ -66,40 +93,31 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     );
 
     try {
-      final orderData = await planController.purchasePlan(
-        packageName: plan.name,
-        amount: plan.amount,
+      // Simulate payment processing with mock service
+      final paymentResult = await mockPaymentService.processPayment(
+        amount: plan.amount ?? 0.0,
+        paymentMethodId: 'pm_${savedPaymentMethod!.type.name}',
+        planId: plan.id,
       );
 
-      Get.back();
+      Get.back(); // Close loading dialog
 
-      if (orderData == null) {
-        Get.snackbar(
-          'Error',
-          'Failed to create renewal order. Please try again.',
-          snackPosition: SnackPosition.BOTTOM,
+      if (paymentResult['success'] == true) {
+        // Navigate to payment success
+        Get.offAllNamed('/payment-success');
+      } else {
+        // Show error message
+        SnackbarService.showError(
+          paymentResult['message'] ??
+              'Payment processing failed. Please try again.',
         );
-        return;
       }
-
-      Get.snackbar(
-        'Order Created',
-        'Renewal order created successfully. You can now proceed with payment.',
-        snackPosition: SnackPosition.BOTTOM,
-        duration: Duration(seconds: 3),
-      );
-
-      await planController.fetchUserPlan();
     } catch (e) {
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
 
-      Get.snackbar(
-        'Error',
-        'Failed to initiate renewal: ${e.toString()}',
-        snackPosition: SnackPosition.BOTTOM,
-      );
+      SnackbarService.showError('Failed to initiate renewal: ${e.toString()}');
     }
   }
 
@@ -155,7 +173,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                 ),
                 SizedBox(height: 8),
                 TextButton(
-                  onPressed: () => Get.off(() => TabsScreen(initialIndex: 2)),
+                  onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
                   child: Text('Browse Plans'),
                 ),
               ],
@@ -165,33 +183,24 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
 
         final daysRemaining = planController.daysRemaining;
 
-        String startDateText = 'N/A';
-        if (plan.purchaseDate != null) {
-          final start = plan.purchaseDate!;
-          startDateText =
-              '${start.day.toString().padLeft(2, '0')} ${_getMonthName(start.month)} ${start.year}';
-        }
+        final startDateText = DateFormatter.formatDate(plan.purchaseDate);
+        final expiryDateText = DateFormatter.formatDate(plan.expiryDate);
 
-        String expiryDateText = 'N/A';
-        if (plan.expiryDate != null) {
-          final expiry = plan.expiryDate!;
-          expiryDateText =
-              '${expiry.day.toString().padLeft(2, '0')} ${_getMonthName(expiry.month)} ${expiry.year}';
-        }
-
-        final totalPaid = plan.amount;
-        final perDayCost = plan.validityDays > 0
-            ? (totalPaid / plan.validityDays).round()
+        final totalPaid = plan.amount ?? 0.0;
+        final perDayCost = (plan.validityDays ?? 0) > 0
+            ? (totalPaid / (plan.validityDays ?? 1)).round()
             : 0;
 
-        final completionPercentage = plan.validityDays > 0
-            ? ((plan.validityDays - daysRemaining) / plan.validityDays * 100)
+        final completionPercentage = (plan.validityDays ?? 0) > 0
+            ? (((plan.validityDays ?? 0) - daysRemaining) /
+                      (plan.validityDays ?? 1) *
+                      100)
                   .clamp(0, 100)
                   .toInt()
             : 0;
 
-        final benefits = plan.features.isNotEmpty
-            ? plan.features
+        final benefits = (plan.features?.isNotEmpty ?? false)
+            ? plan.features!
             : [
                 'Unlimited research reports',
                 'Real-time market data',
@@ -204,411 +213,33 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (daysRemaining <= 7)
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: Color(0xFFFFF5F5),
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Color(0xFFFFE5E5)),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Icon(Icons.warning, color: Color(0xFFE53E3E), size: 20),
-                        SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'Plan expiring in $daysRemaining days',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFFE53E3E),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Text(
-                                'Renew now to continue accessing premium research',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  color: Color(0xFFE53E3E),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
+                if (daysRemaining <= 7) ...[
+                  ExpiryWarningBanner(
+                    daysRemaining: daysRemaining,
+                    message: 'Renew now to continue accessing premium research',
                   ),
-                if (daysRemaining <= 7) SizedBox(height: 20),
+                  const SizedBox(height: 20),
+                ],
+                const SectionHeader(title: 'Current Plan'),
+                const SizedBox(height: 16),
 
-                Text(
-                  'Current Plan',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.primaryBlueDark,
-                  ),
+                ActivePlanCard(
+                  plan: plan,
+                  startDateText: startDateText,
+                  expiryDateText: expiryDateText,
+                  perDayCost: perDayCost,
+                  totalPaid: totalPaid,
+                  completionPercentage: completionPercentage,
+                  onRenew: _renewPlan,
+                  onViewInvoice: () {},
+                  tags: const ['Index Option', 'Trader'],
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 20),
 
-                Container(
-                  padding: EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(16),
-                    border: Border.all(color: Color(0xFFE2E8F0), width: 3),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              plan.name.isNotEmpty
-                                  ? plan.name
-                                  : 'Index Option – Splendid Plan',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 18,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryBlueDark,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Color(0xFF10B981),
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Container(
-                                  width: 6,
-                                  height: 6,
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    shape: BoxShape.circle,
-                                  ),
-                                ),
-                                SizedBox(width: 4),
-                                Text(
-                                  'Active',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12,
-                                    fontWeight: FontWeight.w500,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 12),
-
-                      Row(
-                        children: [
-                          _buildTag('Index Option'),
-                          SizedBox(width: 8),
-                          _buildTag('Trader'),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Start Date',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12,
-                                    color: AppTheme.textGrey,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  startDateText,
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.primaryBlueDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Expiry Date',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12,
-                                    color: AppTheme.textGrey,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  expiryDateText,
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.primaryBlueDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Per Day Cost',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12,
-                                    color: AppTheme.textGrey,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Text(
-                                  '₹$perDayCost',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppTheme.primaryBlueDark,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  'Total Paid',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: 12,
-                                    color: AppTheme.textGrey,
-                                  ),
-                                ),
-                                SizedBox(height: 4),
-                                Row(
-                                  children: [
-                                    Text(
-                                      '₹${totalPaid.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF10B981),
-                                      ),
-                                    ),
-                                    SizedBox(width: 4),
-                                    Text(
-                                      'Excl. GST',
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 10,
-                                        color: AppTheme.textGrey,
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                'Plan Duration',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  color: AppTheme.textGrey,
-                                ),
-                              ),
-                              Text(
-                                '$completionPercentage% Complete',
-                                style: TextStyle(
-                                  fontFamily: 'Poppins',
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: AppTheme.primaryBlueDark,
-                                ),
-                              ),
-                            ],
-                          ),
-                          SizedBox(height: 8),
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(4),
-                            child: LinearProgressIndicator(
-                              value: completionPercentage / 100,
-                              minHeight: 8,
-                              backgroundColor: Color(0xFFE2E8F0),
-                              valueColor: AlwaysStoppedAnimation<Color>(
-                                Color(0xFF10B981),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      SizedBox(height: 20),
-
-                      Row(
-                        children: [
-                          Expanded(
-                            child: ElevatedButton.icon(
-                              onPressed: _renewPlan,
-                              icon: Icon(Icons.refresh, size: 18),
-                              label: Text('Renew Plan'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Color(0xFF10B981),
-                                foregroundColor: Colors.white,
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                elevation: 0,
-                              ),
-                            ),
-                          ),
-                          SizedBox(width: 12),
-                          Expanded(
-                            child: OutlinedButton.icon(
-                              onPressed: () {},
-                              icon: Icon(Icons.receipt_long, size: 18),
-                              label: Text('View Invoice'),
-                              style: OutlinedButton.styleFrom(
-                                foregroundColor: AppTheme.primaryBlueDark,
-                                side: BorderSide(color: AppTheme.primaryBlue),
-                                padding: EdgeInsets.symmetric(vertical: 12),
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
-
-                Text(
-                  'Payment Method',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.primaryBlueDark,
-                  ),
-                ),
-                SizedBox(height: 12),
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Color(0xFFE2E8F0)),
-                  ),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 48,
-                        height: 32,
-                        decoration: BoxDecoration(
-                          color: Color(0xFF1A1F71),
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: Center(
-                          child: Text(
-                            'VISA',
-                            style: TextStyle(
-                              fontFamily: 'Poppins',
-                              fontSize: 14,
-                              fontWeight: FontWeight.w700,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '**** **** **** 4532',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 14,
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryBlueDark,
-                              ),
-                            ),
-                            SizedBox(height: 2),
-                            Text(
-                              'Expires 12/27',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: 12,
-                                color: AppTheme.textGrey,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      Icon(
-                        Icons.check_circle,
-                        color: Color(0xFF10B981),
-                        size: 24,
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24),
+                const SectionHeader(title: 'Payment Method'),
+                const SizedBox(height: 12),
+                _buildPaymentMethodSection(),
+                const SizedBox(height: 24),
 
                 Button(
                   title: 'Renew with One Click',
@@ -618,7 +249,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                 SizedBox(height: 16),
 
                 OutlinedButton(
-                  onPressed: () => Get.off(() => TabsScreen(initialIndex: 2)),
+                  onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primaryBlueDark,
                     side: BorderSide(color: AppTheme.primaryBlue),
@@ -637,78 +268,13 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
 
-                Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: Color(0xFFF7FAFC),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'What you\'ll continue to get:',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.primaryBlueDark,
-                        ),
-                      ),
-                      SizedBox(height: 12),
-                      ...benefits
-                          .map(
-                            (benefit) => Padding(
-                              padding: const EdgeInsets.only(bottom: 8),
-                              child: Row(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Icon(
-                                    Icons.check_circle,
-                                    color: Color(0xFF10B981),
-                                    size: 20,
-                                  ),
-                                  SizedBox(width: 12),
-                                  Expanded(
-                                    child: Text(
-                                      benefit,
-                                      style: TextStyle(
-                                        fontFamily: 'Poppins',
-                                        fontSize: 14,
-                                        color: AppTheme.primaryBlueDark,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          )
-                          .toList(),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 24),
+                BenefitsCard(benefits: benefits),
+                const SizedBox(height: 24),
 
-                Center(
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.lock, color: AppTheme.textGrey, size: 16),
-                      SizedBox(width: 6),
-                      Text(
-                        'Secure payment powered by Stripe',
-                        style: TextStyle(
-                          fontFamily: 'Poppins',
-                          fontSize: 12,
-                          color: AppTheme.textGrey,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                SizedBox(height: 20),
+                const Center(child: SecurePaymentFooter()),
+                const SizedBox(height: 20),
               ],
             ),
           ),
@@ -717,40 +283,62 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     );
   }
 
-  Widget _buildTag(String text) {
-    return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: Color(0xFFF1F5F9),
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
-          color: AppTheme.primaryBlueDark,
+  Widget _buildPaymentMethodSection() {
+    if (isLoadingPayment) {
+      return Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
         ),
-      ),
-    );
-  }
+        child: const Center(child: CircularProgressIndicator()),
+      );
+    }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
-    ];
-    return months[month - 1];
+    if (savedPaymentMethod == null) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF7FAFC),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Column(
+          children: [
+            const Icon(Icons.payment, size: 48, color: AppTheme.textGrey),
+            const SizedBox(height: 12),
+            const Text(
+              'No payment method saved',
+              style: TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryBlueDark,
+              ),
+            ),
+            const SizedBox(height: 8),
+            TextButton.icon(
+              onPressed: () {
+                SnackbarService.showInfo(
+                  'Add payment method feature will be available soon',
+                );
+              },
+              icon: const Icon(Icons.add_circle_outline),
+              label: const Text('Add Payment Method'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    return PaymentMethodCard(
+      paymentMethod: savedPaymentMethod!,
+      onTap: () {
+        SnackbarService.showInfo(
+          'Change payment method feature will be available soon',
+        );
+      },
+    );
   }
 }

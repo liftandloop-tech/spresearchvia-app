@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/screens/auth/login.screen.dart';
-import 'package:spresearchvia2/screens/kyc/pan_verification_screen.dart';
-import 'package:spresearchvia2/widgets/app_logo.dart';
-import 'package:spresearchvia2/widgets/button.dart';
-import 'package:spresearchvia2/widgets/kyc_verification_card.dart';
-import 'package:spresearchvia2/widgets/data_protection_footer.dart';
+import '../auth/login.screen.dart';
+import 'pan_verification_screen.dart';
+import '../../widgets/app_logo.dart';
+import '../../widgets/button.dart';
+import '../../widgets/kyc_verification_card.dart';
+import '../../widgets/data_protection_footer.dart';
 
 class KycIntroScreen extends StatelessWidget {
   const KycIntroScreen({super.key});

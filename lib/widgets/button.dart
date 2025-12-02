@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
+import '../core/theme/app_theme.dart';
+import '../core/theme/app_styles.dart';
+import '../core/constants/app_dimensions.dart';
+import '../core/utils/responsive.dart';
 
 enum ButtonType { green, blue, blueBorder, greyBorder }
 
@@ -24,6 +26,8 @@ class Button extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive.of(context);
+
     Color backgroundColor;
     Color textColor;
     Color iconColor;
@@ -63,15 +67,19 @@ class Button extends StatelessWidget {
         break;
     }
 
+    final buttonHeight = responsive.spacing(AppDimensions.buttonHeight);
+    final borderRadius = responsive.radius(AppDimensions.radiusButton);
+    final iconSize = responsive.spacing(AppDimensions.iconMedium);
+
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        height: 56,
+        height: buttonHeight,
         decoration: BoxDecoration(
           color: backgroundColor,
-          borderRadius: BorderRadius.circular(13),
+          borderRadius: BorderRadius.circular(borderRadius),
           border: borderColor != null
-              ? Border.all(color: borderColor, width: 1.5)
+              ? Border.all(color: borderColor, width: AppDimensions.borderMedium)
               : null,
           boxShadow: buttonType == ButtonType.greyBorder
               ? null
@@ -94,19 +102,25 @@ class Button extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             if (icon != null) ...[
-              Icon(icon, color: iconColor, size: 20),
-              const SizedBox(width: 8),
+              Icon(icon, color: iconColor, size: iconSize),
+              SizedBox(width: responsive.spacing(AppDimensions.spacing8)),
             ],
-            Text(title, style: AppStyles.button.copyWith(color: textColor)),
+            Text(
+              title,
+              style: AppStyles.button.copyWith(
+                color: textColor,
+                fontSize: responsive.sp(16),
+              ),
+            ),
             if (iconRight != null) ...[
-              const SizedBox(width: 8),
-              Icon(iconRight, color: iconColor, size: 20),
+              SizedBox(width: responsive.spacing(AppDimensions.spacing8)),
+              Icon(iconRight, color: iconColor, size: iconSize),
             ],
             if (showLoading) ...[
-              const SizedBox(width: 8),
+              SizedBox(width: responsive.spacing(AppDimensions.spacing8)),
               SizedBox(
-                width: 20,
-                height: 20,
+                width: iconSize,
+                height: iconSize,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
                   color: textColor,

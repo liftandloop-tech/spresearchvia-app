@@ -1,17 +1,16 @@
-import 'package:dio/dio.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/config/api.config.dart';
-import 'package:spresearchvia2/core/models/user.dart';
-import 'package:spresearchvia2/services/api_client.service.dart';
-import 'package:spresearchvia2/services/api_exception.service.dart';
-import 'package:spresearchvia2/services/storage.service.dart';
-import 'package:spresearchvia2/services/snackbar.service.dart';
-
-import 'package:spresearchvia2/controllers/user.controller.dart';
+import '../core/config/api.config.dart';
+import '../core/models/user.dart';
+import '../services/api_client.service.dart';
+import '../services/api_exception.service.dart';
+import '../services/secure_storage.service.dart';
+import '../services/snackbar.service.dart';
+import '../core/config/app_mode.dart';
+import 'user.controller.dart';
 
 class AuthController extends GetxController {
   final ApiClient _apiClient = ApiClient();
-  final StorageService _storage = StorageService();
+  final SecureStorageService _storage = SecureStorageService();
 
   final isFetchingPhoneNumber = false.obs;
   final isLoading = false.obs;
@@ -25,8 +24,8 @@ class AuthController extends GetxController {
   }
 
   Future<void> checkAuthStatus() async {
-    if (_storage.isLoggedIn() && _storage.hasAuthToken()) {
-      final userData = _storage.getUserData();
+    if (_storage.isLoggedIn() && await _storage.hasAuthToken()) {
+      final userData = await _storage.getUserData();
       if (userData != null) {
         currentUser.value = User.fromJson(userData);
       }
@@ -36,94 +35,73 @@ class AuthController extends GetxController {
   Future<bool> sendOtp(String phone) async {
     try {
       isLoading.value = true;
-      final response = await _apiClient.post(
-        ApiConfig.requestOTP,
-        data: {'phone': phone},
-        options: Options(
-          sendTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
-        ),
-      );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (AppMode.isDevelopment) {
+        await Future.delayed(Duration(seconds: 1));
         isOtpSent.value = true;
-        SnackbarService.showSuccess('OTP sent successfully to $phone');
+        SnackbarService.showSuccess('OTP sent to your phone');
         return true;
-      }
+      } else {
+        final response = await _apiClient.post(
+          ApiConfig.sendOtp,
+          data: {'phone': phone},
+        );
 
-      return false;
+        if (response.statusCode == 200) {
+          final data = response.data;
+          if (data['message'] == 'User not exist') {
+            SnackbarService.showError('User not found. Please sign up first.');
+            return false;
+          }
+          isOtpSent.value = true;
+          SnackbarService.showSuccess('OTP sent to your phone');
+          return true;
+        }
+        return false;
+      }
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-
-      String errorMessage = error.message;
-      if (errorMessage.toLowerCase().contains('timeout')) {
-        errorMessage =
-            'Request timed out. Please check your internet connection and try again.';
-      }
-
-      SnackbarService.showError(errorMessage);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
     }
   }
 
-  Future<bool> verifyOtp(String phone, String otp) async {
+  Future<bool> verifyOtp(String otp) async {
     try {
       isLoading.value = true;
 
-      final response = await _apiClient.post(
-        ApiConfig.verifyOTP,
-        data: {'phone': phone, 'otp': int.tryParse(otp) ?? otp},
-        options: Options(
-          sendTimeout: const Duration(seconds: 30),
-          receiveTimeout: const Duration(seconds: 30),
-        ),
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        final data = response.data;
-
-        final token = data['token'] ?? data['data']?['token'];
-        final userData = data['user'] ?? data['data']?['user'] ?? data['data'];
-
-        if (token != null) {
-          await _storage.saveAuthToken(token);
-        }
-
-        if (userData != null) {
-          final user = User.fromJson(userData);
-          currentUser.value = user;
-          await _storage.saveUserId(user.id);
-          await _storage.saveUserData(userData);
-          await _storage.setLoggedIn(true);
-
-          if (Get.isRegistered<UserController>()) {
-            final uc = Get.find<UserController>();
-            uc.currentUser.value = user;
-          }
-
-          if (Get.isRegistered<UserController>()) {
-            final uc = Get.find<UserController>();
-            uc.loadUserData();
-          }
-        }
-
-        SnackbarService.showSuccess('Login successful!');
+      if (AppMode.isDevelopment) {
+        await Future.delayed(Duration(seconds: 1));
+        await _storage.saveUserData({'phone': '9876543210'});
+        SnackbarService.showSuccess('OTP verified successfully');
         return true;
-      }
+      } else {
+        final response = await _apiClient.post(
+          ApiConfig.verifyOtp,
+          data: {'otp': int.tryParse(otp) ?? otp},
+        );
 
-      return false;
+        if (response.statusCode == 200) {
+          final data = response.data;
+          if (data['message'] == 'User not exist' ||
+              data['message'] == 'OTP Invalid') {
+            SnackbarService.showError(data['message']);
+            return false;
+          }
+          final phone = data['data']?['phone'];
+          if (phone != null) {
+            await _storage.saveUserData({'phone': phone});
+          }
+          SnackbarService.showSuccess('OTP verified successfully');
+          return true;
+        }
+        return false;
+      }
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
-
-      String errorMessage = error.message;
-      if (errorMessage.toLowerCase().contains('timeout')) {
-        errorMessage =
-            'Request timed out. Please check your internet connection and try again.';
-      }
-
-      SnackbarService.showError(errorMessage);
+      SnackbarService.showError(error.message);
       return false;
     } finally {
       isLoading.value = false;
@@ -131,48 +109,35 @@ class AuthController extends GetxController {
   }
 
   Future<bool> createUser({
-    required String fullName,
-    required String email,
-    required String phone,
-    required bool termsCondition,
-    PersonalInformation? personalInformation,
-    AddressDetails? addressDetails,
+    required String pan,
+    required String dob,
+    required String aadhaarNumber,
   }) async {
     try {
       isLoading.value = true;
-
-      final requestData = {
-        'fullName': fullName,
-        'contactDetails': {'email': email, 'phone': phone},
-        'userType': 'user',
-        'termsCondition': termsCondition ? 'yes' : 'no',
-      };
-
-      if (personalInformation != null) {
-        requestData['personalInformation'] = personalInformation.toJson();
-      }
-      if (addressDetails != null) {
-        requestData['addressDetails'] = addressDetails.toJson();
-      }
-
       final response = await _apiClient.post(
         ApiConfig.createUser,
-        data: requestData,
+        data: {
+          'pan': pan,
+          'dob': dob,
+          'aadhaarNumber': aadhaarNumber,
+          'userType': 'user',
+        },
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final data = response.data;
-        final userData = data['user'] ?? data['data']?['user'] ?? data['data'];
-
-        if (userData != null) {
-          final user = User.fromJson(userData);
-          await _storage.saveUserId(user.id);
+        if (data['message'] == 'user already exist') {
+          SnackbarService.showError('User already exists');
+          return false;
         }
-
-        SnackbarService.showSuccess('Account created successfully!');
+        final userData = data['data']?['user'];
+        if (userData != null) {
+          await _storage.saveUserData(userData);
+        }
+        SnackbarService.showSuccess('OTP sent to your phone');
         return true;
       }
-
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
@@ -183,25 +148,100 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login({
+    String? email,
+    String? phone,
+    required String mPin,
+  }) async {
     try {
       isLoading.value = true;
 
+      if (AppMode.isDevelopment) {
+        await Future.delayed(Duration(seconds: 1));
+        final mockUser = User(
+          id: 'mock_user_id',
+          fullName: 'Test User',
+          email: email ?? 'test@example.com',
+          phone: phone ?? '9876543210',
+        );
+        currentUser.value = mockUser;
+        await _storage.saveAuthToken('mock_token');
+        await _storage.saveUserId(mockUser.id);
+        await _storage.saveUserData(mockUser.toJson());
+        await _storage.setLoggedIn(true);
+
+        if (Get.isRegistered<UserController>()) {
+          Get.find<UserController>().currentUser.value = mockUser;
+        }
+        SnackbarService.showSuccess('Login successful!');
+        return true;
+      } else {
+        final requestData = {'mPin': int.tryParse(mPin) ?? mPin};
+        if (email != null) requestData['email'] = email;
+        if (phone != null) requestData['phone'] = phone;
+
+        final response = await _apiClient.post(
+          ApiConfig.login,
+          data: requestData,
+        );
+
+        if (response.statusCode == 200) {
+          final data = response.data;
+          if (data['message'] == 'Invalid credentials') {
+            SnackbarService.showError('Invalid credentials');
+            return false;
+          }
+          final token = data['data']?['token'];
+          final userData = data['data']?['user'];
+
+          if (token != null) {
+            await _storage.saveAuthToken(token);
+          }
+          if (userData != null) {
+            final user = User.fromJson(userData);
+            currentUser.value = user;
+            await _storage.saveUserId(user.id);
+            await _storage.saveUserData(userData);
+            await _storage.setLoggedIn(true);
+
+            if (Get.isRegistered<UserController>()) {
+              Get.find<UserController>().currentUser.value = user;
+            }
+          }
+          SnackbarService.showSuccess('Login successful!');
+          return true;
+        }
+        return false;
+      }
+    } catch (e) {
+      final error = ApiErrorHandler.handleError(e);
+      SnackbarService.showError(error.message);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> setMpin(String phone, String mPin) async {
+    try {
+      isLoading.value = true;
       final response = await _apiClient.post(
-        ApiConfig.loginUser,
-        data: {'email': email, 'password': password},
+        ApiConfig.setMpin,
+        data: {'phone': phone, 'mPin': int.tryParse(mPin) ?? mPin},
       );
 
-      if (response.statusCode == 200 || response.statusCode == 201) {
+      if (response.statusCode == 200) {
         final data = response.data;
-
-        final token = data['token'] ?? data['data']?['token'];
-        final userData = data['user'] ?? data['data']?['user'] ?? data['data'];
+        if (data['message'] == 'User not exist') {
+          SnackbarService.showError('User not found');
+          return false;
+        }
+        final token = data['data']?['token'];
+        final userData = data['data']?['user'];
 
         if (token != null) {
           await _storage.saveAuthToken(token);
         }
-
         if (userData != null) {
           final user = User.fromJson(userData);
           currentUser.value = user;
@@ -210,15 +250,12 @@ class AuthController extends GetxController {
           await _storage.setLoggedIn(true);
 
           if (Get.isRegistered<UserController>()) {
-            final uc = Get.find<UserController>();
-            uc.currentUser.value = user;
+            Get.find<UserController>().currentUser.value = user;
           }
         }
-
-        SnackbarService.showSuccess('Login successful!');
+        SnackbarService.showSuccess('MPIN set successfully');
         return true;
       }
-
       return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
@@ -232,32 +269,20 @@ class AuthController extends GetxController {
   Future<void> logout() async {
     try {
       isLoading.value = true;
-
-      await _apiClient.post(ApiConfig.logoutUser);
-
+      await _apiClient.post(ApiConfig.logout);
       await _storage.clearAuthData();
       currentUser.value = null;
       isOtpSent.value = false;
 
       if (Get.isRegistered<UserController>()) {
-        final uc = Get.find<UserController>();
-        uc.currentUser.value = null;
+        Get.find<UserController>().currentUser.value = null;
       }
-
       SnackbarService.showSuccess('Logged out successfully');
-
-      Get.offAllNamed('/login');
+      Get.offAllNamed('/get-started');
     } catch (e) {
       await _storage.clearAuthData();
       currentUser.value = null;
-      isOtpSent.value = false;
-
-      if (Get.isRegistered<UserController>()) {
-        final uc = Get.find<UserController>();
-        uc.currentUser.value = null;
-      }
-
-      Get.offAllNamed('/login');
+      Get.offAllNamed('/get-started');
     } finally {
       isLoading.value = false;
     }
@@ -306,13 +331,6 @@ class AuthController extends GetxController {
     } finally {
       isLoading.value = false;
     }
-  }
-
-  Future<void> fetchPhoneNumber(String pan, String aadhar) async {
-    isFetchingPhoneNumber.value = true;
-    Future.delayed(Duration(seconds: 2));
-
-    isFetchingPhoneNumber.value = false;
   }
 
   void resetOtpState() {

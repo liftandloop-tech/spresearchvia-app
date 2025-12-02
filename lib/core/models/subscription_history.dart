@@ -1,4 +1,4 @@
-enum SubscriptionStatus { active, expired, failed, success }
+enum SubscriptionStatus { active, expired, failed, success, pending }
 
 class SubscriptionHistory {
   final String id;

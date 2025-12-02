@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart' as getx;
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/utils/error_message_handler.dart';
+import '../core/theme/app_theme.dart';
+import '../core/utils/error_message_handler.dart';
 
 enum SnackbarType { success, error, warning, info }
 

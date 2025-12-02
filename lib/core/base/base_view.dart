@@ -3,19 +3,15 @@ import 'package:get/get.dart';
 
 import 'base_controller.dart';
 
-/// Base view widget with common functionality
 abstract class BaseView<T extends BaseController> extends GetView<T> {
   const BaseView({super.key});
 
-  /// Build the main content
   Widget buildContent(BuildContext context);
 
-  /// Build loading indicator
   Widget buildLoadingIndicator() {
     return const Center(child: CircularProgressIndicator());
   }
 
-  /// Build error widget
   Widget buildError(String message) {
     return Center(
       child: Column(

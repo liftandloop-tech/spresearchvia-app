@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/routes/app_routes.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/widgets/button.dart';
+import '../../core/routes/app_routes.dart';
+import '../../core/theme/app_theme.dart';
+import '../../widgets/button.dart';
 
 class GetStartedScreen extends StatelessWidget {
   const GetStartedScreen({super.key});

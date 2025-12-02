@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/controllers/report.controller.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
-import 'package:spresearchvia2/core/theme/app_styles.dart';
-import 'package:spresearchvia2/screens/research/widgets/active_filter_chip.dart';
-import 'package:spresearchvia2/screens/research/widgets/filter_chip_button.dart';
-import 'package:spresearchvia2/screens/research/widgets/report_card.dart';
+import '../../controllers/report.controller.dart';
+import '../../core/theme/app_theme.dart';
+import '../../core/theme/app_styles.dart';
+import '../../services/snackbar.service.dart';
+import 'widgets/active_filter_chip.dart';
+import 'widgets/filter_chip_button.dart';
+import 'widgets/report_card.dart';
 
 class ResearchReportsScreen extends StatefulWidget {
   const ResearchReportsScreen({super.key});
@@ -32,17 +33,14 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
 
   @override
   Widget build(BuildContext context) {
-    final reportController = Get.find<ReportController>();
+    final reportController = Get.put(ReportController());
 
     return Scaffold(
       backgroundColor: AppTheme.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
-          onPressed: () => Get.back(),
-        ),
+        automaticallyImplyLeading: false,
         title: Text(
           'Research Reports',
           style: TextStyle(
@@ -56,9 +54,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
         actions: [
           IconButton(
             icon: Icon(Icons.search, color: AppTheme.primaryBlueDark),
-            onPressed: () {
-              // TODO: Implement search
-            },
+            onPressed: () {},
           ),
         ],
         bottom: PreferredSize(
@@ -92,9 +88,8 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
       body: TabBarView(
         controller: _tabController,
         children: [
-          // Trading Call Tab
           _buildTradingCallTab(reportController),
-          // Reports Tab
+
           _buildReportsTab(reportController),
         ],
       ),
@@ -142,13 +137,11 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
 
       return Column(
         children: [
-          // Filters Section
           Container(
             color: AppTheme.backgroundWhite,
             padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               children: [
-                // Filter Buttons Row
                 Row(
                   children: [
                     Obx(
@@ -213,7 +206,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                     }),
                   ],
                 ),
-                // Active Filters
+
                 Obx(() {
                   if (reportController.selectedCategory.value != null) {
                     return Column(
@@ -244,7 +237,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               ],
             ),
           ),
-          // Reports List
+
           Expanded(
             child: Obx(() {
               final reports = reportController.filteredReports;
@@ -277,17 +270,15 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                   final report = reports[index];
                   return ReportCard(
                     title: report.title,
-                    category: report.category ?? 'Uncategorized',
+                    category: report.category,
                     date: report.createdAt != null
                         ? '${report.createdAt!.day}/${report.createdAt!.month}/${report.createdAt!.year}'
                         : 'N/A',
                     description: report.description,
                     isDownloaded: false,
                     onTap: () {
-                      Get.snackbar(
-                        'Info',
+                      SnackbarService.showInfo(
                         'Report detail view - Coming soon',
-                        snackPosition: SnackPosition.BOTTOM,
                       );
                     },
                     onDownload: () async {
@@ -401,7 +392,6 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               ),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement date filter
               },
             ),
             ListTile(
@@ -417,7 +407,6 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               ),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement date filter
               },
             ),
             ListTile(
@@ -433,7 +422,6 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               ),
               onTap: () {
                 Navigator.pop(context);
-                // TODO: Implement date filter
               },
             ),
           ],
