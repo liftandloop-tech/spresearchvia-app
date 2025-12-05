@@ -14,6 +14,11 @@ class Validators {
   static final RegExp _otpRegex = RegExp(r'^\d{4,6}$');
 
   static final RegExp _nameRegex = RegExp(r"^[a-zA-Z\s.']+$");
+  static final RegExp _dobRegex = RegExp(
+    r'^(0[1-9]|[12][0-9]|3[01])[-\/]' +
+        r'(0[1-9]|1[0-2])[-\/]' +
+        r'(19|20)\d\d$',
+  );
 
   static String? validateEmail(String? value) {
     if (value == null || value.trim().isEmpty) {
@@ -42,9 +47,24 @@ class Validators {
     if (value == null || value.trim().isEmpty) {
       return 'PAN number is required';
     }
-    if (!_panRegex.hasMatch(value.trim().toUpperCase())) {
-      return 'Please enter a valid PAN (e.g., ABCDE1234F)';
+    
+    final pan = value.trim().toUpperCase();
+    
+    if (pan.length != 10) {
+      return 'PAN must be exactly 10 characters';
     }
+    
+    if (!_panRegex.hasMatch(pan)) {
+      return 'Invalid PAN format. Use: ABCDE1234F (5 letters, 4 digits, 1 letter)';
+    }
+    
+    // Additional validation: 4th character must be 'P' for individual
+    if (pan[3] != 'P' && pan[3] != 'C' && pan[3] != 'H' && pan[3] != 'F' && 
+        pan[3] != 'A' && pan[3] != 'T' && pan[3] != 'B' && pan[3] != 'L' && 
+        pan[3] != 'J' && pan[3] != 'G') {
+      return 'Invalid PAN: 4th character must be a valid entity type';
+    }
+    
     return null;
   }
 
@@ -57,6 +77,17 @@ class Validators {
 
     if (!_aadharRegex.hasMatch(cleaned)) {
       return 'Please enter a valid 12-digit Aadhar number';
+    }
+    return null;
+  }
+
+  static String? validateDOB(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return 'Date of Birth is required';
+    }
+    final v = value.trim();
+    if (!_dobRegex.hasMatch(v)) {
+      return 'Please enter DOB in DD-MM-YYYY';
     }
     return null;
   }
@@ -148,6 +179,11 @@ class Validators {
 
   static String cleanAadhar(String aadhar) {
     return aadhar.replaceAll(RegExp(r'\s'), '');
+  }
+
+  static String normalizeDob(String dob) {
+    // Accept DD-MM-YYYY or DD/MM/YYYY and return DD-MM-YYYY
+    return dob.trim().replaceAll('/', '-');
   }
 
   static String formatPhone(String phone) {

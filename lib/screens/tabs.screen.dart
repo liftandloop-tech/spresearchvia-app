@@ -39,10 +39,14 @@ class TabsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.put(TabsController());
-    
+
     // Initialize required controllers
-    Get.put(ReportController());
-    Get.put(PlanPurchaseController());
+    if (!Get.isRegistered<ReportController>()) {
+      Get.put(ReportController());
+    }
+    if (!Get.isRegistered<PlanPurchaseController>()) {
+      Get.put(PlanPurchaseController());
+    }
 
     // Set initial index from Get.arguments
     final int initialIndex = Get.arguments ?? 0;

@@ -6,26 +6,20 @@ class AadharInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text;
-
-    if (text.isEmpty) {
-      return newValue;
-    }
-
-    final digitsOnly = text.replaceAll(RegExp(r'\D'), '');
-
-    if (digitsOnly.length > 12) {
+    final text = newValue.text.replaceAll(' ', '');
+    if (text.length > 12) {
       return oldValue;
     }
 
-    String formatted = digitsOnly;
-    if (digitsOnly.length > 8) {
-      formatted =
-          '${digitsOnly.substring(0, 4)} ${digitsOnly.substring(4, 8)} ${digitsOnly.substring(8)}';
-    } else if (digitsOnly.length > 4) {
-      formatted = '${digitsOnly.substring(0, 4)} ${digitsOnly.substring(4)}';
+    final buffer = StringBuffer();
+    for (int i = 0; i < text.length; i++) {
+      buffer.write(text[i]);
+      if ((i + 1) % 4 == 0 && i + 1 != text.length) {
+        buffer.write(' ');
+      }
     }
 
+    final formatted = buffer.toString();
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
@@ -33,43 +27,42 @@ class AadharInputFormatter extends TextInputFormatter {
   }
 }
 
-class PincodeInputFormatter extends TextInputFormatter {
+class DateInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text;
-    final digitsOnly = text.replaceAll(RegExp(r'\D'), '');
-
-    if (digitsOnly.length > 6) {
+    final text = newValue.text.replaceAll('-', '');
+    if (text.length > 8) {
       return oldValue;
     }
 
+    final buffer = StringBuffer();
+    for (int i = 0; i < text.length; i++) {
+      buffer.write(text[i]);
+      if ((i == 1 || i == 3) && i + 1 != text.length) {
+        buffer.write('-');
+      }
+    }
+
+    final formatted = buffer.toString();
     return TextEditingValue(
-      text: digitsOnly,
-      selection: TextSelection.collapsed(offset: digitsOnly.length),
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }
 
-class PANInputFormatter extends TextInputFormatter {
+class UpperCaseTextFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text.toUpperCase();
-
-    if (text.length > 10) {
-      return oldValue;
-    }
-
-    final alphanumericOnly = text.replaceAll(RegExp(r'[^A-Z0-9]'), '');
-
     return TextEditingValue(
-      text: alphanumericOnly,
-      selection: TextSelection.collapsed(offset: alphanumericOnly.length),
+      text: newValue.text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }
@@ -80,16 +73,30 @@ class OTPInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text;
-    final digitsOnly = text.replaceAll(RegExp(r'\D'), '');
-
-    if (digitsOnly.length > 6) {
+    final text = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (text.length > 6) {
       return oldValue;
     }
-
     return TextEditingValue(
-      text: digitsOnly,
-      selection: TextSelection.collapsed(offset: digitsOnly.length),
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+}
+
+class PhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (text.length > 10) {
+      return oldValue;
+    }
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
     );
   }
 }
@@ -100,24 +107,62 @@ class NameInputFormatter extends TextInputFormatter {
     TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
-    final text = newValue.text;
-
-    final lettersAndSpacesOnly = text.replaceAll(RegExp(r"[^a-zA-Z\s.']"), '');
-
-    String capitalizedText = lettersAndSpacesOnly;
-    if (lettersAndSpacesOnly.isNotEmpty) {
-      capitalizedText = lettersAndSpacesOnly
-          .split(' ')
-          .map((word) {
-            if (word.isEmpty) return word;
-            return word[0].toUpperCase() + word.substring(1).toLowerCase();
-          })
-          .join(' ');
-    }
-
+    final text = newValue.text.replaceAll(RegExp(r'[^a-zA-Z ]'), '');
     return TextEditingValue(
-      text: capitalizedText,
-      selection: TextSelection.collapsed(offset: capitalizedText.length),
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+}
+
+class PincodeInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text.replaceAll(RegExp(r'\D'), '');
+    if (text.length > 6) {
+      return oldValue;
+    }
+    return TextEditingValue(
+      text: text,
+      selection: TextSelection.collapsed(offset: text.length),
+    );
+  }
+}
+
+class PANInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    String text = newValue.text.toUpperCase();
+    
+    if (text.length > 10) {
+      return oldValue;
+    }
+    
+    // Format: ABCDE1234F (5 letters, 4 digits, 1 letter)
+    String formatted = '';
+    for (int i = 0; i < text.length; i++) {
+      if (i < 5 || i == 9) {
+        // First 5 and last character must be letters
+        if (RegExp(r'[A-Z]').hasMatch(text[i])) {
+          formatted += text[i];
+        }
+      } else if (i >= 5 && i < 9) {
+        // Middle 4 characters must be digits
+        if (RegExp(r'[0-9]').hasMatch(text[i])) {
+          formatted += text[i];
+        }
+      }
+    }
+    
+    return TextEditingValue(
+      text: formatted,
+      selection: TextSelection.collapsed(offset: formatted.length),
     );
   }
 }

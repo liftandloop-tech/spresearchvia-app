@@ -5,7 +5,6 @@ import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
 import '../services/storage.service.dart';
 import '../services/snackbar.service.dart';
-import '../core/config/app_mode.dart';
 
 class PlanPurchaseController extends GetxController {
   final ApiClient _apiClient = ApiClient();
@@ -29,50 +28,40 @@ class PlanPurchaseController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
-      
-      if (AppMode.isDevelopment) {
-        await Future.delayed(Duration(seconds: 1));
-        return {
-          'paymentId': 'mock_payment_${DateTime.now().millisecondsSinceEpoch}',
-          'razorpayOrderId': 'order_mock_${DateTime.now().millisecondsSinceEpoch}',
-          'amount': amount,
-          'packageName': packageName,
-        };
-      } else {
-        final uid = userId;
-        if (uid == null) {
-          SnackbarService.showWarning('User not logged in');
-          return null;
-        }
 
-        final requestData = {'packageName': packageName, 'amount': amount};
-
-        final response = await _apiClient.post(
-          ApiConfig.purchasePlan(uid),
-          data: requestData,
-        );
-
-        if (response.statusCode == 200) {
-          final data = response.data;
-          final orderData = data['data'] ?? data;
-
-          final orderCreate = orderData['orderCreate'];
-          final userPlan = orderData['userPlan'];
-
-          if (orderCreate != null) {
-            return {
-              'razorpayOrderId': orderCreate['razorpayOrderId'],
-              'paymentId': orderCreate['_id'],
-              'orderCreate': orderCreate,
-              'userPlan': userPlan,
-            };
-          }
-
-          return orderData as Map<String, dynamic>?;
-        }
-
+      final uid = userId;
+      if (uid == null) {
+        SnackbarService.showWarning('User not logged in');
         return null;
       }
+
+      final requestData = {'packageName': packageName, 'amount': amount};
+
+      final response = await _apiClient.post(
+        ApiConfig.purchasePlan(uid),
+        data: requestData,
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final orderData = data['data'] ?? data;
+
+        final orderCreate = orderData['orderCreate'];
+        final userPlan = orderData['userPlan'];
+
+        if (orderCreate != null) {
+          return {
+            'razorpayOrderId': orderCreate['razorpayOrderId'],
+            'paymentId': orderCreate['_id'],
+            'orderCreate': orderCreate,
+            'userPlan': userPlan,
+          };
+        }
+
+        return orderData as Map<String, dynamic>?;
+      }
+
+      return null;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
@@ -129,40 +118,19 @@ class PlanPurchaseController extends GetxController {
 
   Future<void> fetchUserPlan() async {
     try {
-      if (AppMode.isDevelopment) {
-        await Future.delayed(Duration(seconds: 1));
-        currentPlan.value = Plan(
-          id: 'mock_plan_id',
-          userId: 'mock_user_id',
-          packageName: 'Annual Plan',
-          validity: 365,
-          startDate: DateTime.now().subtract(Duration(days: 30)),
-          endDate: DateTime.now().add(Duration(days: 335)),
-          status: 'active',
-          name: 'Annual Plan',
-          description: 'Full access to all research reports',
-          amount: 5900.0,
-          validityDays: 365,
-          purchaseDate: DateTime.now().subtract(Duration(days: 30)),
-          expiryDate: DateTime.now().add(Duration(days: 335)),
-          features: ['Premium Reports', 'Market Analysis', 'Expert Support'],
-        );
-        expiryRemindersEnabled.value = true;
-      } else {
-        final uid = userId;
-        if (uid == null) return;
+      final uid = userId;
+      if (uid == null) return;
 
-        final response = await _apiClient.get(ApiConfig.getUserPlan(uid));
-        if (response.statusCode == 200) {
-          final data = response.data;
-          final planData = data['data']?['plan'];
+      final response = await _apiClient.get(ApiConfig.getUserPlan(uid));
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final planData = data['data']?['plan'];
 
-          if (planData != null) {
-            currentPlan.value = Plan.fromJson(planData);
-            expiryRemindersEnabled.value = planData['expiryReminder'] ?? false;
-          } else {
-            currentPlan.value = null;
-          }
+        if (planData != null) {
+          currentPlan.value = Plan.fromJson(planData);
+          expiryRemindersEnabled.value = planData['expiryReminder'] ?? false;
+        } else {
+          currentPlan.value = null;
         }
       }
     } catch (e) {
@@ -189,7 +157,9 @@ class PlanPurchaseController extends GetxController {
         final data = response.data;
         final reminderStatus = data['data']?['expiryReminderOnOff'];
         expiryRemindersEnabled.value = reminderStatus ?? enabled;
-        SnackbarService.showSuccess('Expiry reminders ${enabled ? 'enabled' : 'disabled'}');
+        SnackbarService.showSuccess(
+          'Expiry reminders ${enabled ? 'enabled' : 'disabled'}',
+        );
         return true;
       }
       return false;

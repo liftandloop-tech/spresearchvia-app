@@ -9,6 +9,7 @@ import 'package:path/path.dart' as path;
 import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
 import '../services/storage.service.dart';
+import 'user.controller.dart';
 
 class KycController extends GetxController {
   final ApiClient _apiClient = ApiClient();
@@ -62,6 +63,9 @@ class KycController extends GetxController {
       if (response.statusCode == 200) {
         isPanUploaded.value = true;
         SnackbarService.showSuccess('PAN card uploaded successfully');
+        if (Get.isRegistered<UserController>()) {
+          Get.find<UserController>().refreshUserData();
+        }
         return true;
       }
 
@@ -129,6 +133,9 @@ class KycController extends GetxController {
       if (response.statusCode == 200) {
         isAadharUploaded.value = true;
         SnackbarService.showSuccess('Aadhar card uploaded successfully');
+        if (Get.isRegistered<UserController>()) {
+          Get.find<UserController>().refreshUserData();
+        }
         return true;
       }
 
@@ -164,6 +171,9 @@ class KycController extends GetxController {
       if (response.statusCode == 200) {
         isKycCompleted.value = true;
         SnackbarService.showSuccess('KYC verification initiated successfully');
+        if (Get.isRegistered<UserController>()) {
+          Get.find<UserController>().refreshUserData();
+        }
         return true;
       }
 

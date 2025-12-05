@@ -1,13 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
-import '../../core/routes/app_routes.dart';
 import 'widgets/account_type_toggle.dart';
 import '../../services/snackbar.service.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/button.dart';
 import '../../widgets/title_field.dart';
 import '../../controllers/auth.controller.dart';
+import '../../core/utils/validators.dart';
+import '../../core/utils/input_formatters.dart';
+import '../../core/constants/app_dimensions.dart';
+import 'otp_verification.screen.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -15,51 +19,56 @@ class SignupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final signupController = Get.find<AuthController>();
-    final accountTypeController = Get.put(
-      AccountTypeController(),
-      tag: 'signup',
-    );
+    Get.put(AccountTypeController(), tag: 'signup');
     final TextEditingController panController = TextEditingController();
+    // DOB split controllers
+    final TextEditingController dayController = TextEditingController();
+    final TextEditingController monthController = TextEditingController();
+    final TextEditingController yearController = TextEditingController();
+    final FocusNode dayFocus = FocusNode();
+    final FocusNode monthFocus = FocusNode();
+    final FocusNode yearFocus = FocusNode();
     final TextEditingController aadharController = TextEditingController();
-    final TextEditingController phoneController = TextEditingController();
 
     Future<void> submit() async {
       final pan = panController.text.trim();
+      final dd = dayController.text.trim();
+      final mm = monthController.text.trim();
+      final yyyy = yearController.text.trim();
+      if (dd.isEmpty || mm.isEmpty || yyyy.isEmpty) {
+        SnackbarService.showError('Date of Birth is required');
+        return;
+      }
+      final dob = '${dd.padLeft(2, '0')}-${mm.padLeft(2, '0')}-$yyyy';
       final aadhar = aadharController.text.trim();
-      final phone = phoneController.text.trim();
 
-      if (pan.isEmpty) {
-        SnackbarService.showError('Please enter PAN number');
+      final panError = Validators.validatePAN(pan);
+      if (panError != null) {
+        SnackbarService.showError(panError);
         return;
       }
 
-      if (aadhar.isEmpty) {
-        SnackbarService.showError('Please enter Aadhar number');
+      final dobError = Validators.validateDOB(dob);
+      if (dobError != null) {
+        SnackbarService.showError(dobError);
         return;
       }
 
-      if (phone.isEmpty) {
-        // Mock PAN/Aadhar verification - return dummy phone
-        final fetchedPhone = '9876543210';
-
-        phoneController.text = fetchedPhone;
-
-        SnackbarService.showSuccess(
-          'Phone number verified. Please click submit again to continue.',
-        );
+      final aadharError = Validators.validateAadhar(aadhar);
+      if (aadharError != null) {
+        SnackbarService.showError(aadharError);
         return;
       }
 
-      Get.toNamed(
-        AppRoutes.otpVerification,
-        arguments: {
-          'phone': phone,
-          'pan': pan,
-          'aadhar': aadhar,
-          'accountType': accountTypeController.selectedType.value,
-          'isSignup': true,
-        },
+      final success = await signupController.createUser(
+        pan: Validators.formatPAN(pan),
+        dob: Validators.normalizeDob(dob),
+        aadhaarNumber: Validators.cleanAadhar(aadhar),
       );
+
+      if (success) {
+        Get.off(() => const OtpVerificationScreen());
+      }
     }
 
     void back() {
@@ -117,19 +126,30 @@ class SignupScreen extends StatelessWidget {
                             title: 'PAN Card Number',
                             hint: 'eg: ABCDE1234F',
                             controller: panController,
+                            keyboardType: TextInputType.text,
+                            inputFormatters: [
+                              PANInputFormatter(),
+                            ],
+                          ),
+                          SizedBox(height: 20),
+                          _DobTripleField(
+                            dayController: dayController,
+                            monthController: monthController,
+                            yearController: yearController,
+                            dayFocus: dayFocus,
+                            monthFocus: monthFocus,
+                            yearFocus: yearFocus,
                           ),
                           SizedBox(height: 20),
                           TitleField(
                             title: 'Aadhar Number',
                             hint: 'eg: 1234 5678 9012',
                             controller: aadharController,
-                          ),
-                          SizedBox(height: 20),
-                          TitleField(
-                            title: 'Phone Number',
-                            hint: 'Will be fetched automatically',
-                            controller: phoneController,
-                            readOnly: true,
+                            keyboardType: TextInputType.number,
+                            inputFormatters: [
+                              FilteringTextInputFormatter.digitsOnly,
+                              AadharInputFormatter(),
+                            ],
                           ),
                         ],
                       ),
@@ -178,7 +198,6 @@ class SignupScreen extends StatelessWidget {
               ),
             ),
           ),
-
           SizedBox(
             width: double.maxFinite,
             height: double.maxFinite,
@@ -198,6 +217,137 @@ class SignupScreen extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+class _DobTripleField extends StatelessWidget {
+  const _DobTripleField({
+    required this.dayController,
+    required this.monthController,
+    required this.yearController,
+    required this.dayFocus,
+    required this.monthFocus,
+    required this.yearFocus,
+  });
+
+  final TextEditingController dayController;
+  final TextEditingController monthController;
+  final TextEditingController yearController;
+  final FocusNode dayFocus;
+  final FocusNode monthFocus;
+  final FocusNode yearFocus;
+
+  @override
+  Widget build(BuildContext context) {
+    final labelStyle = const TextStyle(
+      fontFamily: 'Poppins',
+      color: AppTheme.primaryBlue,
+      fontSize: 14,
+      fontWeight: FontWeight.w500,
+    );
+
+    final hintStyle = const TextStyle(
+      fontSize: 14,
+      color: AppTheme.textGreyLight,
+      fontFamily: 'Poppins',
+    );
+
+    InputDecoration _decoration(String hint) => InputDecoration(
+      hintText: hint,
+      hintStyle: hintStyle,
+      border: InputBorder.none,
+      counterText: '',
+    );
+
+    Widget _box({
+      required TextEditingController controller,
+      required FocusNode focusNode,
+      required String hint,
+      required int maxLength,
+      void Function(String)? onChanged,
+    }) {
+      return Container(
+        height: AppDimensions.containerSmall,
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppDimensions.spacing10,
+        ),
+        decoration: BoxDecoration(
+          color: const Color(0xffF9FAFB),
+          border: Border.all(
+            width: AppDimensions.borderThin,
+            color: AppTheme.borderGrey,
+          ),
+          borderRadius: BorderRadius.circular(AppDimensions.radiusMedium),
+        ),
+        child: Center(
+          child: TextField(
+            controller: controller,
+            focusNode: focusNode,
+            keyboardType: TextInputType.number,
+            inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+            maxLength: maxLength,
+            onChanged: onChanged,
+            decoration: _decoration(hint),
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Date of Birth', style: labelStyle),
+        const SizedBox(height: 5),
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: _box(
+                controller: dayController,
+                focusNode: dayFocus,
+                hint: 'DD',
+                maxLength: 2,
+                onChanged: (v) {
+                  if (v.length == 2) {
+                    FocusScope.of(context).requestFocus(monthFocus);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 2,
+              child: _box(
+                controller: monthController,
+                focusNode: monthFocus,
+                hint: 'MM',
+                maxLength: 2,
+                onChanged: (v) {
+                  if (v.length == 2) {
+                    FocusScope.of(context).requestFocus(yearFocus);
+                  }
+                },
+              ),
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              flex: 3,
+              child: _box(
+                controller: yearController,
+                focusNode: yearFocus,
+                hint: 'YYYY',
+                maxLength: 4,
+                onChanged: (v) {
+                  if (v.length == 4) {
+                    FocusScope.of(context).unfocus();
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 }

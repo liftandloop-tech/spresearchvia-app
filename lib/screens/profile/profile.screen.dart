@@ -4,6 +4,7 @@ import '../../controllers/user.controller.dart';
 import '../../controllers/auth.controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
+import '../../core/models/user.dart';
 import '../notification/notification_settings.screen.dart';
 import 'edit_profile.screen.dart';
 import 'widgets/KycStatus.Item.dart';
@@ -15,8 +16,57 @@ import '../../widgets/button.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  String _getKycStatusText(KycStatus? status) {
+    switch (status) {
+      case KycStatus.verified:
+        return 'Verified';
+      case KycStatus.pending:
+        return 'Pending';
+      case KycStatus.rejected:
+        return 'Rejected';
+      case KycStatus.notStarted:
+      default:
+        return 'Not Started';
+    }
+  }
+
+  Color _getKycStatusColor(KycStatus? status) {
+    switch (status) {
+      case KycStatus.verified:
+        return Color(0xff16A34A);
+      case KycStatus.pending:
+        return Color(0xffF59E0B);
+      case KycStatus.rejected:
+        return Color(0xffEF4444);
+      case KycStatus.notStarted:
+      default:
+        return Color(0xff6B7280);
+    }
+  }
+
+  String _getKycStatusLabel(KycStatus? status) {
+    switch (status) {
+      case KycStatus.verified:
+        return 'Completed';
+      case KycStatus.pending:
+        return 'In Progress';
+      case KycStatus.rejected:
+        return 'Rejected';
+      case KycStatus.notStarted:
+      default:
+        return 'Not Started';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    if (!Get.isRegistered<UserController>()) {
+      Get.put(UserController());
+    }
+    if (!Get.isRegistered<AuthController>()) {
+      Get.put(AuthController());
+    }
+    
     final userController = Get.find<UserController>();
     final authController = Get.find<AuthController>();
 
@@ -88,27 +138,9 @@ class ProfileScreen extends StatelessWidget {
               KycStatusItem(
                 icon: Icons.verified_user,
                 title: 'KYC Status',
-                value:
-                    (user.kycStatus?.toString().toLowerCase().contains(
-                          'verified',
-                        ) ??
-                        false)
-                    ? 'Verified'
-                    : 'Pending',
-                statusColor:
-                    (user.kycStatus?.toString().toLowerCase().contains(
-                          'verified',
-                        ) ??
-                        false)
-                    ? Color(0xff16A34A)
-                    : Color(0xffF87171),
-                statusLabel:
-                    (user.kycStatus?.toString().toLowerCase().contains(
-                          'verified',
-                        ) ??
-                        false)
-                    ? 'Completed'
-                    : 'Pending',
+                value: _getKycStatusText(user.kycStatus),
+                statusColor: _getKycStatusColor(user.kycStatus),
+                statusLabel: _getKycStatusLabel(user.kycStatus),
               ),
               SizedBox(height: 15),
               Button(

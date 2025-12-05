@@ -68,6 +68,11 @@ class User {
     // Backend returns userObject with KYC data
     final userObject = json['userObject'] as Map<String, dynamic>?;
     
+    // Check if userObject contains error
+    if (userObject?['APP_ERROR_CODE'] != null) {
+      throw Exception(userObject?['APP_ERROR_DESC'] ?? 'Invalid user data');
+    }
+    
     return User(
       id: json['_id'] ?? json['id'] ?? '',
       fullName: userObject?['APP_NAME'] as String? ?? json['fullName'] as String?,
@@ -84,7 +89,7 @@ class User {
       contactDetails: json['contactDetails'] != null
           ? ContactDetails.fromJson(json['contactDetails'])
           : null,
-      kycStatus: _parseKycStatus(json['kycStatus']),
+      kycStatus: _parseKycStatus(json['kycStatus'] ?? 'notStarted'),
       currentPlan: _parsePlanType(json['currentPlan']),
     );
   }
@@ -104,11 +109,12 @@ class User {
   }
 
   static KycStatus? _parseKycStatus(dynamic status) {
-    if (status == null) return null;
+    if (status == null) return KycStatus.notStarted;
     final statusStr = status.toString().toLowerCase();
     if (statusStr.contains('verified')) return KycStatus.verified;
     if (statusStr.contains('pending')) return KycStatus.pending;
     if (statusStr.contains('rejected')) return KycStatus.rejected;
+    if (statusStr.contains('notstarted') || statusStr.contains('not_started')) return KycStatus.notStarted;
     return KycStatus.notStarted;
   }
 

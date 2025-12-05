@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/kyc.controller.dart';
 import '../../services/snackbar.service.dart';
 import '../../core/utils/validators.dart';
+import '../../core/utils/input_formatters.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
 import 'aadhar_verification_screen.dart';
@@ -102,6 +104,12 @@ class _PanVerificationScreenState extends State<PanVerificationScreen> {
                       hint: 'eg: ABCDE1234F',
                       controller: _panController,
                       icon: Icons.credit_card,
+                      keyboardType: TextInputType.text,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.allow(RegExp(r'[A-Za-z0-9]')),
+                        LengthLimitingTextInputFormatter(10),
+                        UpperCaseTextFormatter(),
+                      ],
                     ),
                   ],
                 ),

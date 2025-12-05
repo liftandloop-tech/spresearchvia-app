@@ -76,7 +76,8 @@ class Responsive {
   double get bottomSafeArea => _mediaQuery.padding.bottom;
 
   // Text scale factor
-  double get textScaleFactor => _mediaQuery.textScaler.scale(1.0).clamp(0.8, 1.3);
+  double get textScaleFactor =>
+      _mediaQuery.textScaler.scale(1.0).clamp(0.8, 1.3);
 
   // Pixel density
   double get pixelRatio => _mediaQuery.devicePixelRatio;

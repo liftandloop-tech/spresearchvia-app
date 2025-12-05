@@ -3,8 +3,6 @@ import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/button.dart';
 import '../../services/snackbar.service.dart';
-import '../../services/storage.service.dart';
-import '../../controllers/user.controller.dart';
 
 class ConfirmPaymentScreen extends StatefulWidget {
   const ConfirmPaymentScreen({super.key});
@@ -17,7 +15,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
   final RxBool agreedToTerms = false.obs;
   final RxBool authorizedPayment = false.obs;
   final RxBool isProcessing = false.obs;
-  final Rx<int> selectedPaymentMethod = 1.obs; // 0=Card, 1=UPI, 2=NetBanking, 3=Wallet
+  final Rx<int> selectedPaymentMethod = 1.obs;
   final customAmountController = TextEditingController();
 
   @override
@@ -33,30 +31,9 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
     }
 
     isProcessing.value = true;
-
-    try {
-      // Mock payment processing
-      await Future.delayed(Duration(seconds: 2));
-
-      // Save login state
-      final storage = StorageService();
-      final userController = Get.find<UserController>();
-      await storage.setLoggedIn(true);
-      await storage.saveAuthToken('mock_token_${DateTime.now().millisecondsSinceEpoch}');
-      await storage.saveUserData({
-        'id': 'user_${DateTime.now().millisecondsSinceEpoch}',
-        'name': userController.currentUser.value?.name ?? 'User',
-        'email': userController.currentUser.value?.email ?? '',
-        'phone': userController.currentUser.value?.phone ?? '',
-      });
-
-      isProcessing.value = false;
-      SnackbarService.showSuccess('Payment completed successfully!');
-      Get.offAllNamed('/payment-success');
-    } catch (e) {
-      isProcessing.value = false;
-      SnackbarService.showError('Failed to process payment: ${e.toString()}');
-    }
+    SnackbarService.showError('This screen is deprecated. Please use the registration screen for payments.');
+    isProcessing.value = false;
+    Get.back();
   }
 
   @override
@@ -98,8 +75,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
               ),
             ),
             SizedBox(height: 16),
-
-            // Secure Gateway Badge
             Container(
               padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
@@ -124,8 +99,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
               ),
             ),
             SizedBox(height: 24),
-
-            // Plan Details
             Container(
               padding: EdgeInsets.all(16),
               decoration: BoxDecoration(
@@ -174,8 +147,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
               ),
             ),
             SizedBox(height: 24),
-
-            // Custom Payment Section
             Text(
               '💳 Custom Payment',
               style: TextStyle(
@@ -208,108 +179,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
                 ),
               ),
             ),
-            SizedBox(height: 8),
-            Container(
-              padding: EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Color(0xFFF0F9FF),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Row(
-                children: [
-                  Icon(Icons.info_outline, color: AppTheme.primaryBlue, size: 16),
-                  SizedBox(width: 8),
-                  Expanded(
-                    child: Text(
-                      'Approx per-day cost: ₹414/day',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 11,
-                        color: AppTheme.primaryBlueDark,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            SizedBox(height: 8),
-            Text(
-              'Custom payments are reviewed and approved by the ResearchVia compliance team.',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 10,
-                color: AppTheme.textGrey,
-              ),
-            ),
             SizedBox(height: 24),
-
-            // Payment Breakdown
-            Text(
-              'Payment Breakdown',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlueDark,
-              ),
-            ),
-            SizedBox(height: 12),
-            _buildPriceRow('Subtotal', '₹151,000'),
-            SizedBox(height: 8),
-            _buildPriceRow('GST (18%)', '₹27,180'),
-            SizedBox(height: 12),
-            Divider(),
-            SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  'Total Payable',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 16,
-                    fontWeight: FontWeight.w700,
-                    color: AppTheme.primaryBlueDark,
-                  ),
-                ),
-                Text(
-                  '₹178,180',
-                  style: TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 18,
-                    fontWeight: FontWeight.w700,
-                    color: Color(0xFF10B981),
-                  ),
-                ),
-              ],
-            ),
-            SizedBox(height: 24),
-
-            // Payment Options
-            Text(
-              'Payment Options',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 16,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlueDark,
-              ),
-            ),
-            SizedBox(height: 12),
-            Obx(() => Column(
-              children: [
-                _buildPaymentOption(0, Icons.credit_card, 'Credit / Debit Card'),
-                SizedBox(height: 8),
-                _buildPaymentOption(1, Icons.phone_android, 'UPI (Google Pay, Paytm, PhonePe)'),
-                SizedBox(height: 8),
-                _buildPaymentOption(2, Icons.account_balance, 'Net Banking'),
-                SizedBox(height: 8),
-                _buildPaymentOption(3, Icons.account_balance_wallet, 'EMI / Wallet'),
-              ],
-            )),
-            SizedBox(height: 24),
-
-            // Terms
             Obx(() => CheckboxListTile(
               value: agreedToTerms.value,
               onChanged: (val) => agreedToTerms.value = val ?? false,
@@ -358,8 +228,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
               ),
             )),
             SizedBox(height: 24),
-
-            // Proceed Button
             Obx(() => Button(
               title: isProcessing.value ? 'Processing...' : 'Proceed to Pay ₹178,180',
               buttonType: ButtonType.green,
@@ -377,40 +245,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
                     fontSize: 13,
                     color: AppTheme.textGrey,
                   ),
-                ),
-              ),
-            ),
-            SizedBox(height: 24),
-
-            // Footer
-            Center(
-              child: Text(
-                'Powered by Razorpay Payment Gateway',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 11,
-                  color: AppTheme.textGrey,
-                ),
-              ),
-            ),
-            SizedBox(height: 8),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Image.asset('assets/icons/visa.png', width: 30, height: 20),
-                SizedBox(width: 8),
-                Image.asset('assets/icons/mastercard.png', width: 30, height: 20),
-              ],
-            ),
-            SizedBox(height: 12),
-            Center(
-              child: Text(
-                'All transactions are encrypted and verified by PCI-DSS standards.',
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 10,
-                  color: AppTheme.textGrey,
                 ),
               ),
             ),
@@ -442,73 +276,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
           ),
         ),
       ],
-    );
-  }
-
-  Widget _buildPriceRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: AppTheme.textGrey,
-          ),
-        ),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.primaryBlueDark,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentOption(int index, IconData icon, String label) {
-    final isSelected = selectedPaymentMethod.value == index;
-    return InkWell(
-      onTap: () => selectedPaymentMethod.value = index,
-      borderRadius: BorderRadius.circular(8),
-      child: Container(
-        padding: EdgeInsets.all(12),
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: isSelected ? AppTheme.primaryBlue : Color(0xFFE5E7EB),
-            width: isSelected ? 2 : 1,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          color: isSelected ? Color(0xFFF0F9FF) : Colors.white,
-        ),
-        child: Row(
-          children: [
-            Radio<int>(
-              value: index,
-              groupValue: selectedPaymentMethod.value,
-              onChanged: (val) => selectedPaymentMethod.value = val ?? index,
-              activeColor: AppTheme.primaryBlue,
-            ),
-            Icon(icon, color: AppTheme.primaryBlueDark, size: 20),
-            SizedBox(width: 12),
-            Expanded(
-              child: Text(
-                label,
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 13,
-                  fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: AppTheme.primaryBlueDark,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
     );
   }
 }

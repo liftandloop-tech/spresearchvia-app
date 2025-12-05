@@ -37,4 +37,6 @@ abstract class AppStrings {
   static const String pleaseEnterCredentials = 'Please enter your credentials';
   static const String invalidEmail = 'Invalid email address';
   static const String invalidPhone = 'Invalid phone number';
+  static const String invalidPhoneAndEmail =
+      'Please enter a valid email or phone number';
 }

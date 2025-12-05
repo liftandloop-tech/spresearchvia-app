@@ -1,10 +1,10 @@
-import '../core/config/app_mode.dart';
+import '../core/config/app.config.dart';
 import '../core/models/research_report.dart';
 import '../core/models/user.dart';
 
 class MockApiService {
   static Future<List<ResearchReport>> getResearchReports() async {
-    if (AppMode.isDevelopment) {
+    if (AppConfig.isDevelopment) {
       await Future.delayed(Duration(seconds: 1));
       return [
         ResearchReport(
@@ -31,16 +31,7 @@ class MockApiService {
   }
 
   static Future<User?> getCurrentUser() async {
-    if (AppMode.isDevelopment) {
-      await Future.delayed(Duration(milliseconds: 500));
-      return User(
-        id: 'mock_user_id',
-        fullName: 'Test User',
-        email: 'test@example.com',
-        phone: '9876543210',
-      );
-    } else {
-      return null;
-    }
+    // Always return null in production - use real API
+    return null;
   }
 }

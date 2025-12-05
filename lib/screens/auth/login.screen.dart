@@ -1,11 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/utils/validators.dart';
 import '../../controllers/auth.controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
-import '../../core/utils/input_formatters.dart';
+import 'package:flutter/services.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_strings.dart';
@@ -13,6 +14,9 @@ import '../../widgets/app_logo.dart';
 import '../../widgets/button.dart';
 import '../../widgets/title_field.dart';
 import '../../services/snackbar.service.dart';
+import '../kyc/sebi_compilance_check.dart';
+
+part 'widgets/data_protection_footer.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -47,16 +51,35 @@ class _LoginScreenState extends State<LoginScreen> {
     final responsive = Responsive.of(context);
 
     Future<void> handleLogin() async {
-      final input = phoneOrMailController.text.trim();
-      final mpin = mpinController.text.trim();
+      final String input = phoneOrMailController.text.trim();
+      final String mpin = mpinController.text.trim();
+
       if (input.isEmpty || mpin.isEmpty) {
         SnackbarService.showError(AppStrings.pleaseEnterCredentials);
         return;
       }
 
-      final success = await authController.verifyOtp(input);
+      final bool isEmail = Validators.isValidEmail(input);
+      final bool isPhone = Validators.isValidPhone(input);
+
+      if (!isEmail && !isPhone) {
+        SnackbarService.showError(AppStrings.invalidPhoneAndEmail);
+        return;
+      }
+
+      if (mpin.length != 4) {
+        SnackbarService.showError('Enter valid MPIN');
+        return;
+      }
+
+      final success = await authController.login(
+        email: isEmail ? input : null,
+        phone: isEmail ? null : input,
+        mPin: mpin,
+      );
+
       if (success) {
-        Get.offAllNamed(AppRoutes.tabs);
+        Get.off(() => const SebiComplianceCheck());
       }
     }
 
@@ -64,7 +87,10 @@ class _LoginScreenState extends State<LoginScreen> {
       backgroundColor: AppTheme.backgroundWhite,
       body: SafeArea(
         child: Padding(
-          padding: responsive.padding(horizontal: AppDimensions.paddingMedium, vertical: AppDimensions.paddingSmall),
+          padding: responsive.padding(
+            horizontal: AppDimensions.paddingMedium,
+            vertical: AppDimensions.paddingSmall,
+          ),
           child: SingleChildScrollView(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.start,
@@ -72,7 +98,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 Row(
                   children: [
                     IconButton(
-                      icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlue, size: responsive.spacing(AppDimensions.iconLarge)),
+                      icon: Icon(
+                        Icons.arrow_back,
+                        color: AppTheme.primaryBlue,
+                        size: responsive.spacing(AppDimensions.iconLarge),
+                      ),
                       onPressed: () => Get.back(),
                     ),
                   ],
@@ -86,11 +116,15 @@ class _LoginScreenState extends State<LoginScreen> {
                 SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
                 Text(
                   AppStrings.welcomeBack,
-                  style: AppStyles.welcomeText.copyWith(fontSize: responsive.sp(24)),
+                  style: AppStyles.welcomeText.copyWith(
+                    fontSize: responsive.sp(24),
+                  ),
                 ),
                 Text(
                   AppStrings.signInToAccess,
-                  style: AppStyles.bodyLarge.copyWith(fontSize: responsive.sp(16)),
+                  style: AppStyles.bodyLarge.copyWith(
+                    fontSize: responsive.sp(16),
+                  ),
                 ),
                 SizedBox(height: responsive.spacing(AppDimensions.spacing40)),
                 TitleField(
@@ -106,9 +140,12 @@ class _LoginScreenState extends State<LoginScreen> {
                   hint: AppStrings.enterMpin,
                   controller: mpinController,
                   icon: Icons.lock_outline,
-                  inputFormatters: [OTPInputFormatter()],
+                  inputFormatters: [
+                    FilteringTextInputFormatter.digitsOnly,
+                    LengthLimitingTextInputFormatter(4),
+                  ],
                   keyboardType: TextInputType.number,
-                  maxLength: 6,
+                  maxLength: 4,
                 ),
                 SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
                 Align(
@@ -145,36 +182,6 @@ class _LoginScreenState extends State<LoginScreen> {
             ),
           ),
         ),
-      ),
-    );
-  }
-}
-
-class DataProtection extends StatelessWidget {
-  const DataProtection({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final responsive = Responsive.of(context);
-
-    return SizedBox(
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          Icon(
-            Icons.shield_outlined,
-            color: AppTheme.textGrey,
-            size: responsive.spacing(AppDimensions.iconMedium),
-          ),
-          Flexible(
-            child: Text(
-              " ${AppStrings.dataProtection}",
-              style: AppStyles.caption.copyWith(fontSize: responsive.sp(12)),
-              textAlign: TextAlign.center,
-            ),
-          ),
-        ],
       ),
     );
   }

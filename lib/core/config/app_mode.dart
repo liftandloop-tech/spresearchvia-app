@@ -1,6 +1,7 @@
+import 'app.config.dart';
+
 class AppMode {
-  static const String mode = 'development'; // Change to 'production' for live
-  
-  static bool get isDevelopment => mode == 'development';
-  static bool get isProduction => mode == 'production';
+  static const String mode = 'production';
+  static bool get isDevelopment => AppConfig.isDevelopment;
+  static bool get isProduction => AppConfig.isProduction;
 }

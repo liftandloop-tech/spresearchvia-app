@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/kyc.controller.dart';
 import '../../services/snackbar.service.dart';
+import '../../core/utils/input_formatters.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
 import 'digio_connect_screen.dart';
@@ -101,6 +103,11 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
                       hint: 'Enter 12-digit Aadhar number',
                       controller: _aadharController,
                       icon: Icons.credit_card,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [
+                        FilteringTextInputFormatter.digitsOnly,
+                        AadharInputFormatter(),
+                      ],
                     ),
                   ],
                 ),

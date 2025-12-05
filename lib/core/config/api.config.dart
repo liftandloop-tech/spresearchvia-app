@@ -16,6 +16,7 @@ abstract class ApiConfig {
   static String updateProfile(String userId) => '/user/update/$userId';
   static String changeImage(String userId) => '/user/image-change/$userId';
   static const String userList = '/user/user-list';
+  static String getUserById(String userId) => '/user/user/$userId';
   static String deleteUser(String userId) => '/user/delete-user/$userId';
 
   static String uploadAadhar(String userId) =>
@@ -36,7 +37,6 @@ abstract class ApiConfig {
   static String downloadReport(String reportId) =>
       '/reports/download-report/$reportId';
 
-  
   static String reportListWithFilters({
     String? category,
     String search = '',

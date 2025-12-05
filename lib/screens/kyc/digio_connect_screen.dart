@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:spresearchvia2/core/theme/app_theme.dart';
-import '../../core/routes/app_routes.dart';
 import '../../widgets/button.dart';
+import '../subscription/registration.screen.dart';
 
 class DigioConnectScreen extends StatelessWidget {
   const DigioConnectScreen({super.key});
@@ -10,7 +10,7 @@ class DigioConnectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void onConnect() {
-      Get.offAllNamed(AppRoutes.registrationScreen);
+      Get.off(() => const SubscriptionConfirmScreen());
     }
 
     return Scaffold(

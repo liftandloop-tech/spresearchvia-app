@@ -8,6 +8,8 @@ import '../../screens/auth/get_started.dart';
 import '../../screens/auth/signup.screen.dart';
 import '../../screens/splash/splash.screen.dart';
 import '../../screens/auth/login.screen.dart';
+import '../../screens/auth/otp_verification.screen.dart';
+import '../../screens/auth/set_mpin.screen.dart';
 import '../../screens/tabs.screen.dart';
 import '../../screens/dashboard/dashboard.screen.dart';
 import '../../screens/profile/profile.screen.dart';
@@ -30,7 +32,7 @@ class AppRoutes {
   static const String getStarted = '/get-started';
   static const String login = '/login';
   static const String signup = '/signup';
-  static const String otpVerification = '/otp';
+  static const String otpVerification = '/otp-verification';
   static const String forgotMpin = '/forgot-mpin';
   static const String setMpin = '/set-mpin';
   static const String tabs = '/tabs';
@@ -62,7 +64,8 @@ class AppRoutes {
     GetPage(name: getStarted, page: () => const GetStartedScreen()),
     GetPage(name: login, page: () => const LoginScreen()),
     GetPage(name: signup, page: () => SignupScreen()),
-    // Removed OTP/MPIN screens - not implemented
+    GetPage(name: otpVerification, page: () => const OtpVerificationScreen()),
+    GetPage(name: setMpin, page: () => const SetMpinScreen()),
     GetPage(name: quickRenewal, page: () => QuickRenewalScreen()),
     GetPage(name: tabs, page: () => const TabsScreen()),
     GetPage(name: dashboard, page: () => DashboardScreen()),

@@ -33,7 +33,9 @@ class _SplashScreenState extends State<SplashScreen>
 
   Future<void> _handleStartup() async {
     try {
-      await Future.delayed(const Duration(milliseconds: 800));
+      await Future.delayed(const Duration(milliseconds: 1500));
+
+      if (!mounted) return;
 
       AuthController authController;
       if (Get.isRegistered<AuthController>()) {
@@ -47,13 +49,22 @@ class _SplashScreenState extends State<SplashScreen>
       final hasToken = storage.hasAuthToken();
       final userData = storage.getUserData();
 
-      await Future.delayed(const Duration(milliseconds: 500));
+      // Check if user is in signup flow (has tempUser)
+      if (userData != null && userData['tempUser'] != null) {
+        Get.offAllNamed(AppRoutes.getStarted);
+        return;
+      }
 
-      if (!mounted) return;
-
+      // Check if fully logged in
       if (isLoggedIn && hasToken && userData != null) {
-        authController.currentUser.value = User.fromJson(userData);
-        Get.offAllNamed(AppRoutes.tabs);
+        try {
+          authController.currentUser.value = User.fromJson(userData);
+          Get.offAllNamed(AppRoutes.tabs);
+        } catch (e) {
+          print('Error parsing user data: $e');
+          await storage.clearAuthData();
+          Get.offAllNamed(AppRoutes.getStarted);
+        }
       } else {
         Get.offAllNamed(AppRoutes.getStarted);
       }

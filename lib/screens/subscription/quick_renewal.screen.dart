@@ -4,7 +4,6 @@ import '../../core/theme/app_theme.dart';
 import '../../core/utils/date_formatter.dart';
 import '../../controllers/plan_purchase.controller.dart';
 import '../../controllers/user.controller.dart';
-import '../../services/mock_payment.service.dart';
 import '../../services/snackbar.service.dart';
 import '../../widgets/button.dart';
 import '../../widgets/active_plan_card.dart';
@@ -24,7 +23,6 @@ class QuickRenewalScreen extends StatefulWidget {
 class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
   final planController = Get.find<PlanPurchaseController>();
   final userController = Get.find<UserController>();
-  final mockPaymentService = MockPaymentService();
 
   PaymentMethodData? savedPaymentMethod;
   bool isLoadingPayment = true;
@@ -36,31 +34,17 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     planController.fetchUserPlan();
   }
 
-  /// Load saved payment method from mock backend
   Future<void> _loadPaymentMethod() async {
-    try {
-      final paymentMethod = await mockPaymentService.getSavedPaymentMethod();
-      setState(() {
-        savedPaymentMethod = paymentMethod;
-        isLoadingPayment = false;
-      });
-    } catch (e) {
-      setState(() {
-        isLoadingPayment = false;
-      });
-      SnackbarService.showError('Failed to load payment method');
-    }
+    setState(() {
+      savedPaymentMethod = null;
+      isLoadingPayment = false;
+    });
   }
 
   Future<void> _renewPlan() async {
     final plan = planController.currentPlan.value;
     if (plan == null) {
       SnackbarService.showError('No active plan found');
-      return;
-    }
-
-    if (savedPaymentMethod == null) {
-      SnackbarService.showError('Please add a payment method first');
       return;
     }
 
@@ -93,30 +77,23 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     );
 
     try {
-      // Simulate payment processing with mock service
-      final paymentResult = await mockPaymentService.processPayment(
+      final orderData = await planController.purchasePlan(
+        packageName: plan.name ?? 'Renewal',
         amount: plan.amount ?? 0.0,
-        paymentMethodId: 'pm_${savedPaymentMethod!.type.name}',
-        planId: plan.id,
       );
 
-      Get.back(); // Close loading dialog
+      Get.back();
 
-      if (paymentResult['success'] == true) {
-        // Navigate to payment success
-        Get.offAllNamed('/payment-success');
+      if (orderData != null) {
+        SnackbarService.showSuccess('Redirecting to payment gateway...');
+        Get.toNamed('/registration');
       } else {
-        // Show error message
-        SnackbarService.showError(
-          paymentResult['message'] ??
-              'Payment processing failed. Please try again.',
-        );
+        SnackbarService.showError('Failed to create payment order');
       }
     } catch (e) {
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-
       SnackbarService.showError('Failed to initiate renewal: ${e.toString()}');
     }
   }
@@ -182,15 +159,12 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         }
 
         final daysRemaining = planController.daysRemaining;
-
         final startDateText = DateFormatter.formatDate(plan.purchaseDate);
         final expiryDateText = DateFormatter.formatDate(plan.expiryDate);
-
         final totalPaid = plan.amount ?? 0.0;
         final perDayCost = (plan.validityDays ?? 0) > 0
             ? (totalPaid / (plan.validityDays ?? 1)).round()
             : 0;
-
         final completionPercentage = (plan.validityDays ?? 0) > 0
             ? (((plan.validityDays ?? 0) - daysRemaining) /
                       (plan.validityDays ?? 1) *
@@ -198,7 +172,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   .clamp(0, 100)
                   .toInt()
             : 0;
-
         final benefits = (plan.features?.isNotEmpty ?? false)
             ? plan.features!
             : [
@@ -213,16 +186,15 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                if (daysRemaining <= 7) ...[
+                if (daysRemaining <= 7) ...{
                   ExpiryWarningBanner(
                     daysRemaining: daysRemaining,
                     message: 'Renew now to continue accessing premium research',
                   ),
                   const SizedBox(height: 20),
-                ],
+                },
                 const SectionHeader(title: 'Current Plan'),
                 const SizedBox(height: 16),
-
                 ActivePlanCard(
                   plan: plan,
                   startDateText: startDateText,
@@ -235,19 +207,16 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   tags: const ['Index Option', 'Trader'],
                 ),
                 const SizedBox(height: 20),
-
                 const SectionHeader(title: 'Payment Method'),
                 const SizedBox(height: 12),
                 _buildPaymentMethodSection(),
                 const SizedBox(height: 24),
-
                 Button(
                   title: 'Renew with One Click',
                   buttonType: ButtonType.green,
                   onTap: _renewPlan,
                 ),
                 SizedBox(height: 16),
-
                 OutlinedButton(
                   onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
                   style: OutlinedButton.styleFrom(
@@ -269,10 +238,8 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   ),
                 ),
                 const SizedBox(height: 24),
-
                 BenefitsCard(benefits: benefits),
                 const SizedBox(height: 24),
-
                 const Center(child: SecurePaymentFooter()),
                 const SizedBox(height: 20),
               ],

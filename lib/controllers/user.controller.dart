@@ -25,9 +25,14 @@ class UserController extends GetxController {
   }
 
   void loadUserData() {
-    final userData = _storage.getUserData();
-    if (userData != null) {
-      currentUser.value = User.fromJson(userData);
+    try {
+      final userData = _storage.getUserData();
+      if (userData != null) {
+        currentUser.value = User.fromJson(userData);
+      }
+    } catch (e) {
+      print('Error loading user data: $e');
+      currentUser.value = null;
     }
   }
 
@@ -211,6 +216,24 @@ class UserController extends GetxController {
   }
 
   Future<void> refreshUserData() async {
-    loadUserData();
+    try {
+      final uid = userId;
+      if (uid == null) return;
+
+      final response = await _apiClient.get(ApiConfig.getUserById(uid));
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final userData = data['data']?['user'] ?? data['user'];
+
+        if (userData != null) {
+          final user = User.fromJson(userData);
+          currentUser.value = user;
+          await _storage.saveUserData(userData);
+        }
+      }
+    } catch (e) {
+      loadUserData();
+    }
   }
 }

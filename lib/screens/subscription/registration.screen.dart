@@ -4,11 +4,9 @@ import 'package:razorpay_flutter/razorpay_flutter.dart';
 import '../../controllers/plan_purchase.controller.dart';
 import '../../controllers/user.controller.dart';
 import '../../core/models/payment.options.dart';
-import '../../core/config/app_mode.dart';
 import '../../core/theme/app_theme.dart';
 import 'widgets/plan.card.dart';
 import '../../services/snackbar.service.dart';
-import '../../services/storage.service.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/button.dart';
 import '../../widgets/payment_option_selector.dart';
@@ -120,58 +118,36 @@ class RegistrationController extends GetxController {
         throw Exception('Order ID not received from backend');
       }
 
-      if (AppMode.isDevelopment) {
-        // Mock payment flow
-        await Future.delayed(Duration(seconds: 2));
-        isProcessing.value = false;
-        currentPaymentId.value = null;
+      // Use actual Razorpay payment gateway
+      final user = userController.currentUser.value;
+      final userEmail = user?.email ?? '';
+      final userPhone = user?.phone ?? '';
+      final userName = user?.name ?? 'User';
 
-        // Save login state and user data
-        final storage = StorageService();
-        await storage.setLoggedIn(true);
-        await storage.saveAuthToken(
-          'mock_token_${DateTime.now().millisecondsSinceEpoch}',
-        );
-        await storage.saveUserData({
-          'id': 'user_${DateTime.now().millisecondsSinceEpoch}',
-          'name': userController.currentUser.value?.name ?? 'User',
-          'email': userController.currentUser.value?.email ?? '',
-          'phone': userController.currentUser.value?.phone ?? '',
-        });
-
-        SnackbarService.showSuccess('Payment completed successfully!');
-        Get.offAllNamed('/payment-success');
-      } else {
-        // Production: Use actual Razorpay
-        final user = userController.currentUser.value;
-        final userEmail = user?.email ?? '';
-        final userPhone = user?.phone ?? '';
-        final userName = user?.name ?? 'User';
-
-        Map<String, dynamic> options = {
-          'key': 'rzp_test_your_key_id', // Replace with actual key
-          'amount': (amount * 100).round(),
-          'name': 'SP ResearchVia',
-          'order_id': razorpayOrderId,
-          'description': planName,
-          'timeout': 300,
-          'prefill': {'contact': userPhone, 'email': userEmail, 'name': userName},
-          'theme': {'color': '#163174'},
-          'readonly': {
-            'email': userEmail.isNotEmpty,
-            'contact': userPhone.isNotEmpty,
+      Map<String, dynamic> options = {
+        'key':
+            'rzp_live_RQWUApgnu01KES', // Production Razorpay key from backend .env
+        'amount': (amount * 100).round(),
+        'name': 'SP ResearchVia',
+        'order_id': razorpayOrderId,
+        'description': planName,
+        'timeout': 300,
+        'prefill': {'contact': userPhone, 'email': userEmail, 'name': userName},
+        'theme': {'color': '#163174'},
+        'readonly': {
+          'email': userEmail.isNotEmpty,
+          'contact': userPhone.isNotEmpty,
+        },
+        'modal': {
+          'ondismiss': () {
+            isProcessing.value = false;
+            currentPaymentId.value = null;
           },
-          'modal': {
-            'ondismiss': () {
-              isProcessing.value = false;
-              currentPaymentId.value = null;
-            },
-            'confirm_close': true,
-          },
-        };
+          'confirm_close': true,
+        },
+      };
 
-        razorpay.open(options);
-      }
+      razorpay.open(options);
     } catch (e) {
       isProcessing.value = false;
       currentPaymentId.value = null;

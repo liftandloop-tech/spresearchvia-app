@@ -3,7 +3,7 @@ enum AppMode { development, production }
 enum FeatureFlag { paymentMockEnabled, debugLogsEnabled, crashReportingEnabled }
 
 class AppConfig {
-  static const AppMode _mode = AppMode.production; // Change for builds
+  static const AppMode _mode = AppMode.production;
 
   static const Map<FeatureFlag, bool> _defaultFlags = {
     FeatureFlag.paymentMockEnabled: false,
@@ -32,9 +32,9 @@ class AppConfig {
   static String get baseUrl {
     switch (_mode) {
       case AppMode.development:
-        return 'https://spresearchviaapp.koyeb.app/api';
+        return 'https://api.researchvia.in/api';
       case AppMode.production:
-        return 'https://spresearchviaapp.koyeb.app/api';
+        return 'https://api.researchvia.in/api';
     }
   }
 
