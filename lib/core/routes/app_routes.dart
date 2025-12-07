@@ -1,7 +1,9 @@
 import 'package:get/get.dart';
-import 'package:spresearchvia2/screens/kyc/sebi_compilance_check.dart';
-import 'package:spresearchvia2/screens/renewal/quick_renewal.screen.dart';
-import 'package:spresearchvia2/screens/subscription/registration.screen.dart';
+import 'package:SPResearchvia/screens/kyc/sebi_compilance_check.dart';
+import 'package:SPResearchvia/screens/renewal/quick_renewal.screen.dart';
+import 'package:SPResearchvia/screens/subscription/registration.screen.dart';
+import 'package:SPResearchvia/screens/subscription/select_segment.screen.dart';
+import 'package:SPResearchvia/controllers/segment_plan.controller.dart';
 import '../../screens/subscription/receipt.screen.dart';
 import '../../screens/subscription/confirm_payment.screen.dart';
 import '../../screens/auth/get_started.dart';
@@ -20,8 +22,8 @@ import '../../screens/subscription/choose_plan.screen.dart';
 import '../../screens/subscription/subscription_history.screen.dart';
 import '../../screens/notification/notification_settings.screen.dart';
 import '../../screens/setting/settings.screen.dart';
-import '../../screens/payment/payment_success.screen.dart';
-import '../../screens/payment/payment_faliure.screen.dart';
+import '../../screens/subscription/payment/payment_success.screen.dart';
+import '../../screens/subscription/payment/payment_faliure.screen.dart';
 import '../../screens/kyc/kyc_intro.dart';
 import '../../screens/kyc/pan_verification_screen.dart';
 import '../../screens/kyc/aadhar_verification_screen.dart';
@@ -79,7 +81,13 @@ class AppRoutes {
     ),
     GetPage(name: choosePlan, page: () => ChoosePlanScreen()),
     GetPage(name: subscriptionHistory, page: () => SubscriptionHistoryScreen()),
-    // Removed select segment screen - not implemented
+    GetPage(
+      name: selectSegment,
+      page: () => SelectSegmentScreen(),
+      binding: BindingsBuilder(() {
+        Get.put(SegmentPlanController());
+      }),
+    ),
     GetPage(
       name: notificationSettings,
       page: () => NotificationSettingScreen(),
@@ -94,10 +102,7 @@ class AppRoutes {
       page: () => const AadharVerificationScreen(),
     ),
     GetPage(name: digioConnect, page: () => const DigioConnectScreen()),
-    GetPage(
-      name: registrationScreen,
-      page: () => const SubscriptionConfirmScreen(),
-    ),
+    GetPage(name: registrationScreen, page: () => const RegistrationScreen()),
     GetPage(name: receipt, page: () => const ReceiptScreen()),
     GetPage(name: confirmPayment, page: () => const ConfirmPaymentScreen()),
   ];

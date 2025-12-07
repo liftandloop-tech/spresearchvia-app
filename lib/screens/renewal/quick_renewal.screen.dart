@@ -64,19 +64,12 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     );
 
     try {
-      final orderData = await planController.purchasePlan(
-        packageName: plan.name ?? 'Plan',
-        amount: plan.amount ?? 0.0,
+      await planController.purchasePlan(
+        packageName: plan.name,
+        amount: plan.amount,
       );
 
       Get.back();
-
-      if (orderData == null) {
-        SnackbarService.showError(
-          'Failed to create renewal order. Please try again.',
-        );
-        return;
-      }
 
       SnackbarService.showSuccess(
         'Renewal order created successfully. You can now proceed with payment.',
@@ -88,8 +81,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-
-      SnackbarService.showError('Failed to initiate renewal: ${e.toString()}');
     }
   }
 
@@ -154,7 +145,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         }
 
         final daysRemaining = planController.daysRemaining;
-        final validityText = (plan.validityDays ?? 0) > 0
+        final validityText = plan.validityDays != null && plan.validityDays! > 0
             ? '${plan.validityDays} days'
             : 'N/A';
 
@@ -208,11 +199,11 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   ),
                 SizedBox(height: 12),
                 CurrentPlanCard(
-                  planName: (plan.name?.isNotEmpty ?? false) ? plan.name! : 'Premium Plan',
-                  description: (plan.description?.isNotEmpty ?? false)
+                  planName: plan.name.isNotEmpty ? plan.name : 'Premium Plan',
+                  description: plan.description?.isNotEmpty == true
                       ? plan.description!
                       : 'Full access to all reports',
-                  price: '₹${(plan.amount ?? 0.0).toStringAsFixed(2)}/$validityText',
+                  price: '₹${plan.amount.toStringAsFixed(2)}/$validityText',
                   validity: validityText,
                   expiryDate: expiryDateText,
                 ),
@@ -233,8 +224,8 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                         ),
                       ),
                       Text(
-                        (plan.amount ?? 0.0) > 0
-                            ? '₹${(plan.amount ?? 0.0).toStringAsFixed(2)}'
+                        plan.amount > 0
+                            ? '₹${plan.amount.toStringAsFixed(2)}'
                             : 'Free',
                         style: TextStyle(
                           fontFamily: 'Poppins',

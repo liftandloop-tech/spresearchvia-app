@@ -28,7 +28,6 @@ class AppConfig {
     return _defaultFlags[flag] ?? false;
   }
 
-  // API Configuration
   static String get baseUrl {
     switch (_mode) {
       case AppMode.development:
@@ -38,14 +37,11 @@ class AppConfig {
     }
   }
 
-  // Security Configuration
   static bool get useSecureStorage => isProduction;
   static Duration get tokenRefreshThreshold => const Duration(minutes: 5);
 
-  // Performance Configuration
   static int get maxRetryAttempts => 3;
   static Duration get networkTimeout => const Duration(seconds: 30);
 
-  // UI Configuration
   static int get OTPSize => 4;
 }

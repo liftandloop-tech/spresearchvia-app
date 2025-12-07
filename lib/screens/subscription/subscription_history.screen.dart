@@ -19,7 +19,6 @@ class SubscriptionHistoryController extends GetxController {
     super.onInit();
     loadSubscriptionHistory();
 
-    // Use worker to automatically filter when filter changes
     ever(selectedFilter, (_) => _applyFilter());
   }
 
@@ -29,21 +28,23 @@ class SubscriptionHistoryController extends GetxController {
     try {
       final plans = await planController.fetchSubscriptionHistory();
       final loadedSubscriptions = plans
-          .map((plan) => SubscriptionHistory(
-                id: plan.id,
-                paymentDate: plan.startDate.toString().split(' ')[0],
-                amountPaid: '₹${(plan.validity * 10).toString()}',
-                validityDays: '${plan.validity} days',
-                expiryDate: plan.endDate.toString().split(' ')[0],
-                headerStatus: plan.isActive
-                    ? SubscriptionStatus.active
-                    : plan.isExpired
-                        ? SubscriptionStatus.expired
-                        : SubscriptionStatus.pending,
-                footerStatus: plan.isFailed
-                    ? SubscriptionStatus.failed
-                    : SubscriptionStatus.success,
-              ))
+          .map(
+            (plan) => SubscriptionHistory(
+              id: plan.id,
+              paymentDate: plan.startDate.toString().split(' ')[0],
+              amountPaid: '₹${(plan.validity * 10).toString()}',
+              validityDays: '${plan.validity} days',
+              expiryDate: plan.endDate.toString().split(' ')[0],
+              headerStatus: plan.isActive
+                  ? SubscriptionStatus.active
+                  : plan.isExpired
+                  ? SubscriptionStatus.expired
+                  : SubscriptionStatus.pending,
+              footerStatus: plan.isFailed
+                  ? SubscriptionStatus.failed
+                  : SubscriptionStatus.success,
+            ),
+          )
           .toList();
 
       _allSubscriptions.value = loadedSubscriptions;
@@ -95,11 +96,12 @@ class SubscriptionHistoryController extends GetxController {
 class SubscriptionHistoryScreen extends StatelessWidget {
   const SubscriptionHistoryScreen({super.key});
 
-  void _showReceiptDialog(BuildContext context, SubscriptionHistory subscription) {
+  void _showReceiptDialog(
+    BuildContext context,
+    SubscriptionHistory subscription,
+  ) {
     Get.toNamed('/receipt');
   }
-
-
 
   @override
   Widget build(BuildContext context) {

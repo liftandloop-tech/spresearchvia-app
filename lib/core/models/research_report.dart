@@ -10,8 +10,7 @@ class ResearchReport {
   final DateTime? createdAt;
   final DateTime? updatedAt;
   bool isDownloaded;
-  
-  // Additional properties for UI compatibility
+
   final String? publishedDate;
   final String? executiveSummary;
   final List<String>? keyHighlights;
@@ -54,8 +53,12 @@ class ResearchReport {
       reportOriginalName: json['reportOriginalName']?.toString() ?? '',
       reportName: json['reportName']?.toString() ?? '',
       publishedStatus: json['publishedStatus']?.toString() ?? 'draft',
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      createdAt: json['createdAt'] != null
+          ? DateTime.tryParse(json['createdAt'])
+          : null,
+      updatedAt: json['updatedAt'] != null
+          ? DateTime.tryParse(json['updatedAt'])
+          : null,
       publishedDate: json['createdAt']?.toString().split('T')[0],
       executiveSummary: json['description']?.toString(),
       keyHighlights: ['Key insights from ${json['title'] ?? 'report'}'],

@@ -1,5 +1,5 @@
-name: spresearchvia2
-description: "A new Flutter project."
+name: SPResearchvia
+description: "SPResearchvia"
 
 publish_to: "none"
 
@@ -27,6 +27,13 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/icons/sp_app_icon.png"
+  min_sdk_android: 21
 
 flutter:
   uses-material-design: true

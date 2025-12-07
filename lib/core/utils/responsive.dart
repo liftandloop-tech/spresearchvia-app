@@ -14,7 +14,6 @@ class Responsive {
     _orientation = _mediaQuery.orientation;
   }
 
-  // Screen dimensions
   double get width => _screenWidth;
   double get height => _screenHeight;
   double get aspectRatio => _screenWidth / _screenHeight;
@@ -22,7 +21,6 @@ class Responsive {
   bool get isPortrait => _orientation == Orientation.portrait;
   bool get isLandscape => _orientation == Orientation.landscape;
 
-  // Device type detection
   bool get isMobile => _screenWidth < 600;
   bool get isTablet => _screenWidth >= 600 && _screenWidth < 900;
   bool get isDesktop => _screenWidth >= 900;
@@ -30,18 +28,15 @@ class Responsive {
   bool get isMediumPhone => _screenWidth >= 360 && _screenWidth < 400;
   bool get isLargePhone => _screenWidth >= 400 && _screenWidth < 600;
 
-  // Responsive sizing
   double wp(double percentage) => _screenWidth * percentage / 100;
   double hp(double percentage) => _screenHeight * percentage / 100;
 
-  // Responsive font sizing
   double sp(double size) {
-    final baseWidth = 375.0; // iPhone 11 Pro width as base
+    final baseWidth = 375.0;
     final scale = _screenWidth / baseWidth;
     return size * scale.clamp(0.8, 1.3);
   }
 
-  // Responsive spacing
   double spacing(double base) {
     if (isSmallPhone) return base * 0.8;
     if (isTablet) return base * 1.2;
@@ -49,7 +44,6 @@ class Responsive {
     return base;
   }
 
-  // Responsive padding
   EdgeInsets padding({
     double? all,
     double? horizontal,
@@ -67,26 +61,20 @@ class Responsive {
     );
   }
 
-  // Responsive border radius
   double radius(double base) => spacing(base);
 
-  // Safe area insets
   EdgeInsets get safeAreaPadding => _mediaQuery.padding;
   double get topSafeArea => _mediaQuery.padding.top;
   double get bottomSafeArea => _mediaQuery.padding.bottom;
 
-  // Text scale factor
   double get textScaleFactor =>
       _mediaQuery.textScaler.scale(1.0).clamp(0.8, 1.3);
 
-  // Pixel density
   double get pixelRatio => _mediaQuery.devicePixelRatio;
 
-  // Static helper
   static Responsive of(BuildContext context) => Responsive(context);
 }
 
-// Extension for easy access
 extension ResponsiveExtension on BuildContext {
   Responsive get responsive => Responsive(this);
 }

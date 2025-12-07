@@ -3,18 +3,18 @@ import '../core/config/api.config.dart';
 import '../core/models/plan.dart';
 import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
-import '../services/storage.service.dart';
+import '../services/secure_storage.service.dart';
 import '../services/snackbar.service.dart';
 
 class PlanPurchaseController extends GetxController {
   final ApiClient _apiClient = ApiClient();
-  final StorageService _storage = StorageService();
+  final SecureStorageService _storage = SecureStorageService();
 
   final isLoading = false.obs;
   final currentPlan = Rxn<Plan>();
   final expiryRemindersEnabled = true.obs;
 
-  String? get userId => _storage.getUserId();
+  Future<String?> get userId => _storage.getUserId();
 
   @override
   void onInit() {
@@ -29,10 +29,9 @@ class PlanPurchaseController extends GetxController {
     try {
       isLoading.value = true;
 
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) {
-        SnackbarService.showWarning('User not logged in');
-        return null;
+        throw Exception('User not logged in');
       }
 
       final requestData = {'packageName': packageName, 'amount': amount};
@@ -58,14 +57,18 @@ class PlanPurchaseController extends GetxController {
           };
         }
 
-        return orderData as Map<String, dynamic>?;
+        if (orderData is Map<String, dynamic>) {
+          return orderData;
+        }
+
+        throw Exception('Invalid response format from server');
       }
 
-      return null;
+      throw Exception('Server returned status code: ${response.statusCode}');
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
-      return null;
+      rethrow;
     } finally {
       isLoading.value = false;
     }
@@ -118,7 +121,7 @@ class PlanPurchaseController extends GetxController {
 
   Future<void> fetchUserPlan() async {
     try {
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) return;
 
       final response = await _apiClient.get(ApiConfig.getUserPlan(uid));
@@ -141,7 +144,7 @@ class PlanPurchaseController extends GetxController {
 
   Future<bool> toggleExpiryReminders(bool enabled) async {
     try {
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;
@@ -191,7 +194,7 @@ class PlanPurchaseController extends GetxController {
     int pageSize = 20,
   }) async {
     try {
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) return [];
 
       final response = await _apiClient.get(

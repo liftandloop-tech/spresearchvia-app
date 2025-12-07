@@ -1,6 +1,7 @@
 import 'package:get/get.dart';
 import '../core/config/api.config.dart';
 import '../core/models/user.dart';
+import '../core/routes/app_routes.dart';
 import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
 import '../services/secure_storage.service.dart';
@@ -114,15 +115,14 @@ class AuthController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
         final message = data['message'] ?? '';
-        
+
         if (message == 'user already exist') {
           SnackbarService.showError('User already exists');
           return false;
         }
-        
+
         final userData = data['data']?['user'];
         if (userData != null) {
-          // Don't save to storage yet - only save phone for OTP verification
           final phone = userData['userObject']?['APP_MOB_NO'];
           if (phone != null) {
             await _storage.saveUserData({'phone': phone, 'tempUser': userData});
@@ -130,7 +130,7 @@ class AuthController extends GetxController {
           SnackbarService.showSuccess('OTP sent to your phone');
           return true;
         }
-        
+
         SnackbarService.showError('Failed to create user');
         return false;
       }
@@ -138,13 +138,19 @@ class AuthController extends GetxController {
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       final msg = error.message.toLowerCase();
-      
+
       if (msg.contains('invalid pan') || msg.contains('invalid dob')) {
-        SnackbarService.showError('Invalid PAN or Date of Birth. Please check and try again.');
+        SnackbarService.showError(
+          'Invalid PAN or Date of Birth. Please check and try again.',
+        );
       } else if (msg.contains('no phone number')) {
-        SnackbarService.showError('No phone number found in KYC records. Please contact support.');
+        SnackbarService.showError(
+          'No phone number found in KYC records. Please contact support.',
+        );
       } else if (error.statusCode == 403 || msg.contains('token')) {
-        SnackbarService.showError('KYC service temporarily unavailable. Please try again later.');
+        SnackbarService.showError(
+          'KYC service temporarily unavailable. Please try again later.',
+        );
       } else {
         SnackbarService.showError(error.message);
       }
@@ -180,23 +186,24 @@ class AuthController extends GetxController {
         final token = data['data']?['token'];
         final userData = data['data']?['user'];
 
-        if (token != null) {
-          await _storage.saveAuthToken(token);
-        }
-        if (userData != null) {
+        if (token != null && userData != null) {
           final user = User.fromJson(userData);
           currentUser.value = user;
+
+          await _storage.saveAuthToken(token);
           await _storage.saveUserId(user.id);
           await _storage.saveUserData(userData);
           await _storage.setLoggedIn(true);
 
           if (Get.isRegistered<UserController>()) {
-            Get.find<UserController>().currentUser.value = user;
+            final userController = Get.find<UserController>();
+            userController.currentUser.value = user;
+
+            userController.loadUserData();
           } else {
             Get.put(UserController()).currentUser.value = user;
           }
         }
-        SnackbarService.showSuccess('Login successful!');
         return true;
       }
       return false;
@@ -206,6 +213,34 @@ class AuthController extends GetxController {
       return false;
     } finally {
       isLoading.value = false;
+    }
+  }
+
+  Future<bool> hasActiveSubscription() async {
+    try {
+      final userId = await _storage.getUserId();
+      if (userId == null) return false;
+
+      final response = await _apiClient.get(ApiConfig.getUserPlan(userId));
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final planData = data['data']?['plan'];
+
+        if (planData != null) {
+          final isActive = planData['isActive'] ?? false;
+          final endDate = planData['endDate'];
+
+          if (isActive && endDate != null) {
+            final expiry = DateTime.tryParse(endDate.toString());
+            if (expiry != null && expiry.isAfter(DateTime.now())) {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
+    } catch (e) {
+      return false;
     }
   }
 
@@ -233,7 +268,7 @@ class AuthController extends GetxController {
           final user = User.fromJson(userData);
           currentUser.value = user;
           await _storage.saveUserId(user.id);
-          // Clear temp data and save actual user data
+
           await _storage.clearAuthData();
           await _storage.saveAuthToken(token!);
           await _storage.saveUserData(userData);
@@ -270,11 +305,11 @@ class AuthController extends GetxController {
         Get.find<UserController>().currentUser.value = null;
       }
       SnackbarService.showSuccess('Logged out successfully');
-      Get.offAllNamed('/get-started');
+      Get.offAllNamed(AppRoutes.getStarted);
     } catch (e) {
       await _storage.clearAuthData();
       currentUser.value = null;
-      Get.offAllNamed('/get-started');
+      Get.offAllNamed(AppRoutes.getStarted);
     } finally {
       isLoading.value = false;
     }

@@ -47,24 +47,30 @@ class Validators {
     if (value == null || value.trim().isEmpty) {
       return 'PAN number is required';
     }
-    
+
     final pan = value.trim().toUpperCase();
-    
+
     if (pan.length != 10) {
       return 'PAN must be exactly 10 characters';
     }
-    
+
     if (!_panRegex.hasMatch(pan)) {
       return 'Invalid PAN format. Use: ABCDE1234F (5 letters, 4 digits, 1 letter)';
     }
-    
-    // Additional validation: 4th character must be 'P' for individual
-    if (pan[3] != 'P' && pan[3] != 'C' && pan[3] != 'H' && pan[3] != 'F' && 
-        pan[3] != 'A' && pan[3] != 'T' && pan[3] != 'B' && pan[3] != 'L' && 
-        pan[3] != 'J' && pan[3] != 'G') {
+
+    if (pan[3] != 'P' &&
+        pan[3] != 'C' &&
+        pan[3] != 'H' &&
+        pan[3] != 'F' &&
+        pan[3] != 'A' &&
+        pan[3] != 'T' &&
+        pan[3] != 'B' &&
+        pan[3] != 'L' &&
+        pan[3] != 'J' &&
+        pan[3] != 'G') {
       return 'Invalid PAN: 4th character must be a valid entity type';
     }
-    
+
     return null;
   }
 
@@ -182,7 +188,6 @@ class Validators {
   }
 
   static String normalizeDob(String dob) {
-    // Accept DD-MM-YYYY or DD/MM/YYYY and return DD-MM-YYYY
     return dob.trim().replaceAll('/', '-');
   }
 

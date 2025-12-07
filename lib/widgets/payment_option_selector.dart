@@ -10,16 +10,16 @@ class PaymentOptionSelector extends StatelessWidget {
   });
 
   final PaymentMethod? selectedMethod;
-  final Function(PaymentMethod) onChoose;
+  final void Function(PaymentMethod) onChoose;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
+        const Text(
           'Payment Method',
-          style: const TextStyle(
+          style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
             color: AppTheme.primaryBlue,
@@ -36,13 +36,12 @@ class PaymentOptionSelector extends StatelessWidget {
               onTap: () => onChoose(option.method),
             ),
           );
-        }).toList(),
+        }),
       ],
     );
   }
 }
 
-/// Individual payment method tile
 class PaymentMethodTile extends StatelessWidget {
   const PaymentMethodTile({
     super.key,

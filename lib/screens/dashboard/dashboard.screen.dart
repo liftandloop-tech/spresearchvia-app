@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:SPResearchvia/core/theme/app_theme.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_strings.dart';
+import '../../core/routes/app_routes.dart';
 import '../../controllers/user.controller.dart';
 import '../../controllers/report.controller.dart';
 import 'widgets/quick_action_tile.dart';
@@ -45,7 +46,7 @@ class DashboardController extends GetxController {
   }
 
   void renewNow(BuildContext context) {
-    Get.toNamed('/quick-renewal');
+    Get.toNamed(AppRoutes.quickRenewal);
   }
 }
 
@@ -62,12 +63,17 @@ class DashboardScreen extends StatelessWidget {
         child: Stack(
           children: [
             Padding(
-              padding: responsive.padding(horizontal: AppDimensions.paddingMedium, vertical: AppDimensions.paddingSmall),
+              padding: responsive.padding(
+                horizontal: AppDimensions.paddingMedium,
+                vertical: AppDimensions.paddingSmall,
+              ),
               child: SingleChildScrollView(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing10),
+                    ),
                     SizedBox(
                       height: responsive.spacing(AppDimensions.logoHeight),
                       width: double.maxFinite,
@@ -111,11 +117,17 @@ class DashboardScreen extends StatelessWidget {
                             ),
                           ),
                           Container(
-                            width: responsive.spacing(AppDimensions.containerSmall),
-                            height: responsive.spacing(AppDimensions.containerSmall),
+                            width: responsive.spacing(
+                              AppDimensions.containerSmall,
+                            ),
+                            height: responsive.spacing(
+                              AppDimensions.containerSmall,
+                            ),
                             decoration: BoxDecoration(
                               color: AppTheme.primaryBlueDark,
-                              borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusLarge)),
+                              borderRadius: BorderRadius.circular(
+                                responsive.radius(AppDimensions.radiusLarge),
+                              ),
                             ),
                             child: Icon(
                               Icons.notifications,
@@ -126,9 +138,13 @@ class DashboardScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing10),
+                    ),
                     const PremiumPlanCard(),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing10),
+                    ),
                     Text(
                       AppStrings.quickActions,
                       textAlign: TextAlign.left,
@@ -139,23 +155,29 @@ class DashboardScreen extends StatelessWidget {
                         color: AppTheme.primaryBlue,
                       ),
                     ),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing8)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing8),
+                    ),
                     QuickActionTile(
                       title: AppStrings.subscriptionHistory,
                       icon: Icons.refresh,
                       onTap: () {
-                        Get.toNamed('/subscription-history');
+                        Get.toNamed(AppRoutes.subscriptionHistory);
                       },
                     ),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing8)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing8),
+                    ),
                     QuickActionTile(
                       title: AppStrings.quickRenewal,
                       icon: Icons.credit_card,
                       onTap: () {
-                        Get.toNamed('/quick-renewal');
+                        Get.toNamed(AppRoutes.quickRenewal);
                       },
                     ),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing20),
+                    ),
                     Text(
                       AppStrings.thisMonth,
                       style: TextStyle(
@@ -165,7 +187,9 @@ class DashboardScreen extends StatelessWidget {
                         color: AppTheme.primaryBlue,
                       ),
                     ),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing10)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing10),
+                    ),
                     Row(
                       children: [
                         Expanded(
@@ -175,13 +199,19 @@ class DashboardScreen extends StatelessWidget {
                               final reportCount =
                                   reportController.reports.length;
                               return Container(
-                                height: responsive.spacing(AppDimensions.containerLarge),
+                                height: responsive.spacing(
+                                  AppDimensions.containerLarge,
+                                ),
                                 decoration: BoxDecoration(
                                   border: Border.all(
                                     width: AppDimensions.borderThin,
                                     color: AppTheme.borderGrey,
                                   ),
-                                  borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+                                  borderRadius: BorderRadius.circular(
+                                    responsive.radius(
+                                      AppDimensions.radiusMedium,
+                                    ),
+                                  ),
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -197,7 +227,9 @@ class DashboardScreen extends StatelessWidget {
                                       ),
                                     ),
                                     Padding(
-                                      padding: responsive.padding(horizontal: AppDimensions.spacing8),
+                                      padding: responsive.padding(
+                                        horizontal: AppDimensions.spacing8,
+                                      ),
                                       child: Text(
                                         AppStrings.reportsAvailable,
                                         overflow: TextOverflow.clip,
@@ -215,16 +247,22 @@ class DashboardScreen extends StatelessWidget {
                             },
                           ),
                         ),
-                        SizedBox(width: responsive.spacing(AppDimensions.spacing10)),
+                        SizedBox(
+                          width: responsive.spacing(AppDimensions.spacing10),
+                        ),
                         Expanded(
                           child: Container(
-                            height: responsive.spacing(AppDimensions.containerLarge),
+                            height: responsive.spacing(
+                              AppDimensions.containerLarge,
+                            ),
                             decoration: BoxDecoration(
                               border: Border.all(
                                 width: AppDimensions.borderThin,
                                 color: AppTheme.borderGrey,
                               ),
-                              borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+                              borderRadius: BorderRadius.circular(
+                                responsive.radius(AppDimensions.radiusMedium),
+                              ),
                             ),
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
@@ -240,7 +278,9 @@ class DashboardScreen extends StatelessWidget {
                                   ),
                                 ),
                                 Padding(
-                                  padding: responsive.padding(horizontal: AppDimensions.spacing8),
+                                  padding: responsive.padding(
+                                    horizontal: AppDimensions.spacing8,
+                                  ),
                                   child: Text(
                                     AppStrings.researchHours,
                                     overflow: TextOverflow.clip,
@@ -258,7 +298,9 @@ class DashboardScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
+                    SizedBox(
+                      height: responsive.spacing(AppDimensions.spacing20),
+                    ),
                   ],
                 ),
               ),

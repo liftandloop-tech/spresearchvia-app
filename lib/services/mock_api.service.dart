@@ -18,7 +18,10 @@ class MockApiService {
           publishedStatus: 'published',
           publishedDate: '2024-01-15',
           executiveSummary: 'Key insights into market trends and opportunities',
-          keyHighlights: ['Growth in tech sector', 'Emerging markets expansion'],
+          keyHighlights: [
+            'Growth in tech sector',
+            'Emerging markets expansion',
+          ],
           pages: 25,
           fileSize: '2.5 MB',
           researchTeam: 'SP Research Team',
@@ -31,7 +34,6 @@ class MockApiService {
   }
 
   static Future<User?> getCurrentUser() async {
-    // Always return null in production - use real API
     return null;
   }
 }

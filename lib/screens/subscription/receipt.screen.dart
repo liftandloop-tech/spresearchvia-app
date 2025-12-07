@@ -79,7 +79,6 @@ class ReceiptScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Header Section
               Container(
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(
@@ -190,7 +189,6 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              // Invoice Title
               Padding(
                 padding: EdgeInsets.all(20),
                 child: Text(
@@ -204,7 +202,6 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              // Invoice Details
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
@@ -325,7 +322,6 @@ class ReceiptScreen extends StatelessWidget {
 
               SizedBox(height: 24),
 
-              // Client Information
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 padding: EdgeInsets.all(16),
@@ -369,7 +365,6 @@ class ReceiptScreen extends StatelessWidget {
 
               SizedBox(height: 24),
 
-              // Service Details
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 padding: EdgeInsets.all(16),
@@ -409,7 +404,6 @@ class ReceiptScreen extends StatelessWidget {
 
               SizedBox(height: 24),
 
-              // Pricing Details
               Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
@@ -501,7 +495,6 @@ class ReceiptScreen extends StatelessWidget {
 
               SizedBox(height: 24),
 
-              // Additional Information
               Container(
                 margin: EdgeInsets.symmetric(horizontal: 20),
                 padding: EdgeInsets.all(16),
@@ -552,7 +545,6 @@ class ReceiptScreen extends StatelessWidget {
 
               SizedBox(height: 24),
 
-              // Footer
               Container(
                 padding: EdgeInsets.all(20),
                 decoration: BoxDecoration(

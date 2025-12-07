@@ -77,24 +77,19 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     );
 
     try {
-      final orderData = await planController.purchasePlan(
-        packageName: plan.name ?? 'Renewal',
-        amount: plan.amount ?? 0.0,
+      await planController.purchasePlan(
+        packageName: plan.name,
+        amount: plan.amount,
       );
 
       Get.back();
 
-      if (orderData != null) {
-        SnackbarService.showSuccess('Redirecting to payment gateway...');
-        Get.toNamed('/registration');
-      } else {
-        SnackbarService.showError('Failed to create payment order');
-      }
+      SnackbarService.showSuccess('Redirecting to payment gateway...');
+      Get.toNamed('/registration');
     } catch (e) {
       if (Get.isDialogOpen ?? false) {
         Get.back();
       }
-      SnackbarService.showError('Failed to initiate renewal: ${e.toString()}');
     }
   }
 
@@ -161,16 +156,15 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         final daysRemaining = planController.daysRemaining;
         final startDateText = DateFormatter.formatDate(plan.purchaseDate);
         final expiryDateText = DateFormatter.formatDate(plan.expiryDate);
-        final totalPaid = plan.amount ?? 0.0;
-        final perDayCost = (plan.validityDays ?? 0) > 0
-            ? (totalPaid / (plan.validityDays ?? 1)).round()
+        final totalPaid = plan.amount;
+        final validityDays = plan.validityDays ?? 1;
+        final perDayCost = validityDays > 0
+            ? (totalPaid / validityDays).round()
             : 0;
-        final completionPercentage = (plan.validityDays ?? 0) > 0
-            ? (((plan.validityDays ?? 0) - daysRemaining) /
-                      (plan.validityDays ?? 1) *
-                      100)
+        final completionPercentage = validityDays > 0
+            ? (((validityDays - daysRemaining) / validityDays * 100)
                   .clamp(0, 100)
-                  .toInt()
+                  .toInt())
             : 0;
         final benefits = (plan.features?.isNotEmpty ?? false)
             ? plan.features!

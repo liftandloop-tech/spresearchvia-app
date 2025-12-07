@@ -12,19 +12,19 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Initialize core services and controllers
     Get.put(SecureStorageService(), permanent: true);
     Get.put(AuthController(), permanent: true);
     Get.put(UserController(), permanent: true);
-    
-    // Log current app mode
+
     if (AppConfig.isDevelopment) {
       print('🔧 Running in DEVELOPMENT mode');
-      print('🔧 Payment Mock: ${AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled)}');
+      print(
+        '🔧 Payment Mock: ${AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled)}',
+      );
     }
-    
+
     return GetMaterialApp(
-      title: "spresearchvia",
+      title: "SPResearchvia",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: AppTheme.backgroundWhite,

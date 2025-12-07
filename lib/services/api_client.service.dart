@@ -1,7 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:get/get.dart' as getx;
 import '../core/config/api.config.dart';
-import 'storage.service.dart';
+import 'secure_storage.service.dart';
 
 class ApiClient {
   static final ApiClient _instance = ApiClient._internal();
@@ -32,12 +32,15 @@ class ApiClient {
   }
 
   late Dio _dio;
-  final _storage = StorageService();
+  final _storage = SecureStorageService();
 
   Dio get dio => _dio;
 
-  void _onRequest(RequestOptions options, RequestInterceptorHandler handler) {
-    final token = _storage.getAuthToken();
+  void _onRequest(
+    RequestOptions options,
+    RequestInterceptorHandler handler,
+  ) async {
+    final token = await _storage.getAuthToken();
     if (token != null && token.isNotEmpty) {
       options.headers['Authorization'] = token;
     }
@@ -53,9 +56,9 @@ class ApiClient {
     handler.next(response);
   }
 
-  void _onError(DioException error, ErrorInterceptorHandler handler) {
+  void _onError(DioException error, ErrorInterceptorHandler handler) async {
     if (error.response?.statusCode == 401) {
-      _storage.clearAuthData();
+      await _storage.clearAuthData();
 
       final currentRoute = getx.Get.currentRoute;
       if (currentRoute != '/login' &&

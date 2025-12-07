@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:SPResearchvia/core/theme/app_theme.dart';
 import '../../widgets/button.dart';
 import 'digio_connect_screen.dart';
 

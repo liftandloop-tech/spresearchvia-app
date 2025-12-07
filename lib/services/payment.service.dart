@@ -9,7 +9,7 @@ abstract class PaymentServiceInterface {
     required String packageName,
     required double amount,
   });
-  
+
   Future<bool> verifyPayment({
     required String paymentId,
     required String razorpayOrderId,
@@ -26,8 +26,9 @@ class PaymentService implements PaymentServiceInterface {
   final ApiClient _apiClient = ApiClient();
   final MockPaymentService _mockService = MockPaymentService();
 
-  bool get _useMockService => 
-      AppConfig.isDevelopment || AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled);
+  bool get _useMockService =>
+      AppConfig.isDevelopment ||
+      AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled);
 
   @override
   Future<Map<String, dynamic>?> createOrder({
@@ -36,15 +37,15 @@ class PaymentService implements PaymentServiceInterface {
     required double amount,
   }) async {
     if (_useMockService) {
-      // Use mock service for development
       final result = await _mockService.processPayment(
         amount: amount,
         paymentMethodId: 'mock_payment',
         planId: packageName,
       );
-      
+
       return {
-        'razorpayOrderId': 'mock_order_${DateTime.now().millisecondsSinceEpoch}',
+        'razorpayOrderId':
+            'mock_order_${DateTime.now().millisecondsSinceEpoch}',
         'paymentId': 'mock_payment_${DateTime.now().millisecondsSinceEpoch}',
         'amount': amount,
         'currency': 'INR',
@@ -52,14 +53,10 @@ class PaymentService implements PaymentServiceInterface {
       };
     }
 
-    // Use real backend service for production
     try {
       final response = await _apiClient.post(
         ApiConfig.purchasePlan(userId),
-        data: {
-          'packageName': packageName,
-          'amount': amount,
-        },
+        data: {'packageName': packageName, 'amount': amount},
       );
 
       if (response.statusCode == 200) {
@@ -86,12 +83,10 @@ class PaymentService implements PaymentServiceInterface {
     required String razorpaySignature,
   }) async {
     if (_useMockService) {
-      // Mock verification always succeeds in development
       await Future.delayed(const Duration(milliseconds: 500));
       return true;
     }
 
-    // Use real backend verification for production
     try {
       final response = await _apiClient.post(
         ApiConfig.verifyPayment,

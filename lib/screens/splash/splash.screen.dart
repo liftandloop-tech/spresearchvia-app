@@ -6,7 +6,7 @@ import 'widgets/animated_loading_dots.dart';
 import 'widgets/animated_loading_bar.dart';
 import 'widgets/info_item.dart';
 import '../../controllers/auth.controller.dart';
-import '../../services/storage.service.dart';
+import '../../services/secure_storage.service.dart';
 import '../../core/models/user.dart';
 
 class SplashScreen extends StatefulWidget {
@@ -44,22 +44,26 @@ class _SplashScreenState extends State<SplashScreen>
         authController = Get.put(AuthController());
       }
 
-      final storage = StorageService();
+      final storage = SecureStorageService();
       final isLoggedIn = storage.isLoggedIn();
-      final hasToken = storage.hasAuthToken();
-      final userData = storage.getUserData();
+      final hasToken = await storage.hasAuthToken();
+      final userData = await storage.getUserData();
 
-      // Check if user is in signup flow (has tempUser)
       if (userData != null && userData['tempUser'] != null) {
         Get.offAllNamed(AppRoutes.getStarted);
         return;
       }
 
-      // Check if fully logged in
       if (isLoggedIn && hasToken && userData != null) {
         try {
           authController.currentUser.value = User.fromJson(userData);
-          Get.offAllNamed(AppRoutes.tabs);
+
+          final hasSubscription = await authController.hasActiveSubscription();
+          if (hasSubscription) {
+            Get.offAllNamed(AppRoutes.tabs);
+          } else {
+            Get.offAllNamed(AppRoutes.registrationScreen);
+          }
         } catch (e) {
           print('Error parsing user data: $e');
           await storage.clearAuthData();

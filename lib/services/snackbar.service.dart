@@ -5,8 +5,6 @@ import '../core/utils/error_message_handler.dart';
 
 enum SnackbarType { success, error, warning, info }
 
-///
-
 abstract class SnackbarService {
   static OverlayEntry? _currentSnackbar;
 

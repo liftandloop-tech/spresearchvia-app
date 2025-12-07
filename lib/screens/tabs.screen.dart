@@ -12,7 +12,6 @@ import 'subscription/choose_plan.screen.dart';
 class TabsController extends GetxController {
   final RxInt currentIndex = 0.obs;
 
-  // Cache screens to avoid rebuilding
   late final List<Widget> screens;
 
   @override
@@ -40,7 +39,6 @@ class TabsScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(TabsController());
 
-    // Initialize required controllers
     if (!Get.isRegistered<ReportController>()) {
       Get.put(ReportController());
     }
@@ -48,9 +46,11 @@ class TabsScreen extends StatelessWidget {
       Get.put(PlanPurchaseController());
     }
 
-    // Set initial index from Get.arguments
-    final int initialIndex = Get.arguments ?? 0;
-    controller.currentIndex.value = initialIndex;
+    if (Get.arguments is int) {
+      controller.currentIndex.value = Get.arguments;
+    } else {
+      controller.currentIndex.value = 0;
+    }
 
     return Obx(
       () => Scaffold(

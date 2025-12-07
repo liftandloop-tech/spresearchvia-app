@@ -1,132 +1,89 @@
 class Plan {
   final String id;
-  final String userId;
-  final String packageName;
-  final int validity;
-  final DateTime startDate;
-  final DateTime endDate;
-  final String status;
-  final bool expiryReminder;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
-  
-  // Additional properties for UI compatibility
-  final String? name;
+  final String name;
+  final double amount;
+  final String validity;
+  final double cgstPercent;
+  final double sgstPercent;
   final String? description;
-  final double? amount;
   final int? validityDays;
   final DateTime? expiryDate;
+  final DateTime? startDate;
+  final DateTime? endDate;
   final DateTime? purchaseDate;
   final List<String>? features;
+  final bool isActive;
+  final bool isExpired;
+  final bool isFailed;
 
   Plan({
     required this.id,
-    required this.userId,
-    required this.packageName,
+    required this.name,
+    required this.amount,
     required this.validity,
-    required this.startDate,
-    required this.endDate,
-    required this.status,
-    this.expiryReminder = false,
-    this.createdAt,
-    this.updatedAt,
-    this.name,
+    this.cgstPercent = 9.0,
+    this.sgstPercent = 9.0,
     this.description,
-    this.amount,
     this.validityDays,
     this.expiryDate,
+    this.startDate,
+    this.endDate,
     this.purchaseDate,
     this.features,
+    this.isActive = false,
+    this.isExpired = false,
+    this.isFailed = false,
   });
 
-  bool get isActive => status == 'active';
-  bool get isPending => status == 'pending';
-  bool get isExpired => status == 'expired';
-  bool get isFailed => status == 'failed';
-
-  int get daysRemaining {
-    final now = DateTime.now();
-    return endDate.difference(now).inDays;
-  }
+  double get cgstAmount => (amount * cgstPercent) / 100;
+  double get sgstAmount => (amount * sgstPercent) / 100;
+  double get totalAmount => amount + cgstAmount + sgstAmount;
 
   factory Plan.fromJson(Map<String, dynamic> json) {
     return Plan(
-      id: json['_id']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? '',
-      packageName: json['packageName']?.toString() ?? '',
-      validity: json['validity'] ?? 0,
-      startDate: DateTime.tryParse(json['startDate']?.toString() ?? '') ?? DateTime.now(),
-      endDate: DateTime.tryParse(json['endDate']?.toString() ?? '') ?? DateTime.now(),
-      status: json['status']?.toString() ?? 'pending',
-      expiryReminder: json['expiryReminder'] ?? false,
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
-      name: json['packageName']?.toString(),
-      description: 'Plan for ${json['packageName'] ?? 'subscription'}',
-      amount: (json['validity'] ?? 0) * 10.0, // ₹10 per day
-      validityDays: json['validity'] ?? 0,
-      expiryDate: DateTime.tryParse(json['endDate']?.toString() ?? ''),
-      purchaseDate: DateTime.tryParse(json['startDate']?.toString() ?? ''),
-      features: ['Access to premium content', 'Priority support'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      '_id': id,
-      'userId': userId,
-      'packageName': packageName,
-      'validity': validity,
-      'startDate': startDate.toIso8601String(),
-      'endDate': endDate.toIso8601String(),
-      'status': status,
-      'expiryReminder': expiryReminder,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
-    };
-  }
-}
-
-class Payment {
-  final String id;
-  final String userId;
-  final String? packageId;
-  final String? razorpayOrderId;
-  final String? razorpayPaymentId;
-  final String? razorpaySignature;
-  final String? razorpayReceipt;
-  final double amount;
-  final String? razorpayCurrency;
-  final String status;
-  final DateTime? createdAt;
-
-  Payment({
-    required this.id,
-    required this.userId,
-    this.packageId,
-    this.razorpayOrderId,
-    this.razorpayPaymentId,
-    this.razorpaySignature,
-    this.razorpayReceipt,
-    required this.amount,
-    this.razorpayCurrency,
-    required this.status,
-    this.createdAt,
-  });
-
-  factory Payment.fromJson(Map<String, dynamic> json) {
-    return Payment(
-      id: json['_id']?.toString() ?? '',
-      userId: json['userId']?.toString() ?? '',
-      packageId: json['packageId']?.toString(),
-      razorpayOrderId: json['razorpayOrderId']?.toString(),
-      razorpayPaymentId: json['razorpayPaymentId']?.toString(),
-      razorpaySignature: json['razorpaySignature']?.toString(),
-      razorpayReceipt: json['razorpayReceipt']?.toString(),
+      id: json['id'] ?? json['_id'] ?? '',
+      name: json['name'] ?? json['packageName'] ?? '',
       amount: (json['amount'] ?? 0).toDouble(),
-      razorpayCurrency: json['razorpayCurrency']?.toString(),
-      status: json['status']?.toString() ?? 'created',
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
+      validity: json['validity'] ?? '',
+      cgstPercent: (json['cgstPercent'] ?? 9.0).toDouble(),
+      sgstPercent: (json['sgstPercent'] ?? 9.0).toDouble(),
+      description: json['description'],
+      validityDays: json['validityDays'],
+      expiryDate: json['expiryDate'] != null
+          ? DateTime.tryParse(json['expiryDate'].toString())
+          : null,
+      startDate: json['startDate'] != null
+          ? DateTime.tryParse(json['startDate'].toString())
+          : null,
+      endDate: json['endDate'] != null
+          ? DateTime.tryParse(json['endDate'].toString())
+          : null,
+      purchaseDate: json['purchaseDate'] != null
+          ? DateTime.tryParse(json['purchaseDate'].toString())
+          : null,
+      features: json['features'] != null
+          ? List<String>.from(json['features'])
+          : null,
+      isActive: json['isActive'] ?? false,
+      isExpired: json['isExpired'] ?? false,
+      isFailed: json['isFailed'] ?? false,
     );
+  }
+
+  static List<Plan> getMockPlans() {
+    return [
+      Plan(
+        id: 'annual',
+        name: 'Annual Plan',
+        amount: 5000,
+        validity: '1 Year Access – Renew Annually',
+      ),
+      Plan(
+        id: 'lifetime',
+        name: 'One-Time Plan',
+        amount: 10000,
+        validity: 'Lifetime Access – Pay Once',
+      ),
+    ];
   }
 }

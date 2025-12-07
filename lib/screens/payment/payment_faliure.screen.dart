@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../core/routes/app_routes.dart';
 import '../../widgets/button.dart';
 
 class PaymentFaliureScreen extends StatelessWidget {
@@ -9,8 +8,9 @@ class PaymentFaliureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> errorData = Get.arguments ?? {};
-    final String errorMessage = errorData['message'] ?? 'Something went wrong, please try again';
-    
+    final String errorMessage =
+        errorData['message'] ?? 'Something went wrong, please try again';
+
     return Scaffold(
       body: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -56,11 +56,16 @@ class PaymentFaliureScreen extends StatelessWidget {
           ),
           SizedBox(height: 10),
           Button(
-            title: 'Go to Dashboard',
+            title: 'Back',
             onTap: () {
-              Get.offAllNamed(AppRoutes.tabs);
+              final String? backRoute = errorData['backRoute'];
+              if (backRoute != null) {
+                Get.offAllNamed(backRoute);
+              } else {
+                Get.back();
+              }
             },
-            icon: Icons.home,
+            icon: Icons.arrow_back,
             buttonType: ButtonType.greyBorder,
           ),
 

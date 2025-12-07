@@ -60,7 +60,7 @@ class ActivePlanCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        (plan.name?.isNotEmpty ?? false) ? plan.name! : 'Index Option – Splendid Plan',
+                        plan.name.isNotEmpty ? plan.name : 'Index Option – Splendid Plan',
                         style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 18,

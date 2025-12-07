@@ -21,7 +21,7 @@ class SignupScreen extends StatelessWidget {
     final signupController = Get.find<AuthController>();
     Get.put(AccountTypeController(), tag: 'signup');
     final TextEditingController panController = TextEditingController();
-    // DOB split controllers
+
     final TextEditingController dayController = TextEditingController();
     final TextEditingController monthController = TextEditingController();
     final TextEditingController yearController = TextEditingController();
@@ -127,9 +127,7 @@ class SignupScreen extends StatelessWidget {
                             hint: 'eg: ABCDE1234F',
                             controller: panController,
                             keyboardType: TextInputType.text,
-                            inputFormatters: [
-                              PANInputFormatter(),
-                            ],
+                            inputFormatters: [PANInputFormatter()],
                           ),
                           SizedBox(height: 20),
                           _DobTripleField(

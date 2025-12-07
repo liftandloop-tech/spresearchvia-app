@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia2/core/theme/app_theme.dart';
+import 'package:SPResearchvia/core/theme/app_theme.dart';
 import '../../widgets/button.dart';
 import '../subscription/registration.screen.dart';
 
@@ -10,7 +10,7 @@ class DigioConnectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void onConnect() {
-      Get.off(() => const SubscriptionConfirmScreen());
+      Get.off(() => const RegistrationScreen());
     }
 
     return Scaffold(

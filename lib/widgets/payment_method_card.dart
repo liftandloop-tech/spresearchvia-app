@@ -114,8 +114,9 @@ class PaymentMethodCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
+    return InkWell(
       onTap: onTap,
+      borderRadius: BorderRadius.circular(12),
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
@@ -255,7 +256,6 @@ class PaymentMethodCard extends StatelessWidget {
       );
     }
 
-    // Card payment details
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [

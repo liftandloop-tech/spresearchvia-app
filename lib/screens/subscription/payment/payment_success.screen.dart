@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
 import 'package:get/get.dart';
-import '../../core/routes/app_routes.dart';
-import '../../widgets/button.dart';
+import '../../../core/routes/app_routes.dart';
+import '../../../widgets/button.dart';
 
 class PaymentSuccessScreen extends StatefulWidget {
   const PaymentSuccessScreen({super.key});
@@ -69,7 +69,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     final String? planName = paymentData['planName'];
     final String? amount = paymentData['amount'];
     final String? nextBilling = paymentData['nextBilling'];
-    
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Stack(

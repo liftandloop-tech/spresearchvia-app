@@ -1,5 +1,6 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:get_storage/get_storage.dart';
+import 'dart:convert';
 import '../core/config/app.config.dart';
 
 class SecureStorageService {
@@ -22,7 +23,6 @@ class SecureStorageService {
   static const String _userDataKey = 'user_data';
   static const String _isLoggedInKey = 'is_logged_in';
 
-  // Use secure storage for sensitive data in production
   bool get _useSecureStorage => AppConfig.useSecureStorage;
 
   Future<void> saveAuthToken(String token) async {
@@ -75,8 +75,7 @@ class SecureStorageService {
   }
 
   Future<void> saveUserData(Map<String, dynamic> userData) async {
-    final jsonString = userData
-        .toString(); // In production, use proper JSON encoding
+    final jsonString = jsonEncode(userData);
     if (_useSecureStorage) {
       await _secureStorage.write(key: _userDataKey, value: jsonString);
     } else {
@@ -88,8 +87,12 @@ class SecureStorageService {
     if (_useSecureStorage) {
       final jsonString = await _secureStorage.read(key: _userDataKey);
       if (jsonString != null) {
-        // In production, use proper JSON decoding
-        return {}; // Placeholder - implement proper JSON parsing
+        try {
+          final decoded = jsonDecode(jsonString);
+          if (decoded is Map<String, dynamic>) {
+            return decoded;
+          }
+        } catch (_) {}
       }
       return null;
     } else {

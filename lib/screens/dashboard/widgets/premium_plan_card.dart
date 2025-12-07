@@ -81,9 +81,9 @@ class PremiumPlanCard extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  if (plan.name != null && plan.name!.isNotEmpty)
+                  if (plan.name.isNotEmpty)
                     Text(
-                      plan.name!,
+                      plan.name,
                     style: TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 18,

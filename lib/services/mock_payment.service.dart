@@ -2,21 +2,16 @@ import 'dart:async';
 import 'dart:math';
 import '../widgets/payment_method_card.dart';
 
-/// Mock Payment Service - Simulates backend API calls for development
 class MockPaymentService {
   static final MockPaymentService _instance = MockPaymentService._internal();
   factory MockPaymentService() => _instance;
   MockPaymentService._internal();
 
-  // Simulate network delay
   final Duration _networkDelay = const Duration(milliseconds: 800);
 
-  /// Get saved payment method for user
-  /// Simulates: GET /api/user/payment-method
   Future<PaymentMethodData?> getSavedPaymentMethod() async {
     await Future.delayed(_networkDelay);
 
-    // Simulate random payment methods
     final random = Random();
     final paymentTypes = [
       _generateVisaCard(),
@@ -26,48 +21,34 @@ class MockPaymentService {
       _generateNetBanking(),
     ];
 
-    // Return random payment method (or null to simulate no saved method)
     return random.nextBool()
         ? paymentTypes[random.nextInt(paymentTypes.length)]
         : paymentTypes[0];
   }
 
-  /// Get all saved payment methods for user
-  /// Simulates: GET /api/user/payment-methods
   Future<List<PaymentMethodData>> getAllPaymentMethods() async {
     await Future.delayed(_networkDelay);
 
     return [_generateVisaCard(), _generateMastercardCard(), _generateUPI()];
   }
 
-  /// Save new payment method
-  /// Simulates: POST /api/user/payment-method
   Future<bool> savePaymentMethod(PaymentMethodData paymentMethod) async {
     await Future.delayed(_networkDelay);
 
-    // Simulate 90% success rate
     return Random().nextInt(10) < 9;
   }
 
-  /// Delete payment method
-  /// Simulates: DELETE /api/user/payment-method/:id
   Future<bool> deletePaymentMethod(String methodId) async {
     await Future.delayed(_networkDelay);
 
-    // Simulate 95% success rate
     return Random().nextInt(20) < 19;
   }
 
-  /// Set default payment method
-  /// Simulates: PUT /api/user/payment-method/:id/default
   Future<bool> setDefaultPaymentMethod(String methodId) async {
     await Future.delayed(_networkDelay);
 
-    // Simulate 95% success rate
     return Random().nextInt(20) < 19;
   }
-
-  // Helper methods to generate dummy data
 
   PaymentMethodData _generateVisaCard() {
     final lastDigits = ['4532', '4916', '4485', '4024'];
@@ -133,17 +114,13 @@ class MockPaymentService {
     return '$month/$year';
   }
 
-  /// Simulate payment processing
-  /// Simulates: POST /api/payment/process
   Future<Map<String, dynamic>> processPayment({
     required double amount,
     required String paymentMethodId,
     required String planId,
   }) async {
-    // Simulate longer processing time for payment
     await Future.delayed(const Duration(milliseconds: 1500));
 
-    // Simulate 85% success rate
     final success = Random().nextInt(100) < 85;
 
     if (success) {
@@ -163,8 +140,6 @@ class MockPaymentService {
     }
   }
 
-  /// Simulate fetching payment history
-  /// Simulates: GET /api/user/payment-history
   Future<List<Map<String, dynamic>>> getPaymentHistory() async {
     await Future.delayed(_networkDelay);
 
@@ -197,8 +172,6 @@ class MockPaymentService {
     ];
   }
 
-  /// Simulate invoice generation
-  /// Simulates: GET /api/invoice/:transactionId
   Future<Map<String, dynamic>> getInvoice(String transactionId) async {
     await Future.delayed(_networkDelay);
 

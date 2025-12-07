@@ -7,13 +7,13 @@ import '../core/utils/file_validator.dart';
 import 'package:path/path.dart' as path;
 import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
-import '../services/storage.service.dart';
+import '../services/secure_storage.service.dart';
 import '../core/utils/error_message_handler.dart';
 import '../services/snackbar.service.dart';
 
 class UserController extends GetxController {
   final ApiClient _apiClient = ApiClient();
-  final StorageService _storage = StorageService();
+  final SecureStorageService _storage = SecureStorageService();
 
   final isLoading = false.obs;
   final currentUser = Rxn<User>();
@@ -24,19 +24,28 @@ class UserController extends GetxController {
     loadUserData();
   }
 
-  void loadUserData() {
+  void loadUserData() async {
     try {
-      final userData = _storage.getUserData();
-      if (userData != null) {
+      final userData = await _storage.getUserData();
+      print('UserController loadUserData: userData = $userData');
+      if (userData != null && userData.isNotEmpty) {
+        if (userData.containsKey('tempUser')) {
+          print('⚠️ Skipping tempUser data in UserController');
+          currentUser.value = null;
+          return;
+        }
         currentUser.value = User.fromJson(userData);
+        print('✅ UserController loaded user: ${currentUser.value?.fullName}');
+      } else {
+        print('⚠️ No userData found in storage or empty map');
       }
     } catch (e) {
-      print('Error loading user data: $e');
+      print('❌ Error loading user data: $e');
       currentUser.value = null;
     }
   }
 
-  String? get userId => _storage.getUserId();
+  Future<String?> get userId => _storage.getUserId();
 
   Future<bool> updateProfile({
     PersonalInformation? personalInformation,
@@ -44,7 +53,7 @@ class UserController extends GetxController {
     ContactDetails? contactDetails,
   }) async {
     try {
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;
@@ -97,7 +106,7 @@ class UserController extends GetxController {
 
   Future<bool> changeProfileImage(File imageFile) async {
     try {
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;
@@ -127,13 +136,16 @@ class UserController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
         final files = data['data']?['files'];
-        
+
         if (files != null && currentUser.value != null) {
           final filePath = files['filesObj']?['path'];
           if (filePath != null) {
             String fullImageUrl = filePath;
             if (!filePath.startsWith('http')) {
-              final baseUrl = _apiClient.dio.options.baseUrl.replaceAll('/api', '');
+              final baseUrl = _apiClient.dio.options.baseUrl.replaceAll(
+                '/api',
+                '',
+              );
               fullImageUrl = '$baseUrl/$filePath';
             }
 
@@ -217,7 +229,7 @@ class UserController extends GetxController {
 
   Future<void> refreshUserData() async {
     try {
-      final uid = userId;
+      final uid = await userId;
       if (uid == null) return;
 
       final response = await _apiClient.get(ApiConfig.getUserById(uid));

@@ -65,17 +65,16 @@ class User {
   String get name => fullName ?? personalInformation?.fullName ?? 'User';
 
   factory User.fromJson(Map<String, dynamic> json) {
-    // Backend returns userObject with KYC data
     final userObject = json['userObject'] as Map<String, dynamic>?;
-    
-    // Check if userObject contains error
+
     if (userObject?['APP_ERROR_CODE'] != null) {
       throw Exception(userObject?['APP_ERROR_DESC'] ?? 'Invalid user data');
     }
-    
+
     return User(
       id: json['_id'] ?? json['id'] ?? '',
-      fullName: userObject?['APP_NAME'] as String? ?? json['fullName'] as String?,
+      fullName:
+          userObject?['APP_NAME'] as String? ?? json['fullName'] as String?,
       email: userObject?['APP_EMAIL'] as String? ?? json['email'] as String?,
       phone: userObject?['APP_MOB_NO']?.toString() ?? json['phone']?.toString(),
       profileImage: json['profileImage'] as String?,
@@ -114,7 +113,8 @@ class User {
     if (statusStr.contains('verified')) return KycStatus.verified;
     if (statusStr.contains('pending')) return KycStatus.pending;
     if (statusStr.contains('rejected')) return KycStatus.rejected;
-    if (statusStr.contains('notstarted') || statusStr.contains('not_started')) return KycStatus.notStarted;
+    if (statusStr.contains('notstarted') || statusStr.contains('not_started'))
+      return KycStatus.notStarted;
     return KycStatus.notStarted;
   }
 
@@ -251,5 +251,3 @@ class ContactDetails {
     return {'email': email, 'phone': phone};
   }
 }
-
-

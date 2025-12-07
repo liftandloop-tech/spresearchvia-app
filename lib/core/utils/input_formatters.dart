@@ -139,30 +139,49 @@ class PANInputFormatter extends TextInputFormatter {
     TextEditingValue newValue,
   ) {
     String text = newValue.text.toUpperCase();
-    
+
     if (text.length > 10) {
       return oldValue;
     }
-    
-    // Format: ABCDE1234F (5 letters, 4 digits, 1 letter)
+
     String formatted = '';
     for (int i = 0; i < text.length; i++) {
       if (i < 5 || i == 9) {
-        // First 5 and last character must be letters
         if (RegExp(r'[A-Z]').hasMatch(text[i])) {
           formatted += text[i];
         }
       } else if (i >= 5 && i < 9) {
-        // Middle 4 characters must be digits
         if (RegExp(r'[0-9]').hasMatch(text[i])) {
           formatted += text[i];
         }
       }
     }
-    
+
     return TextEditingValue(
       text: formatted,
       selection: TextSelection.collapsed(offset: formatted.length),
+    );
+  }
+}
+
+class EmailOrPhoneInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+
+    if (RegExp(r'^\d+$').hasMatch(text)) {
+      if (text.length > 10) {
+        return oldValue;
+      }
+      return TextEditingValue(text: text, selection: newValue.selection);
+    }
+
+    return TextEditingValue(
+      text: text.toUpperCase(),
+      selection: newValue.selection,
     );
   }
 }
