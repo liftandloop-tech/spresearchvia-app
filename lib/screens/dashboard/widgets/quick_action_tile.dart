@@ -17,7 +17,7 @@ class QuickActionTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(16),
@@ -28,17 +28,17 @@ class QuickActionTile extends StatelessWidget {
               width: 50,
               height: 50,
               decoration: BoxDecoration(
-                color: Color(0xff163174),
+                color: const Color(0xff163174),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Icon(icon, color: Colors.white, size: 28),
             ),
-            SizedBox(width: 16),
+            const SizedBox(width: 16),
 
             Expanded(
               child: Text(
                 title,
-                style: TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 16,
                   fontWeight: FontWeight.w500,
@@ -47,7 +47,7 @@ class QuickActionTile extends StatelessWidget {
               ),
             ),
 
-            Icon(Icons.chevron_right, color: Color(0xffD1D5DB), size: 28),
+            const Icon(Icons.chevron_right, color: Color(0xffD1D5DB), size: 28),
           ],
         ),
       ),

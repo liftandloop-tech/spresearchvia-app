@@ -4,6 +4,7 @@ import 'package:get/get.dart';
 import '../../core/theme/app_theme.dart';
 import 'widgets/account_type_toggle.dart';
 import '../../services/snackbar.service.dart';
+import '../../services/secure_storage.service.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/button.dart';
 import '../../widgets/title_field.dart';
@@ -11,7 +12,7 @@ import '../../controllers/auth.controller.dart';
 import '../../core/utils/validators.dart';
 import '../../core/utils/input_formatters.dart';
 import '../../core/constants/app_dimensions.dart';
-import 'otp_verification.screen.dart';
+import 'set_mpin.screen.dart';
 
 class SignupScreen extends StatelessWidget {
   const SignupScreen({super.key});
@@ -19,6 +20,7 @@ class SignupScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final signupController = Get.find<AuthController>();
+    final storage = SecureStorageService();
     Get.put(AccountTypeController(), tag: 'signup');
     final TextEditingController panController = TextEditingController();
 
@@ -35,6 +37,7 @@ class SignupScreen extends StatelessWidget {
       final dd = dayController.text.trim();
       final mm = monthController.text.trim();
       final yyyy = yearController.text.trim();
+
       if (dd.isEmpty || mm.isEmpty || yyyy.isEmpty) {
         SnackbarService.showError('Date of Birth is required');
         return;
@@ -60,14 +63,23 @@ class SignupScreen extends StatelessWidget {
         return;
       }
 
-      final success = await signupController.createUser(
+      final userData = await storage.getUserData();
+      final userId = userData?['userId'];
+
+      if (userId == null) {
+        SnackbarService.showError('Session expired. Please start again.');
+        return;
+      }
+
+      final success = await signupController.signUp(
+        userId: userId,
         pan: Validators.formatPAN(pan),
         dob: Validators.normalizeDob(dob),
         aadhaarNumber: Validators.cleanAadhar(aadhar),
       );
 
       if (success) {
-        Get.off(() => const OtpVerificationScreen());
+        Get.off(() => const SetMpinScreen());
       }
     }
 
@@ -85,19 +97,19 @@ class SignupScreen extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
-                  SizedBox(height: 20),
-                  SizedBox(
+                  const SizedBox(height: 20),
+                  const SizedBox(
                     height: 100,
                     width: double.maxFinite,
                     child: AppLogo(),
                   ),
-                  SizedBox(height: 10),
-                  Text(
+                  const SizedBox(height: 10),
+                  const Text(
                     'Create your account to start investing',
                     style: TextStyle(color: AppTheme.primaryBlue, fontSize: 14),
                   ),
-                  SizedBox(height: 30),
-                  SizedBox(
+                  const SizedBox(height: 30),
+                  const SizedBox(
                     width: double.maxFinite,
                     child: Text(
                       'Select Account Type',
@@ -109,9 +121,9 @@ class SignupScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 10),
-                  AccountTypeToggle(),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 10),
+                  const AccountTypeToggle(),
+                  const SizedBox(height: 30),
                   Container(
                     width: double.maxFinite,
                     decoration: BoxDecoration(
@@ -129,7 +141,7 @@ class SignupScreen extends StatelessWidget {
                             keyboardType: TextInputType.text,
                             inputFormatters: [PANInputFormatter()],
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           _DobTripleField(
                             dayController: dayController,
                             monthController: monthController,
@@ -138,7 +150,7 @@ class SignupScreen extends StatelessWidget {
                             monthFocus: monthFocus,
                             yearFocus: yearFocus,
                           ),
-                          SizedBox(height: 20),
+                          const SizedBox(height: 20),
                           TitleField(
                             title: 'Aadhar Number',
                             hint: 'eg: 1234 5678 9012',
@@ -153,7 +165,7 @@ class SignupScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-                  SizedBox(height: 30),
+                  const SizedBox(height: 30),
                   Obx(
                     () => Button(
                       buttonType: ButtonType.blue,
@@ -163,7 +175,7 @@ class SignupScreen extends StatelessWidget {
                       onTap: signupController.isLoading.value ? null : submit,
                     ),
                   ),
-                  SizedBox(height: 10),
+                  const SizedBox(height: 10),
                   Obx(
                     () => Button(
                       title: 'Back',
@@ -171,8 +183,8 @@ class SignupScreen extends StatelessWidget {
                       onTap: signupController.isLoading.value ? null : back,
                     ),
                   ),
-                  SizedBox(height: 20),
-                  Row(
+                  const SizedBox(height: 20),
+                  const Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Icon(
@@ -204,7 +216,7 @@ class SignupScreen extends StatelessWidget {
                 visible: signupController.isLoading.value,
                 child: Container(
                   color: Colors.black.withValues(alpha: 0.3),
-                  child: Center(
+                  child: const Center(
                     child: CircularProgressIndicator(
                       color: AppTheme.primaryBlueDark,
                     ),
@@ -238,27 +250,27 @@ class _DobTripleField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = const TextStyle(
+    const labelStyle = TextStyle(
       fontFamily: 'Poppins',
       color: AppTheme.primaryBlue,
       fontSize: 14,
       fontWeight: FontWeight.w500,
     );
 
-    final hintStyle = const TextStyle(
+    const hintStyle = TextStyle(
       fontSize: 14,
       color: AppTheme.textGreyLight,
       fontFamily: 'Poppins',
     );
 
-    InputDecoration _decoration(String hint) => InputDecoration(
+    InputDecoration decoration(String hint) => InputDecoration(
       hintText: hint,
       hintStyle: hintStyle,
       border: InputBorder.none,
       counterText: '',
     );
 
-    Widget _box({
+    Widget box({
       required TextEditingController controller,
       required FocusNode focusNode,
       required String hint,
@@ -286,7 +298,7 @@ class _DobTripleField extends StatelessWidget {
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
             maxLength: maxLength,
             onChanged: onChanged,
-            decoration: _decoration(hint),
+            decoration: decoration(hint),
           ),
         ),
       );
@@ -295,13 +307,13 @@ class _DobTripleField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Date of Birth', style: labelStyle),
+        const Text('Date of Birth', style: labelStyle),
         const SizedBox(height: 5),
         Row(
           children: [
             Expanded(
               flex: 2,
-              child: _box(
+              child: box(
                 controller: dayController,
                 focusNode: dayFocus,
                 hint: 'DD',
@@ -316,7 +328,7 @@ class _DobTripleField extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               flex: 2,
-              child: _box(
+              child: box(
                 controller: monthController,
                 focusNode: monthFocus,
                 hint: 'MM',
@@ -331,7 +343,7 @@ class _DobTripleField extends StatelessWidget {
             const SizedBox(width: 12),
             Expanded(
               flex: 3,
-              child: _box(
+              child: box(
                 controller: yearController,
                 focusNode: yearFocus,
                 hint: 'YYYY',

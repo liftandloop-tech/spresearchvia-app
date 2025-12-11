@@ -43,5 +43,5 @@ class AppConfig {
   static int get maxRetryAttempts => 3;
   static Duration get networkTimeout => const Duration(seconds: 30);
 
-  static int get OTPSize => 4;
+  static int get otpSize => 4;
 }

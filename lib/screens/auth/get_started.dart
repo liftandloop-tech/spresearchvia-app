@@ -23,12 +23,12 @@ class GetStartedScreen extends StatelessWidget {
                 color: AppTheme.primaryBlueDark,
                 borderRadius: BorderRadius.circular(15),
               ),
-              child: Center(
+              child: const Center(
                 child: Icon(Icons.light, size: 50, color: Colors.white),
               ),
             ),
-            SizedBox(height: 5),
-            Text(
+            const SizedBox(height: 5),
+            const Text(
               'SP ResearchVia',
               style: TextStyle(
                 color: AppTheme.primaryBlue,
@@ -36,16 +36,16 @@ class GetStartedScreen extends StatelessWidget {
                 fontWeight: FontWeight.w500,
               ),
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'Welcome to SP ResearchVia - Your Trusted Market Research Partner',
               textAlign: TextAlign.center,
               style: TextStyle(color: AppTheme.textGrey, fontSize: 14),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             SizedBox(child: Image.asset('assets/images/get_started.png')),
-            SizedBox(height: 20),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
               'Get Started',
               style: TextStyle(
                 color: AppTheme.primaryBlue,
@@ -53,7 +53,7 @@ class GetStartedScreen extends StatelessWidget {
                 fontWeight: FontWeight.bold,
               ),
             ),
-            SizedBox(height: 15),
+            const SizedBox(height: 15),
             Button(
               title: 'Existing Customer - Login',
               icon: Icons.login,
@@ -62,17 +62,17 @@ class GetStartedScreen extends StatelessWidget {
                 Get.toNamed(AppRoutes.login);
               },
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             Button(
               title: 'New Customer - Sign Up',
               icon: Icons.person_add,
               buttonType: ButtonType.green,
               onTap: () {
-                Get.toNamed(AppRoutes.signup);
+                Get.toNamed(AppRoutes.createAccount);
               },
             ),
-            SizedBox(height: 10),
-            Text(
+            const SizedBox(height: 10),
+            const Text(
               'By continuing, you agree to our Terms & Privacy Policy.',
               style: TextStyle(color: AppTheme.textGrey, fontSize: 12),
             ),

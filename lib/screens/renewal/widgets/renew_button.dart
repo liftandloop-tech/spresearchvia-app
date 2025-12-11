@@ -20,7 +20,7 @@ class RenewButton extends StatelessWidget {
           ),
           elevation: 0,
         ),
-        child: Row(
+        child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(Icons.credit_card, color: AppTheme.textWhite, size: 20),

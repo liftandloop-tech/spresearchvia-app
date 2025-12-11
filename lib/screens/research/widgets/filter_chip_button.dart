@@ -20,12 +20,12 @@ class FilterChipButton extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         decoration: BoxDecoration(
           color: isActive ? AppTheme.primaryGreen : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: isActive ? AppTheme.primaryGreen : Color(0xFFE2E8F0),
+            color: isActive ? AppTheme.primaryGreen : const Color(0xFFE2E8F0),
             width: 1.5,
           ),
         ),
@@ -39,7 +39,7 @@ class FilterChipButton extends StatelessWidget {
               size: 16,
               color: isActive ? Colors.white : AppTheme.textGrey,
             ),
-            SizedBox(width: 6),
+            const SizedBox(width: 6),
             Text(
               label,
               style: TextStyle(
@@ -49,7 +49,7 @@ class FilterChipButton extends StatelessWidget {
                 color: isActive ? Colors.white : AppTheme.primaryBlueDark,
               ),
             ),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
             Icon(
               Icons.expand_more,
               size: 18,

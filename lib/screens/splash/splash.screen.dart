@@ -58,14 +58,16 @@ class _SplashScreenState extends State<SplashScreen>
         try {
           authController.currentUser.value = User.fromJson(userData);
 
-          final hasSubscription = await authController.hasActiveSubscription();
+          final hasSubscription = await authController.hasActiveSubscription(
+            forceRefresh: true,
+          );
+
           if (hasSubscription) {
             Get.offAllNamed(AppRoutes.tabs);
           } else {
-            Get.offAllNamed(AppRoutes.registrationScreen);
+            Get.offAllNamed(AppRoutes.getStarted);
           }
         } catch (e) {
-          print('Error parsing user data: $e');
           await storage.clearAuthData();
           Get.offAllNamed(AppRoutes.getStarted);
         }
@@ -73,7 +75,6 @@ class _SplashScreenState extends State<SplashScreen>
         Get.offAllNamed(AppRoutes.getStarted);
       }
     } catch (e) {
-      print('Splash error: $e');
       if (mounted) {
         Get.offAllNamed(AppRoutes.getStarted);
       }
@@ -105,7 +106,7 @@ class _SplashScreenState extends State<SplashScreen>
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       const Spacer(flex: 2),
-                      AppLogo(),
+                      const AppLogo(),
                       const SizedBox(height: 16),
                       Container(
                         width: 64,
@@ -128,19 +129,19 @@ class _SplashScreenState extends State<SplashScreen>
                         ),
                       ),
                       const SizedBox(height: 48),
-                      Row(
+                      const Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           InfoItem(
                             icon: Icons.shield_outlined,
                             title: 'Secure',
                           ),
-                          const SizedBox(width: 32),
+                          SizedBox(width: 32),
                           InfoItem(
                             icon: Icons.flash_on_outlined,
                             title: 'Fast',
                           ),
-                          const SizedBox(width: 32),
+                          SizedBox(width: 32),
                           InfoItem(
                             icon: Icons.analytics_outlined,
                             title: 'Accurate',

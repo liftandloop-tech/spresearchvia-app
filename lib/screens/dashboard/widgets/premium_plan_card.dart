@@ -22,9 +22,9 @@ class PremiumPlanCard extends StatelessWidget {
 
         if (plan == null || !hasActivePlan) {
           return Container(
-            padding: EdgeInsets.all(24),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              gradient: LinearGradient(
+              gradient: const LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [Color(0xff6B7280), Color(0xff4B5563)],
@@ -35,7 +35,7 @@ class PremiumPlanCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
+                const Text(
                   'No Active Plan',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -44,7 +44,7 @@ class PremiumPlanCard extends StatelessWidget {
                     color: Colors.white,
                   ),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 Text(
                   'Subscribe to a plan to access premium features',
                   style: TextStyle(
@@ -65,9 +65,9 @@ class PremiumPlanCard extends StatelessWidget {
             : null;
 
         return Container(
-          padding: EdgeInsets.all(24),
+          padding: const EdgeInsets.all(24),
           decoration: BoxDecoration(
-            gradient: LinearGradient(
+            gradient: const LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [Color(0xff1E4A7C), Color(0xff0D2847)],
@@ -84,7 +84,7 @@ class PremiumPlanCard extends StatelessWidget {
                   if (plan.name.isNotEmpty)
                     Text(
                       plan.name,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -92,12 +92,12 @@ class PremiumPlanCard extends StatelessWidget {
                     ),
                   ),
                   Container(
-                    padding: EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
                     decoration: BoxDecoration(
-                      color: Color(0xff2C4D6F),
+                      color: const Color(0xff2C4D6F),
                       borderRadius: BorderRadius.circular(20),
                     ),
-                    child: Text(
+                    child: const Text(
                       'Active',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -109,13 +109,13 @@ class PremiumPlanCard extends StatelessWidget {
                   ),
                 ],
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Row(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
                     daysRemaining.toString(),
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 35,
                       fontWeight: FontWeight.w700,
@@ -123,12 +123,12 @@ class PremiumPlanCard extends StatelessWidget {
                       height: 1,
                     ),
                   ),
-                  SizedBox(width: 8),
+                  const SizedBox(width: 8),
                   Padding(
                     padding: const EdgeInsets.only(bottom: 8),
                     child: Text(
                       daysRemaining == 1 ? 'day left' : 'days left',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w500,
@@ -138,7 +138,7 @@ class PremiumPlanCard extends StatelessWidget {
                   ),
                 ],
               ),
-              if (formattedExpiry != null) SizedBox(height: 8),
+              if (formattedExpiry != null) const SizedBox(height: 8),
               if (formattedExpiry != null)
                 Text(
                   'Expires on $formattedExpiry',
@@ -149,14 +149,14 @@ class PremiumPlanCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.7),
                   ),
                 ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
               Button(
                 title: 'Renew Now',
                 icon: Icons.refresh,
                 onTap: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (context) => QuickRenewalScreen(),
+                      builder: (context) => const QuickRenewalScreen(),
                     ),
                   );
                 },

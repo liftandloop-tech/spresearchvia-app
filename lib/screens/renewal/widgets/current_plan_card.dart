@@ -59,17 +59,17 @@ class CurrentPlanCard extends StatelessWidget {
                       children: [
                         Text(
                           planName,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: AppTheme.primaryBlueDark,
                           ),
                         ),
-                        SizedBox(height: 4),
+                        const SizedBox(height: 4),
                         Text(
                           description,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
@@ -79,18 +79,18 @@ class CurrentPlanCard extends StatelessWidget {
                       ],
                     ),
                   ),
-                  CurrentBadge(),
+                  const CurrentBadge(),
                 ],
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               PlanDetailRow(label: 'Price', value: price, isExpiry: false),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               PlanDetailRow(
                 label: 'Validity',
                 value: validity,
                 isExpiry: false,
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               PlanDetailRow(
                 label: 'Expires on',
                 value: expiryDate,

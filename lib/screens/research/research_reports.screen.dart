@@ -41,7 +41,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
         backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         automaticallyImplyLeading: false,
-        title: Text(
+        title: const Text(
           'Research Reports',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -53,12 +53,12 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
         centerTitle: true,
         actions: [
           IconButton(
-            icon: Icon(Icons.search, color: AppTheme.primaryBlueDark),
+            icon: const Icon(Icons.search, color: AppTheme.primaryBlueDark),
             onPressed: () {},
           ),
         ],
         bottom: PreferredSize(
-          preferredSize: Size.fromHeight(48),
+          preferredSize: const Size.fromHeight(48),
           child: Container(
             color: AppTheme.backgroundWhite,
             child: TabBar(
@@ -67,17 +67,17 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               indicatorWeight: 3,
               labelColor: AppTheme.primaryBlueDark,
               unselectedLabelColor: AppTheme.textGrey,
-              labelStyle: TextStyle(
+              labelStyle: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
-              unselectedLabelStyle: TextStyle(
+              unselectedLabelStyle: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w500,
               ),
-              tabs: [
+              tabs: const [
                 Tab(text: 'Trading Call'),
                 Tab(text: 'Reports'),
               ],
@@ -97,7 +97,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
   }
 
   Widget _buildTradingCallTab(ReportController reportController) {
-    return Center(
+    return const Center(
       child: Text(
         'Trading Call - Coming Soon',
         style: TextStyle(
@@ -113,13 +113,13 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
     return Obx(() {
       if (reportController.isLoading.value &&
           reportController.reports.isEmpty) {
-        return Center(
+        return const Center(
           child: CircularProgressIndicator(color: AppTheme.primaryBlue),
         );
       }
 
       if (reportController.reports.isEmpty) {
-        return Center(
+        return const Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
@@ -139,7 +139,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
         children: [
           Container(
             color: AppTheme.backgroundWhite,
-            padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Column(
               children: [
                 Row(
@@ -155,7 +155,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                         },
                       ),
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     FilterChipButton(
                       label: 'Date',
                       icon: Icons.expand_more,
@@ -164,22 +164,22 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                         _showDateBottomSheet(context, reportController);
                       },
                     ),
-                    SizedBox(width: 12),
+                    const SizedBox(width: 12),
                     Obx(() {
                       if (reportController.selectedCategory.value != null) {
                         return GestureDetector(
                           onTap: () => reportController.clearFilters(),
                           child: Container(
-                            padding: EdgeInsets.symmetric(
+                            padding: const EdgeInsets.symmetric(
                               horizontal: 16,
                               vertical: 10,
                             ),
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: Color(0xFFE2E8F0)),
+                              border: Border.all(color: const Color(0xFFE2E8F0)),
                             ),
-                            child: Row(
+                            child: const Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
@@ -202,7 +202,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                           ),
                         );
                       }
-                      return SizedBox.shrink();
+                      return const SizedBox.shrink();
                     }),
                   ],
                 ),
@@ -211,10 +211,10 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                   if (reportController.selectedCategory.value != null) {
                     return Column(
                       children: [
-                        SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         Row(
                           children: [
-                            Text(
+                            const Text(
                               'Active:',
                               style: TextStyle(
                                 fontFamily: 'Poppins',
@@ -223,7 +223,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                                 color: AppTheme.textGrey,
                               ),
                             ),
-                            SizedBox(width: 8),
+                            const SizedBox(width: 8),
                             ActiveFilterChip(
                               label: reportController.selectedCategory.value!,
                             ),
@@ -232,7 +232,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                       ],
                     );
                   }
-                  return SizedBox.shrink();
+                  return const SizedBox.shrink();
                 }),
               ],
             ),
@@ -243,7 +243,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               final reports = reportController.filteredReports;
 
               if (reports.isEmpty) {
-                return Center(
+                return const Center(
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
@@ -263,9 +263,9 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               }
 
               return ListView.separated(
-                padding: EdgeInsets.all(16),
+                padding: const EdgeInsets.all(16),
                 itemCount: reports.length,
-                separatorBuilder: (context, index) => SizedBox(height: 12),
+                separatorBuilder: (context, index) => const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final report = reports[index];
                   return ReportCard(
@@ -303,16 +303,16 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Select Category',
               style: TextStyle(
                 fontFamily: 'Poppins',
@@ -321,13 +321,13 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                 color: AppTheme.primaryBlueDark,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ...reportController.categories.map((category) {
               return ListTile(
                 contentPadding: EdgeInsets.zero,
                 title: Text(
                   category,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
@@ -336,7 +336,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                 ),
                 trailing: Text(
                   '(${reportController.getReportCountByCategory(category)})',
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
                     color: AppTheme.textGrey,
@@ -347,7 +347,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                   Navigator.pop(context);
                 },
               );
-            }).toList(),
+            }),
           ],
         ),
       ),
@@ -360,16 +360,16 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
   ) {
     showModalBottomSheet(
       context: context,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (context) => Container(
-        padding: EdgeInsets.all(20),
+        padding: const EdgeInsets.all(20),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               'Select Date Range',
               style: TextStyle(
                 fontFamily: 'Poppins',
@@ -378,10 +378,10 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                 color: AppTheme.primaryBlueDark,
               ),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(
+              title: const Text(
                 'Today',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -396,7 +396,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(
+              title: const Text(
                 'Last 7 Days',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -411,7 +411,7 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
             ),
             ListTile(
               contentPadding: EdgeInsets.zero,
-              title: Text(
+              title: const Text(
                 'Last 30 Days',
                 style: TextStyle(
                   fontFamily: 'Poppins',

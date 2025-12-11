@@ -30,15 +30,15 @@ class ReceiptScreen extends StatelessWidget {
     final String paymentRefId = receiptData['paymentRefId'];
 
     return Scaffold(
-      backgroundColor: Color(0xffF9FAFB),
+      backgroundColor: const Color(0xffF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xff163174)),
+          icon: const Icon(Icons.arrow_back, color: Color(0xff163174)),
           onPressed: () => Get.back(),
         ),
-        title: Text(
+        title: const Text(
           'Receipt',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -49,13 +49,13 @@ class ReceiptScreen extends StatelessWidget {
         ),
         actions: [
           IconButton(
-            icon: Icon(Icons.print, color: Color(0xff163174)),
+            icon: const Icon(Icons.print, color: Color(0xff163174)),
             onPressed: () {
               SnackbarService.showInfo('Print functionality coming soon');
             },
           ),
           IconButton(
-            icon: Icon(Icons.picture_as_pdf, color: Color(0xff163174)),
+            icon: const Icon(Icons.picture_as_pdf, color: Color(0xff163174)),
             onPressed: () {
               SnackbarService.showInfo('PDF download coming soon');
             },
@@ -63,7 +63,7 @@ class ReceiptScreen extends StatelessWidget {
         ],
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
@@ -72,7 +72,7 @@ class ReceiptScreen extends StatelessWidget {
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.05),
                 blurRadius: 10,
-                offset: Offset(0, 2),
+                offset: const Offset(0, 2),
               ),
             ],
           ),
@@ -80,8 +80,8 @@ class ReceiptScreen extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
                   color: Color(0xff163174),
                   borderRadius: BorderRadius.only(
                     topLeft: Radius.circular(12),
@@ -94,7 +94,7 @@ class ReceiptScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'SP RESEARCHVIA',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -112,7 +112,7 @@ class ReceiptScreen extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.9),
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           '129 A, Kalani Bagh, AB Road',
                           style: TextStyle(
@@ -145,7 +145,7 @@ class ReceiptScreen extends StatelessWidget {
                             color: Colors.white.withValues(alpha: 0.8),
                           ),
                         ),
-                        SizedBox(height: 8),
+                        const SizedBox(height: 8),
                         Text(
                           'GSTIN: [Enter GST Number]',
                           style: TextStyle(
@@ -173,7 +173,7 @@ class ReceiptScreen extends StatelessWidget {
                         color: Colors.white,
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: Center(
+                      child: const Center(
                         child: Text(
                           'SP',
                           style: TextStyle(
@@ -189,7 +189,7 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              Padding(
+              const Padding(
                 padding: EdgeInsets.all(20),
                 child: Text(
                   'INVOICE',
@@ -203,14 +203,14 @@ class ReceiptScreen extends StatelessWidget {
               ),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Invoice No:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -220,7 +220,7 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         Text(
                           invoiceNo,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -232,7 +232,7 @@ class ReceiptScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
+                        const Text(
                           'Date:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -242,7 +242,7 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         Text(
                           date,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -255,17 +255,17 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(
+                        const Text(
                           'Payment Mode:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -275,7 +275,7 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         Text(
                           paymentMode,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -287,7 +287,7 @@ class ReceiptScreen extends StatelessWidget {
                     Column(
                       crossAxisAlignment: CrossAxisAlignment.end,
                       children: [
-                        Text(
+                        const Text(
                           'Status:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -296,17 +296,17 @@ class ReceiptScreen extends StatelessWidget {
                           ),
                         ),
                         Container(
-                          padding: EdgeInsets.symmetric(
+                          padding: const EdgeInsets.symmetric(
                             horizontal: 12,
                             vertical: 4,
                           ),
                           decoration: BoxDecoration(
-                            color: Color(0xff10B981),
+                            color: const Color(0xff10B981),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             status,
-                            style: TextStyle(
+                            style: const TextStyle(
                               fontFamily: 'Poppins',
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
@@ -320,19 +320,19 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                padding: EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xffF9FAFB),
+                  color: const Color(0xffF9FAFB),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'CLIENT INFORMATION',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -341,41 +341,41 @@ class ReceiptScreen extends StatelessWidget {
                         color: Color(0xff163174),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildInfoRow('Name:', clientName),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildInfoRow('Father\'s Name:', fatherName),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildInfoRow('Address:', address),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       children: [
                         Expanded(child: _buildInfoRow('Mobile:', mobile)),
-                        SizedBox(width: 16),
+                        const SizedBox(width: 16),
                         Expanded(child: _buildInfoRow('PAN:', pan)),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildInfoRow('Email:', email),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildInfoRow('Aadhaar:', aadhaar),
                   ],
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                padding: EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xffF9FAFB),
+                  color: const Color(0xffF9FAFB),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'SERVICE DETAILS',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -384,14 +384,14 @@ class ReceiptScreen extends StatelessWidget {
                         color: Color(0xff163174),
                       ),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     _buildServiceItem(
                       '1.',
                       'Research Subscription - Index Option',
                       'Splendid Plan | 1 Year',
                       '₹1,51,000',
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildServiceItem(
                       '2.',
                       'Research Subscription - Stock Future',
@@ -402,26 +402,26 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Padding(
-                padding: EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.symmetric(horizontal: 20),
                 child: Column(
                   children: [
                     _buildPriceRow('Subtotal:', subtotal),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildPriceRow('CGST (9%):', cgst),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildPriceRow('SGST (9%):', sgst),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildPriceRow('Total GST (18%):', totalGst),
-                    SizedBox(height: 16),
-                    Divider(color: Color(0xffE5E7EB), thickness: 1),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
+                    const Divider(color: Color(0xffE5E7EB), thickness: 1),
+                    const SizedBox(height: 16),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Total Payable:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -432,7 +432,7 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         Text(
                           totalPayable,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 18,
                             fontWeight: FontWeight.w700,
@@ -441,11 +441,11 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Amount Paid:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -456,7 +456,7 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         Text(
                           amountPaid,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -465,11 +465,11 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                       ],
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        Text(
+                        const Text(
                           'Balance:',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -480,7 +480,7 @@ class ReceiptScreen extends StatelessWidget {
                         ),
                         Text(
                           balance,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontFamily: 'Poppins',
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -493,19 +493,19 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Container(
-                margin: EdgeInsets.symmetric(horizontal: 20),
-                padding: EdgeInsets.all(16),
+                margin: const EdgeInsets.symmetric(horizontal: 20),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Color(0xffF9FAFB),
+                  color: const Color(0xffF9FAFB),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'ADDITIONAL INFORMATION',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -514,14 +514,14 @@ class ReceiptScreen extends StatelessWidget {
                         color: Color(0xff163174),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     _buildInfoRow('Service Validity:', validity),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildInfoRow('Payment Ref ID:', paymentRefId),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     _buildInfoRow('Generated By:', 'ResearchVia Admin'),
-                    SizedBox(height: 12),
-                    Text(
+                    const SizedBox(height: 12),
+                    const Text(
                       'Authorized Signatory:',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -529,8 +529,8 @@ class ReceiptScreen extends StatelessWidget {
                         color: Color(0xff6B7280),
                       ),
                     ),
-                    SizedBox(height: 8),
-                    Text(
+                    const SizedBox(height: 8),
+                    const Text(
                       '[Digital Signature]',
                       style: TextStyle(
                         fontFamily: 'Poppins',
@@ -543,18 +543,18 @@ class ReceiptScreen extends StatelessWidget {
                 ),
               ),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Container(
-                padding: EdgeInsets.all(20),
-                decoration: BoxDecoration(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
                   color: Color(0xffF9FAFB),
                   borderRadius: BorderRadius.only(
                     bottomLeft: Radius.circular(12),
                     bottomRight: Radius.circular(12),
                   ),
                 ),
-                child: Column(
+                child: const Column(
                   children: [
                     Text(
                       'This is a computer-generated invoice. No physical signature required.',
@@ -603,7 +603,7 @@ class ReceiptScreen extends StatelessWidget {
           width: 120,
           child: Text(
             label,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 12,
               color: Color(0xff6B7280),
@@ -613,7 +613,7 @@ class ReceiptScreen extends StatelessWidget {
         Expanded(
           child: Text(
             value,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 12,
               fontWeight: FontWeight.w600,
@@ -639,21 +639,21 @@ class ReceiptScreen extends StatelessWidget {
           children: [
             Text(
               number,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
                 color: Color(0xff163174),
               ),
             ),
-            SizedBox(width: 8),
+            const SizedBox(width: 8),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
@@ -662,7 +662,7 @@ class ReceiptScreen extends StatelessWidget {
                   ),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 11,
                       color: Color(0xff6B7280),
@@ -673,7 +673,7 @@ class ReceiptScreen extends StatelessWidget {
             ),
             Text(
               amount,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
@@ -692,7 +692,7 @@ class ReceiptScreen extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
             color: Color(0xff6B7280),
@@ -700,7 +700,7 @@ class ReceiptScreen extends StatelessWidget {
         ),
         Text(
           amount,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
             fontWeight: FontWeight.w600,

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:SPResearchvia/core/theme/app_theme.dart';
+import 'package:spresearchvia/core/theme/app_theme.dart';
 import '../../widgets/button.dart';
 import 'digio_connect_screen.dart';
 
@@ -27,7 +27,7 @@ class SebiComplianceCheck extends StatelessWidget {
           ),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(
+        title: const Text(
           'SEBI Verification',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -43,14 +43,14 @@ class SebiComplianceCheck extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             children: [
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
 
               Center(
                 child: Container(
                   width: 90,
                   height: 90,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffEAF9EE),
+                  decoration: const BoxDecoration(
+                    color: Color(0xffEAF9EE),
                     shape: BoxShape.circle,
                   ),
                   child: const Center(
@@ -105,9 +105,9 @@ class SebiComplianceCheck extends StatelessWidget {
                   color: const Color(0xffECFDF3),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Row(
+                child: const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(
                       Icons.check_circle,
                       color: Color(0xff10B981),
@@ -195,7 +195,7 @@ class FeatureCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Color.fromARGB(255, 243, 248, 255),
+        color: const Color.fromARGB(255, 243, 248, 255),
         borderRadius: BorderRadius.circular(8),
       ),
       padding: const EdgeInsets.all(14),

@@ -22,7 +22,7 @@ class ExpiryWarningCard extends StatelessWidget {
     final iconColor = isUrgent ? AppTheme.error : AppTheme.textGrey;
 
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: backgroundColor,
         borderRadius: BorderRadius.circular(12),
@@ -36,7 +36,7 @@ class ExpiryWarningCard extends StatelessWidget {
             color: iconColor,
             size: 20,
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -52,7 +52,7 @@ class ExpiryWarningCard extends StatelessWidget {
                     color: textColor,
                   ),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
                   message,
                   style: TextStyle(

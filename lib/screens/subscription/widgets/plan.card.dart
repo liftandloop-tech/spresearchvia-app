@@ -71,7 +71,7 @@ class PlanCard extends StatelessWidget {
                           child: Container(
                             width: responsive.spacing(10),
                             height: responsive.spacing(10),
-                            decoration: BoxDecoration(
+                            decoration: const BoxDecoration(
                               shape: BoxShape.circle,
                               color: Colors.white,
                             ),

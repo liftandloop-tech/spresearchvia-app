@@ -12,6 +12,7 @@ import '../../core/theme/app_theme.dart';
 import 'widgets/plan.card.dart';
 import '../../services/snackbar.service.dart';
 import '../../services/payment_preference.service.dart';
+import '../../services/secure_storage.service.dart';
 import '../../widgets/app_logo.dart';
 import '../../widgets/button.dart';
 import '../../widgets/payment_option_selector.dart';
@@ -27,6 +28,7 @@ class RegistrationController extends GetxController {
 
   final RazorpayPaymentHandler _paymentHandler = RazorpayPaymentHandler();
   final paymentPreferenceService = PaymentPreferenceService();
+  final secureStorage = SecureStorageService();
 
   late final PlanPurchaseController planPurchaseController;
   late final UserController userController;
@@ -34,8 +36,6 @@ class RegistrationController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-
-    print('🔵 RegistrationController onInit started');
 
     if (!Get.isRegistered<PlanPurchaseController>()) {
       Get.put(PlanPurchaseController());
@@ -47,14 +47,9 @@ class RegistrationController extends GetxController {
     planPurchaseController = Get.find<PlanPurchaseController>();
     userController = Get.find<UserController>();
 
-    print(
-      '🔵 UserController currentUser: ${userController.currentUser.value?.fullName}',
-    );
-
     loadPlans();
     loadSavedPaymentMethod();
-
-    print('🔵 RegistrationController onInit completed');
+    checkPendingPayment();
   }
 
   void loadPlans() {
@@ -67,6 +62,36 @@ class RegistrationController extends GetxController {
   void loadSavedPaymentMethod() {
     final method = paymentPreferenceService.getPaymentMethod();
     selectedPaymentMethod.value = method;
+  }
+
+  void checkPendingPayment() async {
+    final pending = await secureStorage.getPendingPayment();
+    if (pending != null) {
+      final paymentId = pending['paymentId'];
+      final orderId = pending['orderId'];
+
+      SnackbarService.showInfo('Checking incomplete payment...');
+
+      try {
+        final success = await planPurchaseController.verifyPayment(
+          paymentId: paymentId!,
+          razorpayOrderId: orderId!,
+          razorpayPaymentId: paymentId,
+          razorpaySignature: '',
+        );
+
+        if (success) {
+          await secureStorage.clearPendingPayment();
+          SnackbarService.showSuccess('Previous payment verified!');
+          await Future.delayed(const Duration(milliseconds: 500));
+          Get.offAllNamed(AppRoutes.tabs);
+        } else {
+          await secureStorage.clearPendingPayment();
+        }
+      } catch (e) {
+        // Ignore payment verification errors on startup
+      }
+    }
   }
 
   void selectPaymentMethod(PaymentMethod method) {
@@ -99,6 +124,7 @@ class RegistrationController extends GetxController {
       );
 
       if (success) {
+        await secureStorage.clearPendingPayment();
         SnackbarService.showSuccess('Payment completed successfully!');
         await Future.delayed(const Duration(milliseconds: 500));
         Get.offAllNamed(AppRoutes.tabs);
@@ -119,6 +145,7 @@ class RegistrationController extends GetxController {
   void handlePaymentError(String errorMessage) async {
     isProcessing.value = false;
     currentPaymentId.value = null;
+    await secureStorage.clearPendingPayment();
     SnackbarService.showError(errorMessage);
     Get.offAllNamed(
       AppRoutes.paymentFailure,
@@ -132,6 +159,7 @@ class RegistrationController extends GetxController {
   void handleExternalWallet(String walletName) async {
     isProcessing.value = false;
     currentPaymentId.value = null;
+    await secureStorage.clearPendingPayment();
     SnackbarService.showInfo('Payment via $walletName');
   }
 
@@ -161,10 +189,12 @@ class RegistrationController extends GetxController {
       final plan = selectedPlan.value!;
       final planName = plan.name;
       final amount = plan.totalAmount;
+      final validity = plan.validityDays ?? 365;
 
       final orderData = await planPurchaseController.purchasePlan(
         packageName: planName,
         amount: amount,
+        validity: validity,
       );
 
       currentPaymentId.value = orderData?['paymentId'];
@@ -173,6 +203,11 @@ class RegistrationController extends GetxController {
       if (razorpayOrderId == null) {
         throw Exception('Order ID not received from backend');
       }
+
+      await secureStorage.savePendingPayment(
+        paymentId: currentPaymentId.value!,
+        orderId: razorpayOrderId,
+      );
 
       final user = userController.currentUser.value;
       final userEmail = user?.email ?? '';
@@ -200,6 +235,7 @@ class RegistrationController extends GetxController {
     } catch (e) {
       isProcessing.value = false;
       currentPaymentId.value = null;
+      await secureStorage.clearPendingPayment();
       SnackbarService.showError('Failed to initiate payment: ${e.toString()}');
     }
   }
@@ -217,10 +253,8 @@ class RegistrationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.put(RegistrationController());
 
-    print('🟢 RegistrationScreen build() called');
-
     return PopScope(
-      canPop: false,
+      canPop: true,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         Get.offAllNamed(AppRoutes.login);
@@ -233,7 +267,7 @@ class RegistrationScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Container(
+                const SizedBox(
                   width: double.maxFinite,
                   height: 60,
                   child: AppLogo(),
@@ -254,9 +288,9 @@ class RegistrationScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 14, color: AppTheme.textGrey),
                 ),
                 const SizedBox(height: 12),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.lock, color: AppTheme.primaryGreen, size: 14),
                     SizedBox(width: 6),
                     Text(
@@ -431,9 +465,9 @@ class RegistrationScreen extends StatelessWidget {
                   style: TextStyle(fontSize: 12, color: AppTheme.textGrey),
                 ),
                 const SizedBox(height: 20),
-                Row(
+                const Row(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     PaymentCardIcon(image: 'assets/icons/visa.png'),
                     SizedBox(width: 10),
                     PaymentCardIcon(image: 'assets/icons/mastercard.png'),

@@ -9,10 +9,10 @@ class PlanRow extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(title, style: TextStyle(fontSize: 12, fontFamily: 'Poppins')),
+        Text(title, style: const TextStyle(fontSize: 12, fontFamily: 'Poppins')),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 14,
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w500,

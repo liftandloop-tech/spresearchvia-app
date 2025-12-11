@@ -16,7 +16,7 @@ class SettingsScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Settings',
           style: TextStyle(
             color: Color(0xff11416B),
@@ -32,9 +32,9 @@ class SettingsScreen extends StatelessWidget {
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.all(10),
+              padding: const EdgeInsets.all(10),
               decoration: BoxDecoration(
-                border: Border.all(width: 1, color: Color(0xffE5E7EB)),
+                border: Border.all(width: 1, color: const Color(0xffE5E7EB)),
                 borderRadius: BorderRadius.circular(16),
               ),
               child: Column(
@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Premium Plan',
                         style: TextStyle(
                           fontSize: 16,
@@ -51,17 +51,17 @@ class SettingsScreen extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        decoration: BoxDecoration(
+                        decoration: const BoxDecoration(
                           shape: BoxShape.circle,
                           color: Color(0xffeaf3ec),
                         ),
-                        child: Text('Active'),
+                        child: const Text('Active'),
                       ),
                     ],
                   ),
-                  SizedBox(height: 5),
-                  Text('data'),
-                  SizedBox(height: 5),
+                  const SizedBox(height: 5),
+                  const Text('data'),
+                  const SizedBox(height: 5),
                   PlanRow(title: 'Monthly Price', value: '₹${planDetails[0]}'),
                   PlanRow(title: 'Next Billing', value: planDetails[1]),
                   PlanRow(
@@ -71,14 +71,14 @@ class SettingsScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             SettingTile(
               title: 'Billing History',
               subtitle: 'View past transactions',
               icon: Icons.list_alt_outlined,
               onTap: () {},
             ),
-            SizedBox(height: 10),
+            const SizedBox(height: 10),
             SettingTile(
               title: 'Payment Method',
               subtitle: 'Update card details',

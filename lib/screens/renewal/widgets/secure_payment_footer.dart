@@ -5,7 +5,7 @@ class SecurePaymentFooter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
+    return const Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Icon(Icons.lock_outline, size: 16, color: Color(0xff9CA3AF)),

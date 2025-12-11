@@ -13,17 +13,17 @@ class KeyHighlightItem extends StatelessWidget {
         Container(
           width: 8,
           height: 8,
-          margin: EdgeInsets.only(top: 6),
-          decoration: BoxDecoration(
+          margin: const EdgeInsets.only(top: 6),
+          decoration: const BoxDecoration(
             color: Color(0xff2C7F38),
             shape: BoxShape.circle,
           ),
         ),
-        SizedBox(width: 12),
+        const SizedBox(width: 12),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
               fontWeight: FontWeight.w400,

@@ -19,7 +19,7 @@ class ApiErrorHandler {
         case DioExceptionType.connectionTimeout:
         case DioExceptionType.sendTimeout:
         case DioExceptionType.receiveTimeout:
-          return ApiException(message: 'Connection Timeout', statusCode: null);
+          return ApiException(message: 'Response Timeout', statusCode: null);
 
         case DioExceptionType.badResponse:
           return _handleBadResponse(error.response);

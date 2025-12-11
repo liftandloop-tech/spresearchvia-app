@@ -31,12 +31,12 @@ class SubscriptionHeader extends StatelessWidget {
         ),
         if (showSecurityBadge) ...[
           const SizedBox(height: 10),
-          Row(
+          const Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.lock, color: AppTheme.primaryGreen, size: 16),
-              const SizedBox(width: 4),
-              const Text(
+              SizedBox(width: 4),
+              Text(
                 'SSL Secured & PCI-DSS Compliant',
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.w500),
               ),

@@ -9,11 +9,11 @@ class OTPField extends StatefulWidget {
   final ValueChanged<String>? onChanged;
 
   const OTPField({
-    Key? key,
+    super.key,
     required this.length,
     required this.onCompleted,
     this.onChanged,
-  }) : super(key: key);
+  });
 
   @override
   State<OTPField> createState() => _OTPFieldState();
@@ -126,7 +126,7 @@ class _OTPDigitBox extends StatelessWidget {
         textAlign: TextAlign.center,
         keyboardType: TextInputType.number,
         maxLength: 1,
-        style: TextStyle(
+        style: const TextStyle(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppTheme.primaryBlueDark,
@@ -145,7 +145,7 @@ class _OTPDigitBox extends StatelessWidget {
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(8),
-            borderSide: BorderSide(color: AppTheme.successGreen, width: 2),
+            borderSide: const BorderSide(color: AppTheme.successGreen, width: 2),
           ),
           filled: true,
           fillColor: Colors.white,

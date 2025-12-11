@@ -67,7 +67,7 @@ class NotificationSettingItem extends StatelessWidget {
           Switch(
             value: value,
             onChanged: onChanged,
-            activeColor: Colors.white,
+            activeThumbColor: Colors.white,
             activeTrackColor: const Color(0xff2C7F38),
             inactiveThumbColor: Colors.white,
             inactiveTrackColor: const Color(0xffD1D5DB),

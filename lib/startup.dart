@@ -7,10 +7,12 @@ import 'controllers/plan_purchase.controller.dart';
 import 'controllers/report.controller.dart';
 import 'services/secure_storage.service.dart';
 import 'services/payment.service.dart';
+import 'services/snackbar.service.dart';
+import 'core/routes/app_routes.dart';
 import 'core/config/app.config.dart';
 
 Future<void> startup() async {
-  await WidgetsFlutterBinding.ensureInitialized();
+  WidgetsFlutterBinding.ensureInitialized();
 
   await SecureStorageService.init();
 
@@ -29,5 +31,42 @@ Future<void> startup() async {
   if (AppConfig.isProduction) {
     final authController = Get.find<AuthController>();
     await authController.checkAuthStatus();
+
+    await _checkPendingPayments();
+  }
+}
+
+Future<void> _checkPendingPayments() async {
+  try {
+    final secureStorage = Get.find<SecureStorageService>();
+    final pending = await secureStorage.getPendingPayment();
+
+    if (pending != null) {
+      final paymentId = pending['paymentId'];
+      final orderId = pending['orderId'];
+
+      if (Get.isRegistered<PlanPurchaseController>()) {
+        final planController = Get.find<PlanPurchaseController>();
+
+        final success = await planController.verifyPayment(
+          paymentId: paymentId!,
+          razorpayOrderId: orderId!,
+          razorpayPaymentId: paymentId,
+          razorpaySignature: '',
+        );
+
+        if (success) {
+          await secureStorage.clearPendingPayment();
+          SnackbarService.showSuccess(
+            'Previous payment verified successfully!',
+          );
+
+          await Future.delayed(const Duration(milliseconds: 1000));
+          Get.offAllNamed(AppRoutes.tabs);
+        }
+      }
+    }
+  } catch (e) {
+    // Ignore pending payment check errors
   }
 }

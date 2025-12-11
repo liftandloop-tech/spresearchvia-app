@@ -6,12 +6,12 @@ class CurrentBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: Color(0xffE5E7EB),
+        color: const Color(0xffE5E7EB),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(
+      child: const Text(
         'CURRENT',
         style: TextStyle(
           fontFamily: 'Poppins',

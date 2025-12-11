@@ -103,13 +103,13 @@ class TitleField extends StatelessWidget {
                         border: InputBorder.none,
                         counterText: '',
                         suffixIcon: GestureDetector(
+                          onTap: fieldController.toggleObscure,
                           child: Icon(
                             fieldController.obscure.value
                                 ? Icons.visibility_off_outlined
                                 : Icons.visibility_outlined,
                             size: responsive.spacing(AppDimensions.iconMedium),
                           ),
-                          onTap: fieldController.toggleObscure,
                         ),
                       ),
                     ),

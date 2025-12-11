@@ -5,7 +5,7 @@ import '../core/models/user.dart';
 class MockApiService {
   static Future<List<ResearchReport>> getResearchReports() async {
     if (AppConfig.isDevelopment) {
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
       return [
         ResearchReport(
           id: '1',

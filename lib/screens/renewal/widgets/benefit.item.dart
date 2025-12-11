@@ -9,12 +9,12 @@ class BenefitItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(Icons.check, color: Color(0xff22C55E), size: 20),
-        SizedBox(width: 8),
+        const Icon(Icons.check, color: Color(0xff22C55E), size: 20),
+        const SizedBox(width: 8),
         Expanded(
           child: Text(
             text,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'Poppins',
               fontSize: 14,
               fontWeight: FontWeight.w400,

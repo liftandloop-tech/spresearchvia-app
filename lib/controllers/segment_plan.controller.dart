@@ -1,5 +1,9 @@
 import 'package:get/get.dart';
 import '../services/snackbar.service.dart';
+import '../services/api_client.service.dart';
+import '../services/api_exception.service.dart';
+import '../services/secure_storage.service.dart';
+import '../core/config/api.config.dart';
 
 class SegmentPlan {
   final String id;
@@ -25,10 +29,18 @@ class SegmentPlan {
   factory SegmentPlan.fromJson(Map<String, dynamic> json) {
     return SegmentPlan(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
-      name: json['name']?.toString() ?? '',
-      description: json['description']?.toString() ?? '',
+      name: json['name']?.toString() ?? json['segmentName']?.toString() ?? '',
+      description:
+          json['description']?.toString() ??
+          (json['validity'] != null
+              ? 'Validity: ${json['validity']} Days'
+              : ''),
       amount: json['amount']?.toString() ?? '',
-      perDay: json['perDay']?.toString() ?? '',
+      perDay:
+          json['perDay']?.toString() ??
+          (json['daysCharge'] != null
+              ? 'Approx ₹${json['daysCharge']}/day'
+              : ''),
       benefits:
           (json['benefits'] as List?)?.map((e) => e.toString()).toList() ?? [],
       badge: json['badge']?.toString(),
@@ -51,12 +63,15 @@ class SegmentPlan {
 }
 
 class SegmentPlanController extends GetxController {
+  final ApiClient _apiClient = ApiClient();
+  final SecureStorageService _storage = SecureStorageService();
+
   final isLoading = false.obs;
   final availablePlans = <SegmentPlan>[].obs;
   final selectedPlanId = Rxn<String>();
   final error = Rxn<String>();
 
-  final Duration _networkDelay = const Duration(seconds: 2);
+  Future<String?> get userId => _storage.getUserId();
 
   @override
   void onInit() {
@@ -69,15 +84,25 @@ class SegmentPlanController extends GetxController {
       isLoading.value = true;
       error.value = null;
 
-      await Future.delayed(_networkDelay);
+      final response = await _apiClient.get(ApiConfig.listSegments);
 
-      final mockPlans = _generateMockPlans();
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> plansData = data['data']['data'] ?? [];
+        availablePlans.value = plansData
+            .map((json) => SegmentPlan.fromJson(json))
+            .toList();
 
-      availablePlans.value = mockPlans;
-
-      final popularPlan = mockPlans.firstWhereOrNull((p) => p.isPopular);
-      if (popularPlan != null) {
-        selectedPlanId.value = popularPlan.id;
+        if (selectedPlanId.value == null) {
+          final popularPlan = availablePlans.firstWhereOrNull(
+            (p) => p.isPopular,
+          );
+          if (popularPlan != null) {
+            selectedPlanId.value = popularPlan.id;
+          }
+        }
+      } else {
+        throw Exception('Failed to load plans');
       }
 
       isLoading.value = false;
@@ -107,51 +132,73 @@ class SegmentPlanController extends GetxController {
     await fetchPlans();
   }
 
-  List<SegmentPlan> _generateMockPlans() {
-    return [
-      SegmentPlan(
-        id: 'plan_splendid_001',
-        name: 'Splendid',
-        description: 'Advanced insights for serious traders.',
-        amount: '₹1.51 Lakh/year',
-        perDay: 'Approx ₹415/day',
-        benefits: [
-          'Daily in-depth research calls',
-          'Dedicated analyst support',
-          'Weekly performance reports',
-          'Access to premium webinars',
-        ],
-        isPopular: false,
-      ),
-      SegmentPlan(
-        id: 'plan_spark_001',
-        name: 'Spark',
-        description: 'Essential signals for smart decisions.',
-        amount: '₹99,000',
-        perDay: 'Approx ₹270/day',
-        benefits: [
-          'Daily basic calls & market alerts',
-          'Limited analyst access',
-          'Performance summary emails',
-        ],
-        isPopular: true,
-      ),
-      SegmentPlan(
-        id: 'plan_hni_001',
-        name: 'HNI Custom Plan',
-        description:
-            'Exclusive personalized research service created by SP ResearchVia',
-        amount: '₹2,50,000',
-        perDay: 'Valid for 1 Year\nApprox ₹685/day',
-        benefits: [
-          'Tailored investment and trading research',
-          'Direct analyst consultation',
-          'Priority updates and private market insights',
-          'Multi-segment strategy coverage',
-          'Custom reporting and performance tracking',
-        ],
-        isPopular: false,
-      ),
-    ];
+  Future<Map<String, dynamic>?> purchaseSegment({
+    required String segmentId,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final uid = await userId;
+      if (uid == null) {
+        throw Exception('User not logged in');
+      }
+
+      final response = await _apiClient.post(
+        ApiConfig.segmentPurchase,
+        data: {'userId': uid, 'segmentId': segmentId},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        return data['data'] ?? data;
+      }
+
+      throw Exception('Server returned status code: ${response.statusCode}');
+    } catch (e) {
+      final error = ApiErrorHandler.handleError(e);
+      SnackbarService.showError(error.message);
+      rethrow;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> verifySegmentPayment({
+    required String segmentId,
+    required String razorpayOrderId,
+    required String razorpayPaymentId,
+    required String razorpaySignature,
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final response = await _apiClient.post(
+        ApiConfig.segmentPaymentVerify,
+        data: {
+          'segmentId': segmentId,
+          'razorpay_order_id': razorpayOrderId,
+          'razorpay_payment_id': razorpayPaymentId,
+          'razorpay_signature': razorpaySignature,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final success = data['success'] ?? false;
+
+        if (success) {
+          SnackbarService.showSuccess('Payment verified successfully!');
+          return true;
+        }
+      }
+
+      throw Exception('Payment verification failed');
+    } catch (e) {
+      final error = ApiErrorHandler.handleError(e);
+      SnackbarService.showError(error.message);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
   }
 }

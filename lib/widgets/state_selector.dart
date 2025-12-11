@@ -104,15 +104,15 @@ class StateSelectorController extends GetxController {
                   elevation: 6.0,
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    constraints: BoxConstraints(maxHeight: 220),
+                    constraints: const BoxConstraints(maxHeight: 220),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.grey.shade300),
                     ),
                     child: indianStates.isEmpty
-                        ? Padding(
-                            padding: const EdgeInsets.all(16.0),
+                        ? const Padding(
+                            padding: EdgeInsets.all(16.0),
                             child: Text(
                               'No options',
                               style: TextStyle(

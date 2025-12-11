@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'core/theme/app_theme.dart';
 import 'core/routes/app_routes.dart';
-import 'core/config/app.config.dart';
 import 'controllers/auth.controller.dart';
 import 'controllers/user.controller.dart';
 import 'services/secure_storage.service.dart';
@@ -16,19 +15,14 @@ class App extends StatelessWidget {
     Get.put(AuthController(), permanent: true);
     Get.put(UserController(), permanent: true);
 
-    if (AppConfig.isDevelopment) {
-      print('🔧 Running in DEVELOPMENT mode');
-      print(
-        '🔧 Payment Mock: ${AppConfig.isFeatureEnabled(FeatureFlag.paymentMockEnabled)}',
-      );
-    }
-
     return GetMaterialApp(
       title: "SPResearchvia",
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         scaffoldBackgroundColor: AppTheme.backgroundWhite,
-        appBarTheme: AppBarTheme(color: AppTheme.backgroundWhite),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: AppTheme.backgroundWhite,
+        ),
         fontFamily: 'Poppins',
       ),
       builder: (context, child) {

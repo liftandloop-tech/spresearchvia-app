@@ -22,7 +22,7 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
     super.initState();
     _confettiController = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 4000),
+      duration: const Duration(milliseconds: 4000),
     );
 
     for (int i = 0; i < 50; i++) {
@@ -45,13 +45,13 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
 
   Color _getRandomColor() {
     List<Color> colors = [
-      Color(0xff2563EB),
-      Color(0xff8DB4A0),
-      Color(0xffF59E0B),
-      Color(0xffEF4444),
-      Color(0xff8B5CF6),
-      Color(0xff10B981),
-      Color(0xffEC4899),
+      const Color(0xff2563EB),
+      const Color(0xff8DB4A0),
+      const Color(0xffF59E0B),
+      const Color(0xffEF4444),
+      const Color(0xff8B5CF6),
+      const Color(0xff10B981),
+      const Color(0xffEC4899),
     ];
     return colors[_random.nextInt(colors.length)];
   }
@@ -76,28 +76,32 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
         children: [
           SafeArea(
             child: Padding(
-              padding: EdgeInsets.all(24),
+              padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
                   Container(
                     width: 120,
                     height: 120,
                     decoration: BoxDecoration(
-                      color: Color(0xff8DB4A0),
+                      color: const Color(0xff8DB4A0),
                       shape: BoxShape.circle,
                       boxShadow: [
                         BoxShadow(
-                          offset: Offset(0, 4),
+                          offset: const Offset(0, 4),
                           blurRadius: 20,
-                          color: Color(0xff8DB4A0).withValues(alpha: 0.3),
+                          color: const Color(0xff8DB4A0).withValues(alpha: 0.3),
                         ),
                       ],
                     ),
-                    child: Icon(Icons.check, color: Colors.white, size: 60),
+                    child: const Icon(
+                      Icons.check,
+                      color: Colors.white,
+                      size: 60,
+                    ),
                   ),
-                  SizedBox(height: 40),
+                  const SizedBox(height: 40),
 
-                  Text(
+                  const Text(
                     'Payment\nSuccessful!',
                     style: TextStyle(
                       fontFamily: 'Poppins',
@@ -108,12 +112,12 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                     ),
                     textAlign: TextAlign.center,
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
 
                   RichText(
                     textAlign: TextAlign.center,
                     text: TextSpan(
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -121,45 +125,51 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                         height: 1.5,
                       ),
                       children: [
-                        TextSpan(text: 'Your subscription is valid until\n'),
-                        if (validUntil != null) TextSpan(
-                          text: validUntil,
-                          style: TextStyle(
-                            fontWeight: FontWeight.w600,
-                            color: Color(0xff2563EB),
-                          ),
+                        const TextSpan(
+                          text: 'Your subscription is valid until\n',
                         ),
+                        if (validUntil != null)
+                          TextSpan(
+                            text: validUntil,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff2563EB),
+                            ),
+                          ),
                       ],
                     ),
                   ),
-                  SizedBox(height: 32),
+                  const SizedBox(height: 32),
 
                   Container(
-                    padding: EdgeInsets.all(20),
+                    padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: Color(0xffF9FAFB),
+                      color: const Color(0xffF9FAFB),
                       borderRadius: BorderRadius.circular(16),
                     ),
                     child: Column(
                       children: [
-                        if (planName != null) DetailRow(label: 'Plan', value: planName),
-                        if (planName != null) SizedBox(height: 16),
-                        if (amount != null) DetailRow(label: 'Amount', value: amount),
-                        if (amount != null) SizedBox(height: 16),
-                        if (nextBilling != null) DetailRow(label: 'Next billing', value: nextBilling),
+                        if (planName != null)
+                          DetailRow(label: 'Plan', value: planName),
+                        if (planName != null) const SizedBox(height: 16),
+                        if (amount != null)
+                          DetailRow(label: 'Amount', value: amount),
+                        if (amount != null) const SizedBox(height: 16),
+                        if (nextBilling != null)
+                          DetailRow(label: 'Next billing', value: nextBilling),
                       ],
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Button(
                     title: 'Go To Dashboard',
                     buttonType: ButtonType.blue,
                     onTap: () {
-                      print('\n.\n|\n.\nGo To Dashboard tapped\n.\n|\n.\n');
+
                       Get.offAllNamed(AppRoutes.tabs);
                     },
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   Button(
                     title: 'View Receipt',
                     buttonType: ButtonType.blueBorder,
@@ -167,34 +177,32 @@ class _PaymentSuccessScreenState extends State<PaymentSuccessScreen>
                       Get.toNamed(AppRoutes.receipt);
                     },
                   ),
-                  SizedBox(height: 15),
+                  const SizedBox(height: 15),
                   GestureDetector(
                     onTap: () {},
-                    child: Container(
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(
-                            fontFamily: 'Poppins',
-                            fontSize: 14,
-                            fontWeight: FontWeight.w400,
-                            color: Color(0xff6B7280),
-                          ),
-                          children: [
-                            TextSpan(text: 'Need help? '),
-                            TextSpan(
-                              text: 'Contact Support',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Color(0xff2563EB),
-                                decoration: TextDecoration.underline,
-                              ),
-                            ),
-                          ],
+                    child: RichText(
+                      text: const TextSpan(
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: 14,
+                          fontWeight: FontWeight.w400,
+                          color: Color(0xff6B7280),
                         ),
+                        children: [
+                          TextSpan(text: 'Need help? '),
+                          TextSpan(
+                            text: 'Contact Support',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xff2563EB),
+                              decoration: TextDecoration.underline,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),
@@ -308,7 +316,7 @@ class DetailRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
             fontWeight: FontWeight.w400,
@@ -317,7 +325,7 @@ class DetailRow extends StatelessWidget {
         ),
         Text(
           value,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
             fontWeight: FontWeight.w600,

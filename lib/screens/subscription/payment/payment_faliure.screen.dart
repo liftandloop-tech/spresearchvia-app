@@ -17,17 +17,17 @@ class PaymentFaliureScreen extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           Container(
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Color(0xffFEF2F2),
               shape: BoxShape.circle,
             ),
-            child: Center(
+            child: const Center(
               child: Icon(Icons.warning, size: 30, color: Color(0xffEF4444)),
             ),
           ),
 
-          SizedBox(height: 25),
-          Text(
+          const SizedBox(height: 25),
+          const Text(
             'Payment Failed',
             style: TextStyle(
               fontSize: 20,
@@ -35,17 +35,17 @@ class PaymentFaliureScreen extends StatelessWidget {
               fontWeight: FontWeight.w500,
             ),
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Text(
               errorMessage,
               overflow: TextOverflow.clip,
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 14, fontFamily: 'Poppins'),
+              style: const TextStyle(fontSize: 14, fontFamily: 'Poppins'),
             ),
           ),
-          SizedBox(height: 20),
+          const SizedBox(height: 20),
           Button(
             title: 'Retry Payment',
             onTap: () {
@@ -54,7 +54,7 @@ class PaymentFaliureScreen extends StatelessWidget {
             icon: Icons.refresh,
             buttonType: ButtonType.green,
           ),
-          SizedBox(height: 10),
+          const SizedBox(height: 10),
           Button(
             title: 'Back',
             onTap: () {
@@ -66,7 +66,7 @@ class PaymentFaliureScreen extends StatelessWidget {
 
           GestureDetector(
             onTap: () {},
-            child: Container(
+            child: const SizedBox(
               height: 20,
               child: Text(
                 'Need help? Contact support',

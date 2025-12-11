@@ -26,11 +26,11 @@ class ReportCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: Color(0xffE5E7EB), width: 1),
+          border: Border.all(color: const Color(0xffE5E7EB), width: 1),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -42,7 +42,7 @@ class ReportCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
@@ -50,7 +50,7 @@ class ReportCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 GestureDetector(
                   onTap: onDownload,
                   child: Container(
@@ -58,27 +58,27 @@ class ReportCard extends StatelessWidget {
                     height: 40,
                     decoration: BoxDecoration(
                       color: isDownloaded
-                          ? Color(0xffF3F4F6)
-                          : Color(0xff2C7F38),
+                          ? const Color(0xffF3F4F6)
+                          : const Color(0xff2C7F38),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       Icons.download,
-                      color: isDownloaded ? Color(0xff6B7280) : Colors.white,
+                      color: isDownloaded ? const Color(0xff6B7280) : Colors.white,
                       size: 20,
                     ),
                   ),
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Row(
               children: [
                 CategoryChip(category: category),
-                SizedBox(width: 12),
+                const SizedBox(width: 12),
                 Text(
                   date,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -87,10 +87,10 @@ class ReportCard extends StatelessWidget {
                 ),
               ],
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Text(
               description,
-              style: TextStyle(
+              style: const TextStyle(
                 fontFamily: 'Poppins',
                 fontSize: 14,
                 fontWeight: FontWeight.w400,

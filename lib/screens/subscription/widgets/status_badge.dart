@@ -15,32 +15,32 @@ class StatusBadge extends StatelessWidget {
 
     switch (status) {
       case SubscriptionStatus.active:
-        bgColor = Color(0xffD1FAE5);
-        textColor = Color(0xff065F46);
+        bgColor = const Color(0xffD1FAE5);
+        textColor = const Color(0xff065F46);
         label = 'Active';
         icon = null;
         break;
       case SubscriptionStatus.expired:
-        bgColor = Color(0xffF3F4F6);
-        textColor = Color(0xff6B7280);
+        bgColor = const Color(0xffF3F4F6);
+        textColor = const Color(0xff6B7280);
         label = 'Expired';
         icon = null;
         break;
       case SubscriptionStatus.failed:
         bgColor = Colors.transparent;
-        textColor = Color(0xffDC2626);
+        textColor = const Color(0xffDC2626);
         label = 'Failed';
         icon = Icons.cancel;
         break;
       case SubscriptionStatus.success:
         bgColor = Colors.transparent;
-        textColor = Color(0xff6B7280);
+        textColor = const Color(0xff6B7280);
         label = 'Success';
         icon = Icons.check_circle;
         break;
       case SubscriptionStatus.pending:
-        bgColor = Color(0xffFEF3C7);
-        textColor = Color(0xff92400E);
+        bgColor = const Color(0xffFEF3C7);
+        textColor = const Color(0xff92400E);
         label = 'Pending';
         icon = null;
         break;
@@ -48,8 +48,8 @@ class StatusBadge extends StatelessWidget {
 
     return Container(
       padding: icon != null
-          ? EdgeInsets.symmetric(horizontal: 0, vertical: 0)
-          : EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+          ? const EdgeInsets.symmetric(horizontal: 0, vertical: 0)
+          : const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: icon != null ? null : BorderRadius.circular(6),
@@ -59,7 +59,7 @@ class StatusBadge extends StatelessWidget {
         children: [
           if (icon != null) ...[
             Icon(icon, size: 18, color: textColor),
-            SizedBox(width: 4),
+            const SizedBox(width: 4),
           ],
           Text(
             label,

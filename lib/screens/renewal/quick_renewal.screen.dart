@@ -38,12 +38,12 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
     Get.dialog(
       Center(
         child: Container(
-          padding: EdgeInsets.all(20),
+          padding: const EdgeInsets.all(20),
           decoration: BoxDecoration(
             color: AppTheme.backgroundWhite,
             borderRadius: BorderRadius.circular(12),
           ),
-          child: Column(
+          child: const Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               CircularProgressIndicator(),
@@ -67,6 +67,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
       await planController.purchasePlan(
         packageName: plan.name,
         amount: plan.amount,
+        validity: plan.validityDays ?? 365,
       );
 
       Get.back();
@@ -92,10 +93,10 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Quick Renewal',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -111,7 +112,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         final isLoading = planController.isLoading.value;
 
         if (isLoading) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (plan == null) {
@@ -119,13 +120,13 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.subscriptions_outlined,
                   size: 64,
                   color: AppTheme.borderGrey,
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'No active plan found',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -134,10 +135,10 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                     color: AppTheme.textGrey,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
-                  child: Text('Browse Plans'),
+                  child: const Text('Browse Plans'),
                 ),
               ],
             ),
@@ -180,16 +181,16 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                         ? 'Renew now to continue accessing premium research'
                         : 'Your plan has expired. Renew to regain access',
                   ),
-                if (daysRemaining >= 0) SizedBox(height: 24),
-                SectionHeader(title: 'Current Plan'),
-                SizedBox(height: 8),
+                if (daysRemaining >= 0) const SizedBox(height: 24),
+                const SectionHeader(title: 'Current Plan'),
+                const SizedBox(height: 8),
 
                 if (userController.currentUser.value != null)
                   Padding(
                     padding: const EdgeInsets.only(bottom: 12.0),
                     child: Text(
                       'Hello, ${userController.currentUser.value!.name}',
-                      style: TextStyle(
+                      style: const TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: 16,
                         fontWeight: FontWeight.w600,
@@ -197,7 +198,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                       ),
                     ),
                   ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 CurrentPlanCard(
                   planName: plan.name.isNotEmpty ? plan.name : 'Premium Plan',
                   description: plan.description?.isNotEmpty == true
@@ -207,14 +208,14 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   validity: validityText,
                   expiryDate: expiryDateText,
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
 
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12.0),
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
+                      const Text(
                         'Amount to pay',
                         style: TextStyle(
                           fontFamily: 'Poppins',
@@ -227,7 +228,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                         plan.amount > 0
                             ? '₹${plan.amount.toStringAsFixed(2)}'
                             : 'Free',
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontFamily: 'Poppins',
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
@@ -239,11 +240,11 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                 ),
 
                 RenewButton(onPressed: _renewPlan),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 BenefitsSection(benefits: benefits),
-                SizedBox(height: 24),
-                SecurePaymentFooter(),
-                SizedBox(height: 20),
+                const SizedBox(height: 24),
+                const SecurePaymentFooter(),
+                const SizedBox(height: 20),
               ],
             ),
           ),

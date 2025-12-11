@@ -113,8 +113,9 @@ class User {
     if (statusStr.contains('verified')) return KycStatus.verified;
     if (statusStr.contains('pending')) return KycStatus.pending;
     if (statusStr.contains('rejected')) return KycStatus.rejected;
-    if (statusStr.contains('notstarted') || statusStr.contains('not_started'))
+    if (statusStr.contains('notstarted') || statusStr.contains('not_started')) {
       return KycStatus.notStarted;
+    }
     return KycStatus.notStarted;
   }
 

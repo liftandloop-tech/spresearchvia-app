@@ -24,13 +24,13 @@ class ProfileImageAvatar extends StatelessWidget {
         boxShadow: [
           BoxShadow(
             color: AppTheme.shadowMedium,
-            offset: Offset(0, 10),
+            offset: const Offset(0, 10),
             blurRadius: 15,
             spreadRadius: 0,
           ),
           BoxShadow(
             color: AppTheme.shadowLight,
-            offset: Offset(0, 4),
+            offset: const Offset(0, 4),
             blurRadius: 6,
             spreadRadius: 0,
           ),
@@ -41,7 +41,7 @@ class ProfileImageAvatar extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    if (imagePath.startsWith('http://') || imagePath.startsWith('https://')) {
+    if (imagePath.startsWith('https://')) {
       return Image.network(
         imagePath,
         fit: BoxFit.cover,

@@ -24,14 +24,14 @@ class TermsSection extends StatelessWidget {
           value: agreedToTerms,
           onChanged: (value) => onTermsChanged(value ?? false),
           label: RichText(
-            text: TextSpan(
-              style: const TextStyle(
-                fontSize: 13,
+            text: const TextSpan(
+              style: TextStyle(
+                fontSize: 12,
                 fontFamily: 'Poppins',
                 color: Colors.black87,
               ),
               children: [
-                const TextSpan(text: 'I agree to the '),
+                TextSpan(text: 'I agree to the '),
                 TextSpan(
                   text: 'Terms & Conditions',
                   style: TextStyle(
@@ -40,7 +40,7 @@ class TermsSection extends StatelessWidget {
                     decoration: TextDecoration.underline,
                   ),
                 ),
-                const TextSpan(text: ' and '),
+                TextSpan(text: ' and '),
                 TextSpan(
                   text: 'Privacy Policy',
                   style: TextStyle(

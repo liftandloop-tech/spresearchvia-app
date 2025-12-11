@@ -25,7 +25,7 @@ class AccountTypeController extends GetxController {
 }
 
 class AccountTypeToggle extends StatelessWidget {
-  const AccountTypeToggle({Key? key}) : super(key: key);
+  const AccountTypeToggle({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,8 +39,8 @@ class AccountTypeToggle extends StatelessWidget {
       ),
       padding: const EdgeInsets.all(4),
       child: LayoutBuilder(
-        builder: (context, constraints) {
-          final buttonWidth = (constraints.maxWidth - 16) / 3;
+        builder: (context, BoxConstraints constraints) {
+          final buttonWidth = (constraints.biggest.width - 16) / 3;
 
           return Stack(
             children: [

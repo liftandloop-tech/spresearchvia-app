@@ -7,18 +7,18 @@ class DataProtectionFooter extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 16),
-      child: Row(
+      child: const Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.shield_outlined,
                 color: Color(0xff6B7280),
                 size: 16,
               ),
-              const SizedBox(width: 4),
-              const Text(
+              SizedBox(width: 4),
+              Text(
                 'Bank-grade security',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -28,16 +28,16 @@ class DataProtectionFooter extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(width: 16),
+          SizedBox(width: 16),
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.lock_outlined,
                 color: Color(0xff6B7280),
                 size: 16,
               ),
-              const SizedBox(width: 4),
-              const Text(
+              SizedBox(width: 4),
+              Text(
                 '256-bit encryption',
                 style: TextStyle(
                   fontFamily: 'Poppins',

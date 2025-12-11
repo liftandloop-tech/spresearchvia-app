@@ -15,9 +15,7 @@ class Validators {
 
   static final RegExp _nameRegex = RegExp(r"^[a-zA-Z\s.']+$");
   static final RegExp _dobRegex = RegExp(
-    r'^(0[1-9]|[12][0-9]|3[01])[-\/]' +
-        r'(0[1-9]|1[0-2])[-\/]' +
-        r'(19|20)\d\d$',
+    r'^(0[1-9]|[12][0-9]|3[01])[-\/]' r'(0[1-9]|1[0-2])[-\/]' r'(19|20)\d\d$',
   );
 
   static String? validateEmail(String? value) {

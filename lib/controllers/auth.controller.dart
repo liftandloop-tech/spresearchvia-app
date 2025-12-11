@@ -10,8 +10,12 @@ import 'user.controller.dart';
 import '../core/utils/validators.dart';
 
 class AuthController extends GetxController {
-  final ApiClient _apiClient = ApiClient();
-  final SecureStorageService _storage = SecureStorageService();
+  final ApiClient _apiClient;
+  final SecureStorageService _storage;
+
+  AuthController({ApiClient? apiClient, SecureStorageService? storage})
+    : _apiClient = apiClient ?? ApiClient(),
+      _storage = storage ?? SecureStorageService();
 
   final isFetchingPhoneNumber = false.obs;
   final isLoading = false.obs;
@@ -25,11 +29,19 @@ class AuthController extends GetxController {
   }
 
   Future<void> checkAuthStatus() async {
-    if (_storage.isLoggedIn() && await _storage.hasAuthToken()) {
-      final userData = await _storage.getUserData();
-      if (userData != null) {
-        currentUser.value = User.fromJson(userData);
+    try {
+      if (_storage.isLoggedIn() && await _storage.hasAuthToken()) {
+        final userData = await _storage.getUserData();
+        if (userData != null) {
+          try {
+            currentUser.value = User.fromJson(userData);
+          } catch (e) {
+            await _storage.clearAuthData();
+          }
+        }
       }
+    } catch (e) {
+      // Ignore auth check errors
     }
   }
 
@@ -80,7 +92,8 @@ class AuthController extends GetxController {
         }
         final phone = data['data']?['phone'];
         if (phone != null) {
-          await _storage.saveUserData({'phone': phone});
+          final existingData = await _storage.getUserData();
+          await _storage.saveUserData({...?existingData, 'phone': phone});
         }
         SnackbarService.showSuccess('OTP verified successfully');
         return true;
@@ -96,19 +109,74 @@ class AuthController extends GetxController {
   }
 
   Future<bool> createUser({
-    required String pan,
-    required String dob,
-    required String aadhaarNumber,
+    required String fullName,
+    required String phone,
   }) async {
     try {
       isLoading.value = true;
       final response = await _apiClient.post(
         ApiConfig.createUser,
+        data: {'fullName': fullName, 'phone': phone},
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final message = data['message'] ?? '';
+
+        if (message.contains('already exist')) {
+          SnackbarService.showError('User already exists');
+          return false;
+        }
+
+        final userData = data['data']?['user'];
+        if (userData != null) {
+          final userId = userData['_id'];
+          await _storage.saveUserData({
+            'userId': userId,
+            'fullName': fullName,
+            'phone': phone,
+            'tempUser': true,
+          });
+          SnackbarService.showSuccess('OTP sent to your phone');
+          return true;
+        }
+
+        SnackbarService.showError('Failed to create user');
+        return false;
+      }
+      return false;
+    } catch (e) {
+      final error = ApiErrorHandler.handleError(e);
+      SnackbarService.showError(error.message);
+      return false;
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<bool> signUp({
+    required String userId,
+    required String pan,
+    required String dob,
+    required String aadhaarNumber,
+    String userType = 'user',
+  }) async {
+    try {
+      isLoading.value = true;
+
+      final aadhaarInt = int.tryParse(Validators.cleanAadhar(aadhaarNumber));
+      if (aadhaarInt == null) {
+        SnackbarService.showError('Invalid Aadhaar number');
+        return false;
+      }
+
+      final response = await _apiClient.put(
+        ApiConfig.signUp(userId),
         data: {
           'pan': Validators.formatPAN(pan),
           'dob': Validators.normalizeDob(dob),
-          'aadhaarNumber': Validators.cleanAadhar(aadhaarNumber),
-          'userType': 'user',
+          'aadhaarNumber': aadhaarInt,
+          'userType': userType,
         },
       );
 
@@ -116,22 +184,24 @@ class AuthController extends GetxController {
         final data = response.data;
         final message = data['message'] ?? '';
 
-        if (message == 'user already exist') {
-          SnackbarService.showError('User already exists');
-          return false;
-        }
-
-        final userData = data['data']?['user'];
-        if (userData != null) {
-          final phone = userData['userObject']?['APP_MOB_NO'];
-          if (phone != null) {
-            await _storage.saveUserData({'phone': phone, 'tempUser': userData});
+        if (message.contains('signed up successfully')) {
+          final userData = data['data']?['existUser'];
+          if (userData != null) {
+            final phone = userData['phone'];
+            if (phone != null) {
+              await _storage.saveUserData({
+                'userId': userId,
+                'phone': phone,
+                'userObject': userData['userObject'],
+                'tempUser': true,
+              });
+            }
+            SnackbarService.showSuccess('KYC completed successfully');
+            return true;
           }
-          SnackbarService.showSuccess('OTP sent to your phone');
-          return true;
         }
 
-        SnackbarService.showError('Failed to create user');
+        SnackbarService.showError('Signup failed');
         return false;
       }
       return false;
@@ -146,10 +216,6 @@ class AuthController extends GetxController {
       } else if (msg.contains('no phone number')) {
         SnackbarService.showError(
           'No phone number found in KYC records. Please contact support.',
-        );
-      } else if (error.statusCode == 403 || msg.contains('token')) {
-        SnackbarService.showError(
-          'KYC service temporarily unavailable. Please try again later.',
         );
       } else {
         SnackbarService.showError(error.message);
@@ -216,31 +282,64 @@ class AuthController extends GetxController {
     }
   }
 
-  Future<bool> hasActiveSubscription() async {
+  Future<bool> hasActiveSubscription({bool forceRefresh = false}) async {
     try {
+      final cached = forceRefresh
+          ? null
+          : await _storage.getCachedSubscriptionStatus();
+
+      if (cached == true && !forceRefresh) {
+        return true;
+      }
+
       final userId = await _storage.getUserId();
-      if (userId == null) return false;
 
-      final response = await _apiClient.get(ApiConfig.getUserPlan(userId));
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final planData = data['data']?['plan'];
-
-        if (planData != null) {
-          final isActive = planData['isActive'] ?? false;
-          final endDate = planData['endDate'];
-
-          if (isActive && endDate != null) {
-            final expiry = DateTime.tryParse(endDate.toString());
-            if (expiry != null && expiry.isAfter(DateTime.now())) {
-              return true;
-            }
-          }
+      if (userId == null) {
+        if (currentUser.value?.id != null && currentUser.value!.id.isNotEmpty) {
+          // Use currentUser.id as fallback
+        } else {
+          return false;
         }
       }
-      return false;
+
+      final idToUse = userId ?? currentUser.value!.id;
+      final response = await _apiClient.get(ApiConfig.getUserPlan(idToUse));
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'];
+        final planData = data?['activePlan'];
+
+        bool planIsActive(Map<String, dynamic>? planJson) {
+          if (planJson == null) {
+            return false;
+          }
+
+          final rawStatus = planJson['status'].toString().toLowerCase();
+          final isActiveFlag = rawStatus == 'active';
+          final endDateValue = planJson['endDate'] ?? planJson['expiryDate'];
+
+          final expiry = endDateValue != null
+              ? DateTime.tryParse(endDateValue.toString())
+              : null;
+
+          final isNotExpired = expiry == null || expiry.isAfter(DateTime.now());
+
+          return isActiveFlag && isNotExpired;
+        }
+
+        if (planIsActive(planData)) {
+          await _storage.cacheSubscriptionStatus(true);
+          return true;
+        }
+
+        await _storage.cacheSubscriptionStatus(false);
+        return false;
+      }
+
+      return cached ?? false;
     } catch (e) {
-      return false;
+      final cached = await _storage.getCachedSubscriptionStatus();
+      return cached ?? false;
     }
   }
 
@@ -315,6 +414,7 @@ class AuthController extends GetxController {
     }
   }
 
+  /*
   Future<bool> forgotPassword(String email) async {
     try {
       isLoading.value = true;
@@ -359,6 +459,7 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
+  */
 
   void resetOtpState() {
     isOtpSent.value = false;

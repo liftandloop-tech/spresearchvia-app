@@ -20,7 +20,7 @@ class KycIntroScreen extends StatelessWidget {
             child: Column(
               children: [
                 const SizedBox(height: 40),
-                SizedBox(
+                const SizedBox(
                   height: 100,
                   width: double.maxFinite,
                   child: AppLogo(),
@@ -30,8 +30,8 @@ class KycIntroScreen extends StatelessWidget {
                 Container(
                   width: 200,
                   height: 200,
-                  decoration: BoxDecoration(
-                    color: const Color(0xffEFF6FF),
+                  decoration: const BoxDecoration(
+                    color: Color(0xffEFF6FF),
                     shape: BoxShape.circle,
                   ),
                   child: Image.asset('assets/images/kyclogo.png'),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:SPResearchvia/screens/renewal/widgets/current_plan_card.dart';
+import 'package:spresearchvia/screens/renewal/widgets/current_plan_card.dart';
 import '../../controllers/plan_purchase.controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/routes/app_routes.dart';
@@ -30,7 +30,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
 
-        title: Text(
+        title: const Text(
           'Choose Your Segment',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -49,19 +49,19 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
               Container(
                 width: 76,
                 height: 76,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: AppTheme.primaryBlueDark,
                   shape: BoxShape.circle,
                 ),
-                child: Icon(
+                child: const Icon(
                   Icons.workspace_premium,
                   color: Colors.white,
                   size: 40,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
 
-              Text(
+              const Text(
                 'Unlock Premium Features',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -71,9 +71,9 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
 
-              Text(
+              const Text(
                 'Get advanced analytics, unlimited transactions,\nand priority support',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -82,14 +82,14 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
               Obx(() {
                 final plan = planController.currentPlan.value;
                 final isLoading = planController.isLoading.value;
 
                 if (isLoading) {
-                  return Center(
+                  return const Center(
                     child: CircularProgressIndicator(
                       color: AppTheme.primaryBlue,
                     ),
@@ -107,7 +107,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                         width: 1,
                       ),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'No active plan found.',
                         style: TextStyle(
@@ -129,9 +129,9 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                 );
               }),
 
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-              Align(
+              const Align(
                 alignment: Alignment.centerLeft,
                 child: Text(
                   'What\'s included:',
@@ -143,16 +143,16 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   ),
                 ),
               ),
-              SizedBox(height: 16),
+              const SizedBox(height: 16),
 
               _buildFeatureItem(Icons.show_chart, 'Advanced Analytics'),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildFeatureItem(Icons.all_inclusive, 'Unlimited Transactions'),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildFeatureItem(Icons.headset_mic, 'Priority Support'),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
               _buildFeatureItem(Icons.security, 'Enhanced Security'),
-              SizedBox(height: 32),
+              const SizedBox(height: 32),
 
               Button(
                 title: 'Choose segment',
@@ -161,9 +161,9 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   Get.toNamed(AppRoutes.selectSegment);
                 },
               ),
-              SizedBox(height: 12),
+              const SizedBox(height: 12),
 
-              Text(
+              const Text(
                 'Cancel anytime â€¢ 7-day free trial',
                 style: TextStyle(
                   fontFamily: 'Poppins',
@@ -171,7 +171,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   color: AppTheme.textGrey,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         ),
@@ -182,11 +182,11 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
   Widget _buildFeatureItem(IconData icon, String text) {
     return Row(
       children: [
-        Icon(icon, color: Color(0xFF10B981), size: 20),
-        SizedBox(width: 12),
+        Icon(icon, color: const Color(0xFF10B981), size: 20),
+        const SizedBox(width: 12),
         Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 14,
             color: AppTheme.primaryBlueDark,

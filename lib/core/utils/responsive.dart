@@ -32,7 +32,7 @@ class Responsive {
   double hp(double percentage) => _screenHeight * percentage / 100;
 
   double sp(double size) {
-    final baseWidth = 375.0;
+    const baseWidth = 375.0;
     final scale = _screenWidth / baseWidth;
     return size * scale.clamp(0.8, 1.3);
   }

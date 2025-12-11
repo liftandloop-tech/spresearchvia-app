@@ -16,33 +16,33 @@ class PaymentMethodCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Color(0xffE5E7EB), width: 1),
+        border: Border.all(color: const Color(0xffE5E7EB), width: 1),
       ),
       child: Row(
         children: [
           CardTypeLogo(cardType: cardType),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   cardNumber,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
                     color: Color(0xff1F2937),
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   expiryDate,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
@@ -52,7 +52,7 @@ class PaymentMethodCard extends StatelessWidget {
               ],
             ),
           ),
-          Icon(Icons.check_circle, color: Color(0xff10B981), size: 24),
+          const Icon(Icons.check_circle, color: Color(0xff10B981), size: 24),
         ],
       ),
     );

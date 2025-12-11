@@ -25,6 +25,7 @@ class PlanPurchaseController extends GetxController {
   Future<Map<String, dynamic>?> purchasePlan({
     required String packageName,
     required double amount,
+    required int validity,
   }) async {
     try {
       isLoading.value = true;
@@ -34,7 +35,11 @@ class PlanPurchaseController extends GetxController {
         throw Exception('User not logged in');
       }
 
-      final requestData = {'packageName': packageName, 'amount': amount};
+      final requestData = {
+        'packageName': packageName,
+        'amount': amount,
+        'validity': validity,
+      };
 
       final response = await _apiClient.post(
         ApiConfig.purchasePlan(uid),
@@ -137,8 +142,7 @@ class PlanPurchaseController extends GetxController {
         }
       }
     } catch (e) {
-      final error = ApiErrorHandler.handleError(e);
-      print(error);
+      ApiErrorHandler.handleError(e);
     }
   }
 
@@ -213,8 +217,7 @@ class PlanPurchaseController extends GetxController {
 
       return [];
     } catch (e) {
-      final error = ApiErrorHandler.handleError(e);
-      print(error);
+      ApiErrorHandler.handleError(e);
       return [];
     }
   }

@@ -82,7 +82,7 @@ class PaymentSummaryCard extends StatelessWidget {
           SummaryItem(title: 'CGST (9%)', amount: cgstAmount),
           SummaryItem(title: 'SGST (9%)', amount: sgstAmount),
           const SizedBox(height: 10),
-          Divider(color: AppTheme.textGrey),
+          const Divider(color: AppTheme.textGrey),
           const SizedBox(height: 5),
           SummaryItem(
             title: 'Total Payable',

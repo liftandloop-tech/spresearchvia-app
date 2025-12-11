@@ -10,15 +10,15 @@ class BenefitsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xffF9FAFB),
+        color: const Color(0xffF9FAFB),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          const Text(
             'What you\'ll continue to get:',
             style: TextStyle(
               fontFamily: 'Poppins',
@@ -27,7 +27,7 @@ class BenefitsSection extends StatelessWidget {
               color: Color(0xff1F2937),
             ),
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           ...benefits.asMap().entries.map((entry) {
             return Padding(
               padding: EdgeInsets.only(
@@ -35,7 +35,7 @@ class BenefitsSection extends StatelessWidget {
               ),
               child: BenefitItem(text: entry.value),
             );
-          }).toList(),
+          }),
         ],
       ),
     );

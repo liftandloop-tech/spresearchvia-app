@@ -19,21 +19,21 @@ class ReportDetailRow extends StatelessWidget {
       children: [
         Text(
           label,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 12,
             fontWeight: FontWeight.w400,
             color: Color(0xff6B7280),
           ),
         ),
-        SizedBox(height: 4),
+        const SizedBox(height: 4),
         Text(
           value,
           style: TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
             fontWeight: FontWeight.w600,
-            color: valueColor ?? Color(0xff163174),
+            color: valueColor ?? const Color(0xff163174),
           ),
         ),
       ],

@@ -11,13 +11,13 @@ class CardTypeLogo extends StatelessWidget {
       width: 48,
       height: 32,
       decoration: BoxDecoration(
-        color: Color(0xff1A1F71),
+        color: const Color(0xff1A1F71),
         borderRadius: BorderRadius.circular(6),
       ),
       child: Center(
         child: Text(
           cardType,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 12,
             fontWeight: FontWeight.w700,

@@ -47,12 +47,12 @@ class _PinInputBoxesState extends State<PinInputBoxes> {
         return Container(
           width: 60,
           height: 60,
-          margin: EdgeInsets.symmetric(horizontal: 6),
+          margin: const EdgeInsets.symmetric(horizontal: 6),
           decoration: BoxDecoration(
             border: Border.all(
               color: controllers[index].text.isNotEmpty
-                  ? Color(0xff0B3A70)
-                  : Color(0xffD1D5DB),
+                  ? const Color(0xff0B3A70)
+                  : const Color(0xffD1D5DB),
               width: 2,
             ),
             borderRadius: BorderRadius.circular(12),
@@ -64,13 +64,13 @@ class _PinInputBoxesState extends State<PinInputBoxes> {
             keyboardType: TextInputType.number,
             maxLength: 1,
             obscureText: widget.obscureText,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.w600,
               color: Color(0xff0B3A70),
             ),
             inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-            decoration: InputDecoration(
+            decoration: const InputDecoration(
               border: InputBorder.none,
               counterText: '',
             ),

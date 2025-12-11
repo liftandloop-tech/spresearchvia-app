@@ -1,10 +1,8 @@
 import 'dart:io';
-import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
 import '../core/config/api.config.dart';
 import '../core/models/user.dart';
 import '../core/utils/file_validator.dart';
-import 'package:path/path.dart' as path;
 import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
 import '../services/secure_storage.service.dart';
@@ -27,20 +25,15 @@ class UserController extends GetxController {
   void loadUserData() async {
     try {
       final userData = await _storage.getUserData();
-      print('UserController loadUserData: userData = $userData');
+
       if (userData != null && userData.isNotEmpty) {
         if (userData.containsKey('tempUser')) {
-          print('⚠️ Skipping tempUser data in UserController');
           currentUser.value = null;
           return;
         }
         currentUser.value = User.fromJson(userData);
-        print('✅ UserController loaded user: ${currentUser.value?.fullName}');
-      } else {
-        print('⚠️ No userData found in storage or empty map');
-      }
+      } else {}
     } catch (e) {
-      print('❌ Error loading user data: $e');
       currentUser.value = null;
     }
   }
@@ -75,6 +68,13 @@ class UserController extends GetxController {
         requestData['contactDetails'] = contactDetails.toJson();
       }
 
+      SnackbarService.showError(
+        'Profile update is temporarily unavailable. Please contact support.',
+      );
+      isLoading.value = false;
+      return false;
+
+      /* DISABLED - Backend route commented out
       final response = await _apiClient.put(
         ApiConfig.updateProfile(uid),
         data: requestData,
@@ -95,6 +95,7 @@ class UserController extends GetxController {
       }
 
       return false;
+      */
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
@@ -118,6 +119,12 @@ class UserController extends GetxController {
         return false;
       }
 
+      SnackbarService.showError(
+        'Profile image change is temporarily unavailable. Please contact support.',
+      );
+      return false;
+
+      /* DISABLED - Backend route commented out
       isLoading.value = true;
 
       final formData = dio.FormData.fromMap({
@@ -163,6 +170,7 @@ class UserController extends GetxController {
       }
 
       return false;
+      */
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       ErrorMessageHandler.logError('Change Profile Image', error);
@@ -170,9 +178,7 @@ class UserController extends GetxController {
         ErrorMessageHandler.getUserFriendlyMessage(error),
       );
       return false;
-    } finally {
-      isLoading.value = false;
-    }
+    } finally {}
   }
 
   Future<List<User>?> getUserList() async {
@@ -232,6 +238,9 @@ class UserController extends GetxController {
       final uid = await userId;
       if (uid == null) return;
 
+      loadUserData();
+
+      /* DISABLED - No backend route available
       final response = await _apiClient.get(ApiConfig.getUserById(uid));
 
       if (response.statusCode == 200) {
@@ -244,6 +253,7 @@ class UserController extends GetxController {
           await _storage.saveUserData(userData);
         }
       }
+      */
     } catch (e) {
       loadUserData();
     }

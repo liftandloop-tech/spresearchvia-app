@@ -19,10 +19,10 @@ class SettingTile extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        padding: EdgeInsets.all(16),
+        padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
           color: Colors.white,
-          border: Border.all(width: 1, color: Color(0xffE5E7EB)),
+          border: Border.all(width: 1, color: const Color(0xffE5E7EB)),
           borderRadius: BorderRadius.circular(14),
         ),
         child: Row(
@@ -31,12 +31,12 @@ class SettingTile extends StatelessWidget {
               width: 35,
               height: 35,
               decoration: BoxDecoration(
-                color: Color(0xffF3F4F6),
+                color: const Color(0xffF3F4F6),
                 borderRadius: BorderRadius.circular(8),
               ),
-              child: Icon(icon, size: 18, color: Color(0xff4B5563)),
+              child: Icon(icon, size: 18, color: const Color(0xff4B5563)),
             ),
-            SizedBox(width: 12),
+            const SizedBox(width: 12),
 
             Expanded(
               child: Column(
@@ -44,17 +44,17 @@ class SettingTile extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
                       color: Color(0xff111827),
                     ),
                   ),
-                  SizedBox(height: 2),
+                  const SizedBox(height: 2),
                   Text(
                     subtitle,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 12,
                       fontWeight: FontWeight.w400,
@@ -65,7 +65,7 @@ class SettingTile extends StatelessWidget {
               ),
             ),
 
-            Icon(Icons.chevron_right, size: 20, color: Color(0xff9CA3AF)),
+            const Icon(Icons.chevron_right, size: 20, color: Color(0xff9CA3AF)),
           ],
         ),
       ),

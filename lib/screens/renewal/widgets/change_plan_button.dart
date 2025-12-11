@@ -13,12 +13,12 @@ class ChangePlanButton extends StatelessWidget {
       child: OutlinedButton(
         onPressed: onPressed,
         style: OutlinedButton.styleFrom(
-          side: BorderSide(color: Color(0xff163174), width: 2),
+          side: const BorderSide(color: Color(0xff163174), width: 2),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
         ),
-        child: Text(
+        child: const Text(
           'Change Plan',
           style: TextStyle(
             fontFamily: 'Poppins',

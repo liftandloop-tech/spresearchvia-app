@@ -1,12 +1,13 @@
 import 'package:get/get.dart';
-import 'package:SPResearchvia/screens/kyc/sebi_compilance_check.dart';
-import 'package:SPResearchvia/screens/renewal/quick_renewal.screen.dart';
-import 'package:SPResearchvia/screens/subscription/registration.screen.dart';
-import 'package:SPResearchvia/screens/subscription/select_segment.screen.dart';
-import 'package:SPResearchvia/controllers/segment_plan.controller.dart';
+import 'package:spresearchvia/screens/kyc/sebi_compilance_check.dart';
+import 'package:spresearchvia/screens/renewal/quick_renewal.screen.dart';
+import 'package:spresearchvia/screens/subscription/registration.screen.dart';
+import 'package:spresearchvia/screens/subscription/select_segment.screen.dart';
+import 'package:spresearchvia/controllers/segment_plan.controller.dart';
 import '../../screens/subscription/receipt.screen.dart';
 import '../../screens/subscription/confirm_payment.screen.dart';
 import '../../screens/auth/get_started.dart';
+import '../../screens/auth/create_account.screen.dart';
 import '../../screens/auth/signup.screen.dart';
 import '../../screens/splash/splash.screen.dart';
 import '../../screens/auth/login.screen.dart';
@@ -33,6 +34,7 @@ class AppRoutes {
   static const String splash = '/';
   static const String getStarted = '/get-started';
   static const String login = '/login';
+  static const String createAccount = '/create-account';
   static const String signup = '/signup';
   static const String otpVerification = '/otp-verification';
   static const String forgotMpin = '/forgot-mpin';
@@ -62,25 +64,26 @@ class AppRoutes {
   static const String sebiCompilanceCheck = '/sebi-compilance-check';
 
   static final pages = [
-    GetPage(name: splash, page: () => SplashScreen()),
+    GetPage(name: splash, page: () => const SplashScreen()),
     GetPage(name: getStarted, page: () => const GetStartedScreen()),
     GetPage(name: login, page: () => const LoginScreen()),
-    GetPage(name: signup, page: () => SignupScreen()),
+    GetPage(name: createAccount, page: () => const CreateAccountScreen()),
+    GetPage(name: signup, page: () => const SignupScreen()),
     GetPage(name: otpVerification, page: () => const OtpVerificationScreen()),
     GetPage(name: setMpin, page: () => const SetMpinScreen()),
-    GetPage(name: quickRenewal, page: () => QuickRenewalScreen()),
+    GetPage(name: quickRenewal, page: () => const QuickRenewalScreen()),
     GetPage(name: tabs, page: () => const TabsScreen()),
-    GetPage(name: dashboard, page: () => DashboardScreen()),
-    GetPage(name: profile, page: () => ProfileScreen()),
-    GetPage(name: editProfile, page: () => EditProfileScreen()),
-    GetPage(name: researchReports, page: () => ResearchReportsScreen()),
-    GetPage(name: sebiCompilanceCheck, page: () => SebiComplianceCheck()),
+    GetPage(name: dashboard, page: () => const DashboardScreen()),
+    GetPage(name: profile, page: () => const ProfileScreen()),
+    GetPage(name: editProfile, page: () => const EditProfileScreen()),
+    GetPage(name: researchReports, page: () => const ResearchReportsScreen()),
+    GetPage(name: sebiCompilanceCheck, page: () => const SebiComplianceCheck()),
     GetPage(
       name: researchReportDetail,
       page: () => ResearchReportDetailScreen(report: Get.arguments),
     ),
-    GetPage(name: choosePlan, page: () => ChoosePlanScreen()),
-    GetPage(name: subscriptionHistory, page: () => SubscriptionHistoryScreen()),
+    GetPage(name: choosePlan, page: () => const ChoosePlanScreen()),
+    GetPage(name: subscriptionHistory, page: () => const SubscriptionHistoryScreen()),
     GetPage(
       name: selectSegment,
       page: () => SelectSegmentScreen(),
@@ -90,11 +93,11 @@ class AppRoutes {
     ),
     GetPage(
       name: notificationSettings,
-      page: () => NotificationSettingScreen(),
+      page: () => const NotificationSettingScreen(),
     ),
-    GetPage(name: settings, page: () => SettingsScreen()),
+    GetPage(name: settings, page: () => const SettingsScreen()),
     GetPage(name: paymentSuccess, page: () => const PaymentSuccessScreen()),
-    GetPage(name: paymentFailure, page: () => PaymentFaliureScreen()),
+    GetPage(name: paymentFailure, page: () => const PaymentFaliureScreen()),
     GetPage(name: kycIntro, page: () => const KycIntroScreen()),
     GetPage(name: panVerification, page: () => const PanVerificationScreen()),
     GetPage(

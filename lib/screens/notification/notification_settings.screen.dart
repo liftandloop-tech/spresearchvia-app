@@ -53,7 +53,7 @@ class NotificationSettingScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(
+        title: const Text(
           'Notification Settings',
           style: TextStyle(
             color: Color(0xff11416B),
@@ -68,19 +68,23 @@ class NotificationSettingScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: Column(
             children: [
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Container(
                 width: 70,
                 height: 70,
-                decoration: BoxDecoration(
+                decoration: const BoxDecoration(
                   color: Color(0xff163174),
                   shape: BoxShape.circle,
                 ),
-                child: Icon(Icons.notifications, color: Colors.white, size: 40),
+                child: const Icon(
+                  Icons.notifications,
+                  color: Colors.white,
+                  size: 40,
+                ),
               ),
-              SizedBox(height: 24),
+              const SizedBox(height: 24),
 
-              Text(
+              const Text(
                 'Stay Informed',
                 style: TextStyle(
                   overflow: TextOverflow.clip,
@@ -91,8 +95,8 @@ class NotificationSettingScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 12),
-              Text(
+              const SizedBox(height: 12),
+              const Text(
                 'Customize your notifications to stay updated on what\nmatters most to your financial journey.',
                 style: TextStyle(
                   overflow: TextOverflow.clip,
@@ -103,7 +107,7 @@ class NotificationSettingScreen extends StatelessWidget {
                 ),
                 textAlign: TextAlign.center,
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Obx(
                 () => NotificationSettingItem(
                   value: controller.researchAlert.value,
@@ -115,7 +119,7 @@ class NotificationSettingScreen extends StatelessWidget {
                       controller.researchAlert.value = newVal,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Obx(
                 () => NotificationSettingItem(
                   value: controller.paymentAlerts.value,
@@ -127,7 +131,7 @@ class NotificationSettingScreen extends StatelessWidget {
                       controller.paymentAlerts.value = newVal,
                 ),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Button(
                 title: 'Save Preferences',
                 buttonType: ButtonType.blue,

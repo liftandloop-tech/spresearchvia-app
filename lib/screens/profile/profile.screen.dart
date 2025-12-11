@@ -33,14 +33,14 @@ class ProfileScreen extends StatelessWidget {
   Color _getKycStatusColor(KycStatus? status) {
     switch (status) {
       case KycStatus.verified:
-        return Color(0xff16A34A);
+        return const Color(0xff16A34A);
       case KycStatus.pending:
-        return Color(0xffF59E0B);
+        return const Color(0xffF59E0B);
       case KycStatus.rejected:
-        return Color(0xffEF4444);
+        return const Color(0xffEF4444);
       case KycStatus.notStarted:
       default:
-        return Color(0xff6B7280);
+        return const Color(0xff6B7280);
     }
   }
 
@@ -72,14 +72,14 @@ class ProfileScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Profile', style: AppStyles.appBarTitle),
+        title: const Text('Profile', style: AppStyles.appBarTitle),
         centerTitle: true,
         automaticallyImplyLeading: false,
         backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         actions: [
           IconButton(
-            icon: Icon(Icons.logout, color: AppTheme.iconRed),
+            icon: const Icon(Icons.logout, color: AppTheme.iconRed),
             tooltip: 'Logout',
             onPressed: () => authController.logout(),
           ),
@@ -93,10 +93,10 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(Icons.person_off, size: 80, color: AppTheme.iconGrey),
-                SizedBox(height: 16),
-                Text('No user data available', style: AppStyles.bodyLarge),
-                SizedBox(height: 24),
+                const Icon(Icons.person_off, size: 80, color: AppTheme.iconGrey),
+                const SizedBox(height: 16),
+                const Text('No user data available', style: AppStyles.bodyLarge),
+                const SizedBox(height: 24),
                 Button(
                   title: 'Logout',
                   buttonType: ButtonType.blue,
@@ -108,7 +108,7 @@ class ProfileScreen extends StatelessWidget {
         }
 
         return SingleChildScrollView(
-          padding: EdgeInsets.symmetric(horizontal: 15, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
           child: Column(
             children: [
               ProfileImageAvatar(
@@ -116,7 +116,7 @@ class ProfileScreen extends StatelessWidget {
                     user.profileImage ??
                     'assets/images/profile_placeholder.jpg',
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               Text(
                 user.name,
                 style: AppStyles.heading3.copyWith(color: AppTheme.primaryBlue),
@@ -125,7 +125,7 @@ class ProfileScreen extends StatelessWidget {
                 user.email ?? '',
                 style: AppStyles.bodySmall.copyWith(color: AppTheme.textGrey),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
               if (user.contactDetails?.phone != null || user.phone != null)
                 ProfileTile(
                   icon: Icons.phone,
@@ -133,8 +133,8 @@ class ProfileScreen extends StatelessWidget {
                   value: user.contactDetails?.phone?.toString() ?? user.phone!,
                 ),
               if (user.contactDetails?.phone != null || user.phone != null)
-                SizedBox(height: 10),
-              SizedBox(height: 10),
+                const SizedBox(height: 10),
+              const SizedBox(height: 10),
               KycStatusItem(
                 icon: Icons.verified_user,
                 title: 'KYC Status',
@@ -142,28 +142,28 @@ class ProfileScreen extends StatelessWidget {
                 statusColor: _getKycStatusColor(user.kycStatus),
                 statusLabel: _getKycStatusLabel(user.kycStatus),
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Button(
                 title: 'Edit Profile',
                 buttonType: ButtonType.blue,
                 icon: Icons.edit_square,
-                onTap: () => Get.to(() => EditProfileScreen()),
+                onTap: () => Get.to(() => const EditProfileScreen()),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Button(
                 title: 'Subscription History',
                 buttonType: ButtonType.blueBorder,
                 icon: Icons.history,
-                onTap: () => Get.to(() => SubscriptionHistoryScreen()),
+                onTap: () => Get.to(() => const SubscriptionHistoryScreen()),
               ),
-              SizedBox(height: 10),
+              const SizedBox(height: 10),
               Button(
                 title: 'Notification Preferences',
                 buttonType: ButtonType.greyBorder,
                 icon: Icons.notifications,
-                onTap: () => Get.to(() => NotificationSettingScreen()),
+                onTap: () => Get.to(() => const NotificationSettingScreen()),
               ),
-              SizedBox(height: 20),
+              const SizedBox(height: 20),
             ],
           ),
         );

@@ -45,10 +45,6 @@ class ApiClient {
       options.headers['Authorization'] = token;
     }
 
-    if (options.data != null) {
-      print('📤 Body: ${options.data}');
-    }
-
     handler.next(options);
   }
 

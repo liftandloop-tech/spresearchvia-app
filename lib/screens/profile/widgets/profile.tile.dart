@@ -14,17 +14,17 @@ class ProfileTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    Color dotColor = Color(0xff22C55E);
+    Color dotColor = const Color(0xff22C55E);
     if (title.toLowerCase().contains('pan') ||
         title.toLowerCase().contains('aadhar')) {
       if (value.isEmpty || value.toLowerCase().contains('not available')) {
-        dotColor = Color(0xffF87171);
+        dotColor = const Color(0xffF87171);
       }
     }
     return Container(
-      padding: EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Color(0xffF9FAFB),
+        color: const Color(0xffF9FAFB),
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -33,12 +33,12 @@ class ProfileTile extends StatelessWidget {
             width: 40,
             height: 40,
             decoration: BoxDecoration(
-              color: Color(0xffE3E6EE),
+              color: const Color(0xffE3E6EE),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 14, color: Color(0xff163174)),
+            child: Icon(icon, size: 14, color: const Color(0xff163174)),
           ),
-          SizedBox(width: 12),
+          const SizedBox(width: 12),
 
           Expanded(
             child: Column(
@@ -46,17 +46,17 @@ class ProfileTile extends StatelessWidget {
               children: [
                 Text(
                   title,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 12,
                     fontWeight: FontWeight.w400,
                     color: Color(0xff6B7280),
                   ),
                 ),
-                SizedBox(height: 2),
+                const SizedBox(height: 2),
                 Text(
                   value,
-                  style: TextStyle(
+                  style: const TextStyle(
                     fontFamily: 'Poppins',
                     fontSize: 14,
                     fontWeight: FontWeight.w500,

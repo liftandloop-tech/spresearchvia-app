@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:SPResearchvia/core/theme/app_theme.dart';
+import 'package:spresearchvia/core/theme/app_theme.dart';
+import '../../core/routes/app_routes.dart';
 import '../../widgets/button.dart';
-import '../subscription/registration.screen.dart';
 
 class DigioConnectScreen extends StatelessWidget {
   const DigioConnectScreen({super.key});
@@ -10,7 +10,7 @@ class DigioConnectScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     void onConnect() {
-      Get.off(() => const RegistrationScreen());
+      Get.offAllNamed(AppRoutes.registrationScreen);
     }
 
     return Scaffold(
@@ -27,7 +27,7 @@ class DigioConnectScreen extends StatelessWidget {
           ),
           onPressed: () => Navigator.of(context).maybePop(),
         ),
-        title: Text(
+        title: const Text(
           'SEBI Verification',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -40,10 +40,10 @@ class DigioConnectScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: Padding(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
           child: Column(
             children: [
-              Spacer(),
+              const Spacer(),
               Container(
                 decoration: BoxDecoration(
                   color: Colors.white,
@@ -130,11 +130,11 @@ class DigioConnectScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              Spacer(),
-              Row(
+              const Spacer(),
+              const Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(Icons.shield, color: const Color(0xff9CA3AF)),
+                  Icon(Icons.shield, color: Color(0xff9CA3AF)),
                   SizedBox(width: 10),
                   Text(
                     'Your data is encrypted & safe',

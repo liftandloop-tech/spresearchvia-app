@@ -74,7 +74,7 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                   elevation: 8,
                   borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
                   child: Container(
-                    constraints: BoxConstraints(maxHeight: 300),
+                    constraints: const BoxConstraints(maxHeight: 300),
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
@@ -84,7 +84,7 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       itemCount: controller.segments.length,
-                      separatorBuilder: (context, index) => Divider(
+                      separatorBuilder: (context, index) => const Divider(
                         height: 1,
                         color: AppTheme.borderGrey,
                       ),
@@ -118,7 +118,7 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                                     ),
                                   ),
                                   if (isSelected)
-                                    Icon(
+                                    const Icon(
                                       Icons.check,
                                       color: AppTheme.primaryGreen,
                                       size: 20,
@@ -179,7 +179,7 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                 Expanded(
                   child: Text(
                     controller.selectedSegment.value,
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                       color: AppTheme.primaryBlue,

@@ -40,15 +40,41 @@ class Plan {
   double get totalAmount => amount + cgstAmount + sgstAmount;
 
   factory Plan.fromJson(Map<String, dynamic> json) {
+    final rawStatus =
+        (json['status'] ?? json['paymentStatus'] ?? json['planStatus'] ?? '')
+            .toString()
+            .toLowerCase();
+    final normalizedStatus = rawStatus.replaceAll(RegExp(r'[^a-z]'), '');
+
+    final isActive =
+        json['isActive'] == true ||
+        normalizedStatus == 'active' ||
+        normalizedStatus == 'success' ||
+        normalizedStatus == 'completed';
+    final isExpired =
+        json['isExpired'] == true || normalizedStatus == 'expired';
+    final isFailed = json['isFailed'] == true || normalizedStatus == 'failed';
+
+    final validityVal = json['validity'];
+    String validityStr = '';
+    int? validityDaysVal = json['validityDays'];
+
+    if (validityVal is int) {
+      validityDaysVal = validityVal;
+      validityStr = '$validityVal Days';
+    } else if (validityVal is String) {
+      validityStr = validityVal;
+    }
+
     return Plan(
       id: json['id'] ?? json['_id'] ?? '',
       name: json['name'] ?? json['packageName'] ?? '',
       amount: (json['amount'] ?? 0).toDouble(),
-      validity: json['validity'] ?? '',
+      validity: validityStr,
       cgstPercent: (json['cgstPercent'] ?? 9.0).toDouble(),
       sgstPercent: (json['sgstPercent'] ?? 9.0).toDouble(),
       description: json['description'],
-      validityDays: json['validityDays'],
+      validityDays: validityDaysVal,
       expiryDate: json['expiryDate'] != null
           ? DateTime.tryParse(json['expiryDate'].toString())
           : null,
@@ -64,9 +90,9 @@ class Plan {
       features: json['features'] != null
           ? List<String>.from(json['features'])
           : null,
-      isActive: json['isActive'] ?? false,
-      isExpired: json['isExpired'] ?? false,
-      isFailed: json['isFailed'] ?? false,
+      isActive: isActive,
+      isExpired: isExpired,
+      isFailed: isFailed,
     );
   }
 
@@ -77,12 +103,14 @@ class Plan {
         name: 'Annual Plan',
         amount: 5000,
         validity: '1 Year Access – Renew Annually',
+        validityDays: 365,
       ),
       Plan(
         id: 'lifetime',
         name: 'One-Time Plan',
         amount: 10000,
         validity: 'Lifetime Access – Pay Once',
+        validityDays: 36500,
       ),
     ];
   }

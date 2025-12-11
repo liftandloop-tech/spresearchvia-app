@@ -6,12 +6,12 @@ class SubscriberBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       decoration: BoxDecoration(
-        color: Color(0xffFFFBEB),
+        color: const Color(0xffFFFBEB),
         borderRadius: BorderRadius.circular(8),
       ),
-      child: Row(
+      child: const Row(
         children: [
           Icon(Icons.workspace_premium, size: 20, color: Color(0xffF59E0B)),
           SizedBox(width: 8),

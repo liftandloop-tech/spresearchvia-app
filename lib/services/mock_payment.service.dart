@@ -179,7 +179,7 @@ class MockPaymentService {
       'invoiceId': 'INV${DateTime.now().millisecondsSinceEpoch}',
       'transactionId': transactionId,
       'generatedAt': DateTime.now().toIso8601String(),
-      'downloadUrl': 'https://example.com/invoice/$transactionId.pdf',
+      'downloadUrl': 'https://example.com/invoice.pdf',
     };
   }
 }

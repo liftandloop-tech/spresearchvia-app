@@ -42,8 +42,8 @@ class ReminderPopup extends StatelessWidget {
             Container(
               width: 80,
               height: 80,
-              decoration: BoxDecoration(
-                color: const Color(0x1A11416B),
+              decoration: const BoxDecoration(
+                color: Color(0x1A11416B),
                 shape: BoxShape.circle,
               ),
               child: Center(
@@ -66,7 +66,7 @@ class ReminderPopup extends StatelessWidget {
             Text(
               'Your subscription\nexpires in ${daysRemaining == 0 ? 'today' : '$daysRemaining day${daysRemaining == 1 ? '' : 's'}'}',
               textAlign: TextAlign.center,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.w700,
                 color: Color(0xFF1A1A1A),

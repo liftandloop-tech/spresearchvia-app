@@ -10,11 +10,11 @@ class FeatureItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Icon(icon, color: Color(0xff2C7F38), size: 20),
-        SizedBox(width: 12),
+        Icon(icon, color: const Color(0xff2C7F38), size: 20),
+        const SizedBox(width: 12),
         Text(
           text,
-          style: TextStyle(
+          style: const TextStyle(
             fontFamily: 'Poppins',
             fontSize: 16,
             fontWeight: FontWeight.w400,

@@ -18,24 +18,33 @@ abstract class SnackbarService {
   }) {
     _dismiss();
 
-    final overlayState = getx.Get.overlayContext;
-    if (overlayState == null) {
-      return;
+    try {
+      final overlayState = getx.Get.overlayContext;
+      if (overlayState == null) {
+        return;
+      }
+
+      final overlay = Overlay.maybeOf(overlayState);
+      if (overlay == null) {
+        return;
+      }
+
+      _currentSnackbar = OverlayEntry(
+        builder: (context) => _SnackbarWidget(
+          message: message,
+          title: title,
+          icon: icon ?? Icons.notifications_outlined,
+          backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
+          duration: duration,
+          onTap: onTap,
+          onDismiss: _dismiss,
+        ),
+      );
+
+      overlay.insert(_currentSnackbar!);
+    } catch (e) {
+      // Ignore errors showing snackbar
     }
-
-    _currentSnackbar = OverlayEntry(
-      builder: (context) => _SnackbarWidget(
-        message: message,
-        title: title,
-        icon: icon ?? Icons.notifications_outlined,
-        backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
-        duration: duration,
-        onTap: onTap,
-        onDismiss: _dismiss,
-      ),
-    );
-
-    Overlay.of(overlayState).insert(_currentSnackbar!);
   }
 
   static void showSuccess(String message, {String? title, Duration? duration}) {

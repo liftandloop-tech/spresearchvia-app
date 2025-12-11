@@ -22,6 +22,10 @@ class SecureStorageService {
   static const String _userIdKey = 'user_id';
   static const String _userDataKey = 'user_data';
   static const String _isLoggedInKey = 'is_logged_in';
+  static const String _pendingPaymentIdKey = 'pending_payment_id';
+  static const String _pendingOrderIdKey = 'pending_order_id';
+  static const String _subscriptionStatusKey = 'subscription_status';
+  static const String _subscriptionCacheTimeKey = 'subscription_cache_time';
 
   bool get _useSecureStorage => AppConfig.useSecureStorage;
 
@@ -108,11 +112,83 @@ class SecureStorageService {
     return _regularStorage.read(_isLoggedInKey) ?? false;
   }
 
+  Future<void> savePendingPayment({
+    required String paymentId,
+    required String orderId,
+  }) async {
+    if (_useSecureStorage) {
+      await _secureStorage.write(key: _pendingPaymentIdKey, value: paymentId);
+      await _secureStorage.write(key: _pendingOrderIdKey, value: orderId);
+    } else {
+      await _regularStorage.write(_pendingPaymentIdKey, paymentId);
+      await _regularStorage.write(_pendingOrderIdKey, orderId);
+    }
+  }
+
+  Future<Map<String, String>?> getPendingPayment() async {
+    String? paymentId;
+    String? orderId;
+
+    if (_useSecureStorage) {
+      paymentId = await _secureStorage.read(key: _pendingPaymentIdKey);
+      orderId = await _secureStorage.read(key: _pendingOrderIdKey);
+    } else {
+      paymentId = _regularStorage.read(_pendingPaymentIdKey);
+      orderId = _regularStorage.read(_pendingOrderIdKey);
+    }
+
+    if (paymentId != null && orderId != null) {
+      return {'paymentId': paymentId, 'orderId': orderId};
+    }
+    return null;
+  }
+
+  Future<void> clearPendingPayment() async {
+    if (_useSecureStorage) {
+      await _secureStorage.delete(key: _pendingPaymentIdKey);
+      await _secureStorage.delete(key: _pendingOrderIdKey);
+    } else {
+      await _regularStorage.remove(_pendingPaymentIdKey);
+      await _regularStorage.remove(_pendingOrderIdKey);
+    }
+  }
+
+  Future<void> cacheSubscriptionStatus(bool hasSubscription) async {
+    await _regularStorage.write(_subscriptionStatusKey, hasSubscription);
+    await _regularStorage.write(
+      _subscriptionCacheTimeKey,
+      DateTime.now().millisecondsSinceEpoch,
+    );
+  }
+
+  Future<bool?> getCachedSubscriptionStatus() async {
+    final cacheTime = _regularStorage.read(_subscriptionCacheTimeKey);
+    if (cacheTime == null) return null;
+
+    final cacheAge = DateTime.now().millisecondsSinceEpoch - (cacheTime as int);
+    const maxCacheAge = 24 * 60 * 60 * 1000;
+
+    if (cacheAge > maxCacheAge) {
+      await _regularStorage.remove(_subscriptionStatusKey);
+      await _regularStorage.remove(_subscriptionCacheTimeKey);
+      return null;
+    }
+
+    return _regularStorage.read(_subscriptionStatusKey);
+  }
+
+  Future<void> clearSubscriptionCache() async {
+    await _regularStorage.remove(_subscriptionStatusKey);
+    await _regularStorage.remove(_subscriptionCacheTimeKey);
+  }
+
   Future<void> clearAuthData() async {
     await removeAuthToken();
     await _regularStorage.remove(_userIdKey);
     await _regularStorage.remove(_userDataKey);
     await setLoggedIn(false);
+    await clearPendingPayment();
+    await clearSubscriptionCache();
 
     if (_useSecureStorage) {
       await _secureStorage.delete(key: _userIdKey);

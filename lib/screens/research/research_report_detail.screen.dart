@@ -14,15 +14,15 @@ class ResearchReportDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color(0xffF9FAFB),
+      backgroundColor: const Color(0xffF9FAFB),
       appBar: AppBar(
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: Color(0xff163174)),
+          icon: const Icon(Icons.arrow_back, color: Color(0xff163174)),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Report Details',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -37,7 +37,7 @@ class ResearchReportDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: ReportHeaderCard(
                 category: 'Market Analysis',
                 title: report.title,
@@ -46,11 +46,11 @@ class ResearchReportDetailScreen extends StatelessWidget {
             ),
             Container(
               color: Colors.white,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Executive Summary',
                     style: TextStyle(
                       fontFamily: 'Poppins',
@@ -59,10 +59,10 @@ class ResearchReportDetailScreen extends StatelessWidget {
                       color: Color(0xff163174),
                     ),
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Text(
                     report.executiveSummary ?? 'No summary available',
-                    style: TextStyle(
+                    style: const TextStyle(
                       fontFamily: 'Poppins',
                       fontSize: 14,
                       fontWeight: FontWeight.w400,
@@ -73,14 +73,14 @@ class ResearchReportDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Container(
-              color: Color(0xffF9FAFB),
-              padding: EdgeInsets.all(20),
+              color: const Color(0xffF9FAFB),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Key Highlights',
                     style: TextStyle(
                       fontFamily: 'Poppins',
@@ -89,24 +89,24 @@ class ResearchReportDetailScreen extends StatelessWidget {
                       color: Color(0xff163174),
                     ),
                   ),
-                  SizedBox(height: 16),
+                  const SizedBox(height: 16),
                   ...(report.keyHighlights ?? []).map((highlight) {
                     return Padding(
-                      padding: EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.only(bottom: 12),
                       child: KeyHighlightItem(text: highlight),
                     );
-                  }).toList(),
+                  }),
                 ],
               ),
             ),
-            SizedBox(height: 12),
+            const SizedBox(height: 12),
             Container(
               color: Colors.white,
-              padding: EdgeInsets.all(20),
+              padding: const EdgeInsets.all(20),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
+                  const Text(
                     'Report Details',
                     style: TextStyle(
                       fontFamily: 'Poppins',
@@ -115,11 +115,11 @@ class ResearchReportDetailScreen extends StatelessWidget {
                       color: Color(0xff163174),
                     ),
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                   Container(
-                    padding: EdgeInsets.all(16),
+                    padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Color(0xffF9FAFB),
+                      color: const Color(0xffF9FAFB),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Column(
@@ -140,7 +140,7 @@ class ResearchReportDetailScreen extends StatelessWidget {
                             ),
                           ],
                         ),
-                        SizedBox(height: 20),
+                        const SizedBox(height: 20),
                         Row(
                           children: [
                             Expanded(
@@ -163,14 +163,14 @@ class ResearchReportDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: 20),
-            Padding(
+            const SizedBox(height: 20),
+            const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
               child: SubscriberBadge(),
             ),
-            SizedBox(height: 16),
+            const SizedBox(height: 16),
             Padding(
-              padding: EdgeInsets.all(16),
+              padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   Button(
@@ -179,14 +179,14 @@ class ResearchReportDetailScreen extends StatelessWidget {
                     icon: Icons.download,
                     onTap: () {},
                   ),
-                  SizedBox(height: 12),
+                  const SizedBox(height: 12),
                   Button(
                     title: 'Download Excel',
                     buttonType: ButtonType.greyBorder,
                     icon: Icons.download,
                     onTap: () {},
                   ),
-                  SizedBox(height: 20),
+                  const SizedBox(height: 20),
                 ],
               ),
             ),

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:SPResearchvia/core/theme/app_theme.dart';
+import 'package:spresearchvia/core/theme/app_theme.dart';
 import '../../core/utils/responsive.dart';
 import '../../core/constants/app_dimensions.dart';
 import '../../core/constants/app_strings.dart';
@@ -77,7 +77,7 @@ class DashboardScreen extends StatelessWidget {
                     SizedBox(
                       height: responsive.spacing(AppDimensions.logoHeight),
                       width: double.maxFinite,
-                      child: AppLogo(),
+                      child: const AppLogo(),
                     ),
                     SizedBox(height: responsive.spacing(5)),
                     SizedBox(

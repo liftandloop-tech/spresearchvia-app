@@ -153,7 +153,7 @@ class EditProfileScreen extends StatelessWidget {
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.white,
-      shape: RoundedRectangleBorder(
+      shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       builder: (BuildContext context) {
@@ -167,12 +167,12 @@ class EditProfileScreen extends StatelessWidget {
                   width: 40,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: Color(0xffE5E7EB),
+                    color: const Color(0xffE5E7EB),
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
-                SizedBox(height: 20),
-                Text(
+                const SizedBox(height: 20),
+                const Text(
                   'Change Profile Picture',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -181,7 +181,7 @@ class EditProfileScreen extends StatelessWidget {
                     color: Color(0xff163174),
                   ),
                 ),
-                SizedBox(height: 24),
+                const SizedBox(height: 24),
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
@@ -189,27 +189,30 @@ class EditProfileScreen extends StatelessWidget {
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xffE5E7EB)),
+                      border: Border.all(color: const Color(0xffE5E7EB)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(12),
+                          decoration: const BoxDecoration(
                             color: Color(0xff163174),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.camera_alt,
                             color: Colors.white,
                             size: 24,
                           ),
                         ),
-                        SizedBox(width: 16),
-                        Text(
+                        const SizedBox(width: 16),
+                        const Text(
                           'Take Photo',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -222,7 +225,7 @@ class EditProfileScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 InkWell(
                   onTap: () {
                     Navigator.pop(context);
@@ -230,27 +233,30 @@ class EditProfileScreen extends StatelessWidget {
                   },
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
-                    padding: EdgeInsets.symmetric(vertical: 16, horizontal: 20),
+                    padding: const EdgeInsets.symmetric(
+                      vertical: 16,
+                      horizontal: 20,
+                    ),
                     decoration: BoxDecoration(
-                      border: Border.all(color: Color(0xffE5E7EB)),
+                      border: Border.all(color: const Color(0xffE5E7EB)),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Row(
                       children: [
                         Container(
-                          padding: EdgeInsets.all(12),
-                          decoration: BoxDecoration(
+                          padding: const EdgeInsets.all(12),
+                          decoration: const BoxDecoration(
                             color: Color(0xff163174),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(
+                          child: const Icon(
                             Icons.photo_library,
                             color: Colors.white,
                             size: 24,
                           ),
                         ),
-                        SizedBox(width: 16),
-                        Text(
+                        const SizedBox(width: 16),
+                        const Text(
                           'Upload from Gallery',
                           style: TextStyle(
                             fontFamily: 'Poppins',
@@ -263,18 +269,18 @@ class EditProfileScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: 12),
+                const SizedBox(height: 12),
                 InkWell(
                   onTap: () => Navigator.pop(context),
                   borderRadius: BorderRadius.circular(12),
                   child: Container(
                     width: double.infinity,
-                    padding: EdgeInsets.symmetric(vertical: 16),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
                     decoration: BoxDecoration(
-                      color: Color(0xffF9FAFB),
+                      color: const Color(0xffF9FAFB),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: Center(
+                    child: const Center(
                       child: Text(
                         'Cancel',
                         style: TextStyle(
@@ -303,7 +309,7 @@ class EditProfileScreen extends StatelessWidget {
       backgroundColor: AppTheme.backgroundWhite,
       appBar: AppBar(
         backgroundColor: AppTheme.backgroundWhite,
-        title: Text('Edit Profile', style: AppStyles.appBarTitle),
+        title: const Text('Edit Profile', style: AppStyles.appBarTitle),
       ),
       body: SingleChildScrollView(
         child: Padding(
@@ -312,23 +318,20 @@ class EditProfileScreen extends StatelessWidget {
             children: [
               GestureDetector(
                 onTap: () => _showImagePickerBottomSheet(context, controller),
-                child: Container(
-                  child: Column(
-                    children: [
-                      Obx(() {
-                        final user =
-                            controller.userController.currentUser.value;
-                        return ProfileImageAvatar(
-                          imagePath:
-                              controller.selectedImage.value?.path ??
-                              user?.profileImage ??
-                              'assets/images/profile_placeholder.jpg',
-                        );
-                      }),
-                      SizedBox(height: 5),
-                      Text('Change Photo', style: AppStyles.link),
-                    ],
-                  ),
+                child: Column(
+                  children: [
+                    Obx(() {
+                      final user = controller.userController.currentUser.value;
+                      return ProfileImageAvatar(
+                        imagePath:
+                            controller.selectedImage.value?.path ??
+                            user?.profileImage ??
+                            'assets/images/profile_placeholder.jpg',
+                      );
+                    }),
+                    const SizedBox(height: 5),
+                    const Text('Change Photo', style: AppStyles.link),
+                  ],
                 ),
               ),
               TitleField(
@@ -338,7 +341,7 @@ class EditProfileScreen extends StatelessWidget {
                 keyboardType: TextInputType.name,
                 inputFormatters: [NameInputFormatter()],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Middle Name',
                 controller: controller.middleNameController,
@@ -346,7 +349,7 @@ class EditProfileScreen extends StatelessWidget {
                 keyboardType: TextInputType.name,
                 inputFormatters: [NameInputFormatter()],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Last Name',
                 controller: controller.lastNameController,
@@ -354,7 +357,7 @@ class EditProfileScreen extends StatelessWidget {
                 keyboardType: TextInputType.name,
                 inputFormatters: [NameInputFormatter()],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: "Father's Name",
                 controller: controller.fatherNameController,
@@ -362,35 +365,35 @@ class EditProfileScreen extends StatelessWidget {
                 keyboardType: TextInputType.name,
                 inputFormatters: [NameInputFormatter()],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'House No',
                 controller: controller.houseNoController,
                 hint: 'Enter house number (optional)',
                 keyboardType: TextInputType.streetAddress,
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Street Address',
                 controller: controller.streetAddressController,
                 hint: 'Enter street address',
                 keyboardType: TextInputType.streetAddress,
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Area',
                 controller: controller.areaController,
                 hint: 'Enter area (optional)',
                 keyboardType: TextInputType.text,
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Landmark',
                 controller: controller.landmarkController,
                 hint: 'Enter landmark (optional)',
                 keyboardType: TextInputType.text,
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Pincode',
                 controller: controller.pincodeController,
@@ -398,7 +401,7 @@ class EditProfileScreen extends StatelessWidget {
                 keyboardType: TextInputType.number,
                 inputFormatters: [PincodeInputFormatter()],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               Obx(
                 () => StateSelector(
                   label: controller.selectedState.value ?? 'Select State',
@@ -406,7 +409,7 @@ class EditProfileScreen extends StatelessWidget {
                       controller.selectedState.value = newState!,
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Mobile Number',
                 controller: controller.phoneController,
@@ -414,14 +417,14 @@ class EditProfileScreen extends StatelessWidget {
                 keyboardType: TextInputType.phone,
                 inputFormatters: [PhoneInputFormatter()],
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               TitleField(
                 title: 'Email',
                 controller: controller.emailController,
                 hint: 'Enter email (optional)',
                 keyboardType: TextInputType.emailAddress,
               ),
-              SizedBox(height: 15),
+              const SizedBox(height: 15),
               Obx(
                 () => Button(
                   title: 'Save Changes',
@@ -434,7 +437,7 @@ class EditProfileScreen extends StatelessWidget {
 
               GestureDetector(
                 onTap: () {},
-                child: Container(
+                child: const SizedBox(
                   height: 60,
                   child: Row(
                     children: [
@@ -454,10 +457,10 @@ class EditProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              SizedBox(height: 5),
+              const SizedBox(height: 5),
               GestureDetector(
                 onTap: () {},
-                child: Container(
+                child: const SizedBox(
                   height: 60,
                   child: Row(
                     children: [

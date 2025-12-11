@@ -166,10 +166,10 @@ class SubscriptionHistoryScreen extends StatelessWidget {
         () => controller.isLoading.value
             ? const Center(child: CircularProgressIndicator())
             : controller.subscriptions.isEmpty
-            ? Center(
+            ? const Center(
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
-                  children: const [
+                  children: [
                     Icon(Icons.history, size: 64, color: Color(0xffD1D5DB)),
                     SizedBox(height: 16),
                     Text(

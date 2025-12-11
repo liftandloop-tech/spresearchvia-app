@@ -80,6 +80,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
       await planController.purchasePlan(
         packageName: plan.name,
         amount: plan.amount,
+        validity: plan.validityDays ?? 365,
       );
 
       Get.back();
@@ -101,10 +102,10 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         backgroundColor: Colors.white,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
           onPressed: () => Navigator.pop(context),
         ),
-        title: Text(
+        title: const Text(
           'Quick Renewal',
           style: TextStyle(
             fontFamily: 'Poppins',
@@ -120,7 +121,7 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
         final isLoading = planController.isLoading.value;
 
         if (isLoading) {
-          return Center(child: CircularProgressIndicator());
+          return const Center(child: CircularProgressIndicator());
         }
 
         if (plan == null) {
@@ -128,13 +129,13 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(
+                const Icon(
                   Icons.subscriptions_outlined,
                   size: 64,
                   color: AppTheme.borderGrey,
                 ),
-                SizedBox(height: 16),
-                Text(
+                const SizedBox(height: 16),
+                const Text(
                   'No active plan found',
                   style: TextStyle(
                     fontFamily: 'Poppins',
@@ -143,10 +144,10 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                     color: AppTheme.textGrey,
                   ),
                 ),
-                SizedBox(height: 8),
+                const SizedBox(height: 8),
                 TextButton(
                   onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
-                  child: Text('Browse Plans'),
+                  child: const Text('Browse Plans'),
                 ),
               ],
             ),
@@ -210,19 +211,19 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   buttonType: ButtonType.green,
                   onTap: _renewPlan,
                 ),
-                SizedBox(height: 16),
+                const SizedBox(height: 16),
                 OutlinedButton(
                   onPressed: () => Get.offAllNamed('/tabs', arguments: 2),
                   style: OutlinedButton.styleFrom(
                     foregroundColor: AppTheme.primaryBlueDark,
-                    side: BorderSide(color: AppTheme.primaryBlue),
-                    padding: EdgeInsets.symmetric(vertical: 16),
-                    minimumSize: Size(double.infinity, 48),
+                    side: const BorderSide(color: AppTheme.primaryBlue),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    minimumSize: const Size(double.infinity, 48),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
                   ),
-                  child: Text(
+                  child: const Text(
                     'Change Plan',
                     style: TextStyle(
                       fontFamily: 'Poppins',

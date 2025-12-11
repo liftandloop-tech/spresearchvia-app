@@ -54,10 +54,10 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
         backgroundColor: AppTheme.backgroundWhite,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: AppTheme.primaryBlue),
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryBlue),
           onPressed: () => Get.back(),
         ),
-        title: Text('KYC Verification', style: AppStyles.appBarTitle),
+        title: const Text('KYC Verification', style: AppStyles.appBarTitle),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -83,14 +83,14 @@ class _AadharVerificationScreenState extends State<AadharVerificationScreen> {
                         color: AppTheme.backgroundLightBlue,
                         borderRadius: BorderRadius.circular(40),
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.credit_card_outlined,
                         color: AppTheme.primaryBlue,
                         size: 30,
                       ),
                     ),
                     const SizedBox(height: 24),
-                    Text('Aadhar Verification', style: AppStyles.heading2),
+                    const Text('Aadhar Verification', style: AppStyles.heading2),
                     const SizedBox(height: 8),
                     Text(
                       'Please provide your Aadhar details for\nidentity verification',

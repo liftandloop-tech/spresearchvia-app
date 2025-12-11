@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:SPResearchvia/controllers/segment_plan.controller.dart';
-import 'package:SPResearchvia/core/theme/app_theme.dart';
-import 'package:SPResearchvia/screens/subscription/widgets/segment.dropdown.dart';
-import 'package:SPResearchvia/widgets/button.dart';
+import 'package:spresearchvia/controllers/segment_plan.controller.dart';
+import 'package:spresearchvia/core/theme/app_theme.dart';
+import 'package:spresearchvia/screens/subscription/widgets/segment.dropdown.dart';
+import 'package:spresearchvia/widgets/button.dart';
+import '../../core/routes/app_routes.dart';
 
 class SelectSegmentScreen extends StatelessWidget {
   SelectSegmentScreen({super.key});
@@ -13,7 +14,7 @@ class SelectSegmentScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PopScope(
-      canPop: false,
+      canPop: true,
       onPopInvokedWithResult: (didPop, result) {
         if (didPop) return;
         Get.back();
@@ -21,15 +22,18 @@ class SelectSegmentScreen extends StatelessWidget {
       child: Scaffold(
         body: SafeArea(
           child: SingleChildScrollView(
-            padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 GestureDetector(
                   onTap: () => Get.back(),
-                  child: Icon(Icons.arrow_back, color: AppTheme.textBlack),
+                  child: const Icon(
+                    Icons.arrow_back,
+                    color: AppTheme.textBlack,
+                  ),
                 ),
-                Text(
+                const Text(
                   'Select Your Research Segment',
                   overflow: TextOverflow.clip,
                   style: TextStyle(
@@ -38,22 +42,22 @@ class SelectSegmentScreen extends StatelessWidget {
                     color: AppTheme.primaryBlue,
                   ),
                 ),
-                SizedBox(height: 10),
-                Text(
+                const SizedBox(height: 10),
+                const Text(
                   'Choose the segment and plan type that suits your trading preference.',
                   overflow: TextOverflow.clip,
                   style: TextStyle(fontSize: 12, color: AppTheme.textBlack),
                 ),
-                SizedBox(height: 15),
-                Divider(height: 1, color: AppTheme.borderGrey),
-                SizedBox(height: 15),
-                Text(
+                const SizedBox(height: 15),
+                const Divider(height: 1, color: AppTheme.borderGrey),
+                const SizedBox(height: 15),
+                const Text(
                   'Select Segment',
                   style: TextStyle(fontSize: 14, color: AppTheme.primaryBlue),
                 ),
-                SizedBox(height: 15),
-                SegmentDropdownMenu(),
-                SizedBox(height: 15),
+                const SizedBox(height: 15),
+                const SegmentDropdownMenu(),
+                const SizedBox(height: 15),
 
                 Obx(() {
                   if (segmentPlanController.isLoading.value) {
@@ -89,9 +93,9 @@ class SelectSegmentScreen extends StatelessWidget {
                               color: Colors.red,
                             ),
                             const SizedBox(height: 16),
-                            Text(
+                            const Text(
                               'Failed to load plans',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w600,
                                 color: Colors.red,
@@ -158,9 +162,9 @@ class SelectSegmentScreen extends StatelessWidget {
                   );
                 }),
 
-                SizedBox(height: 20),
-                Divider(color: AppTheme.infoBorder),
-                SizedBox(height: 15),
+                const SizedBox(height: 20),
+                const Divider(color: AppTheme.infoBorder),
+                const SizedBox(height: 15),
                 Obx(() {
                   final hasSelection =
                       segmentPlanController.selectedPlanId.value != null;
@@ -172,7 +176,7 @@ class SelectSegmentScreen extends StatelessWidget {
                     onTap: hasSelection
                         ? () {
                             Get.toNamed(
-                              '/confirm-payment',
+                              AppRoutes.confirmPayment,
                               arguments: {'plan': selectedPlan},
                             );
                           }
@@ -259,7 +263,7 @@ class SegmentPlanCard extends StatelessWidget {
                       ),
                       if (isHNI) ...[
                         const SizedBox(width: 4),
-                        Icon(
+                        const Icon(
                           Icons.info_outline,
                           size: 16,
                           color: AppTheme.textGrey,
@@ -268,11 +272,11 @@ class SegmentPlanCard extends StatelessWidget {
                     ],
                   ),
                 ),
-                Radio<bool>(
-                  value: true,
-                  groupValue: isSelected,
-                  onChanged: onTap != null ? (_) => onTap!() : null,
-                  activeColor: AppTheme.primaryGreen,
+                Icon(
+                  isSelected
+                      ? Icons.radio_button_checked
+                      : Icons.radio_button_unchecked,
+                  color: isSelected ? AppTheme.primaryGreen : AppTheme.textGrey,
                 ),
               ],
             ),

@@ -29,7 +29,7 @@ class LoginController extends GetxController {
   void onInit() {
     super.onInit();
     authController.resetOtpState();
-    // Prefill phone/email from storage; leave MPIN empty
+
     Future.microtask(_prefillFromStorage);
   }
 
@@ -41,7 +41,6 @@ class LoginController extends GetxController {
         final String? email = userData['email'] as String?;
 
         if (phone != null && phone.isNotEmpty) {
-          // Stored format may include country code (e.g., 91XXXXXXXXXX)
           final normalized = phone.startsWith('91') && phone.length == 12
               ? phone.substring(2)
               : phone;
@@ -50,12 +49,9 @@ class LoginController extends GetxController {
           phoneOrMailController.text = email;
         }
 
-        // Always clear MPIN field for security
         mpinController.clear();
       }
-    } catch (_) {
-      // Silently ignore prefill errors
-    }
+    } catch (_) {}
   }
 
   @override
@@ -91,31 +87,34 @@ class LoginController extends GetxController {
 
     isLoading.value = true;
 
-    final success = await authController.login(
-      email: isEmail ? processedInput : null,
-      phone: isPhone ? processedInput : null,
-      mPin: mpin,
-    );
+    try {
+      final success = await authController.login(
+        email: isEmail ? processedInput : null,
+        phone: isPhone ? processedInput : null,
+        mPin: mpin,
+      );
 
-    if (success) {
-      print('🟡 Login successful, checking subscription...');
-      final hasSubscription = await authController.hasActiveSubscription();
-      isLoading.value = false;
-
-      if (hasSubscription) {
-        print('✅ Has subscription, navigating to tabs');
-        SnackbarService.showSuccess('Login successful!');
-        Get.offAllNamed(AppRoutes.tabs);
-      } else {
-        print('⚠️ No subscription, navigating to registration');
-        SnackbarService.showWarning(
-          'No active subscription found, please register to continue',
+      if (success) {
+        await _storage.clearSubscriptionCache();
+        final hasSubscription = await authController.hasActiveSubscription(
+          forceRefresh: true,
         );
-        Get.offAllNamed(AppRoutes.registrationScreen);
+        if (hasSubscription) {
+          SnackbarService.showSuccess('Login successful!');
+          Get.offAllNamed(AppRoutes.tabs);
+        } else {
+          SnackbarService.showWarning(
+            'No active subscription found, please register to continue',
+          );
+          Get.offAllNamed(AppRoutes.registrationScreen);
+        }
+      } else {
+        SnackbarService.showError('Invalid credentials. Please try again.');
       }
-    } else {
+    } catch (e) {
+      SnackbarService.showError('Login failed. Please try again.');
+    } finally {
       isLoading.value = false;
-      print('❌ Login failed');
     }
   }
 }
@@ -156,7 +155,7 @@ class LoginScreen extends StatelessWidget {
                 SizedBox(
                   height: responsive.spacing(AppDimensions.logoHeight),
                   width: double.maxFinite,
-                  child: AppLogo(),
+                  child: const AppLogo(),
                 ),
                 SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
                 Text(
@@ -230,7 +229,7 @@ class LoginScreen extends StatelessWidget {
                   onTap: () => Get.back(),
                 ),
                 SizedBox(height: responsive.spacing(AppDimensions.spacing20)),
-                DataProtection(),
+                const DataProtection(),
               ],
             ),
           ),
