@@ -11,72 +11,75 @@ class GetStartedScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppTheme.backgroundWhite,
-      body: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                color: AppTheme.primaryBlueDark,
-                borderRadius: BorderRadius.circular(15),
-              ),
-              child: const Center(
-                child: Icon(Icons.light, size: 50, color: Colors.white),
-              ),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 20),
+            child: Column(
+              children: [
+                Container(
+                  width: 100,
+                  height: 100,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primaryBlueDark,
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  child: const Center(
+                    child: Icon(Icons.light, size: 50, color: Colors.white),
+                  ),
+                ),
+                const SizedBox(height: 5),
+                const Text(
+                  'SP ResearchVia',
+                  style: TextStyle(
+                    color: AppTheme.primaryBlue,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'Welcome to SP ResearchVia - Your Trusted Market Research Partner',
+                  textAlign: TextAlign.center,
+                  style: TextStyle(color: AppTheme.textGrey, fontSize: 14),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(child: Image.asset('assets/images/get_started.png')),
+                const SizedBox(height: 20),
+                const Text(
+                  'Get Started',
+                  style: TextStyle(
+                    color: AppTheme.primaryBlue,
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                const SizedBox(height: 15),
+                Button(
+                  title: 'Existing Customer - Login',
+                  icon: Icons.login,
+                  buttonType: ButtonType.blue,
+                  onTap: () {
+                    Get.toNamed(AppRoutes.login);
+                  },
+                ),
+                const SizedBox(height: 10),
+                Button(
+                  title: 'New Customer - Sign Up',
+                  icon: Icons.person_add,
+                  buttonType: ButtonType.green,
+                  onTap: () {
+                    Get.toNamed(AppRoutes.createAccount);
+                  },
+                ),
+                const SizedBox(height: 10),
+                const Text(
+                  'By continuing, you agree to our Terms & Privacy Policy.',
+                  style: TextStyle(color: AppTheme.textGrey, fontSize: 12),
+                ),
+              ],
             ),
-            const SizedBox(height: 5),
-            const Text(
-              'SP ResearchVia',
-              style: TextStyle(
-                color: AppTheme.primaryBlue,
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'Welcome to SP ResearchVia - Your Trusted Market Research Partner',
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppTheme.textGrey, fontSize: 14),
-            ),
-            const SizedBox(height: 20),
-            SizedBox(child: Image.asset('assets/images/get_started.png')),
-            const SizedBox(height: 20),
-            const Text(
-              'Get Started',
-              style: TextStyle(
-                color: AppTheme.primaryBlue,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-            const SizedBox(height: 15),
-            Button(
-              title: 'Existing Customer - Login',
-              icon: Icons.login,
-              buttonType: ButtonType.blue,
-              onTap: () {
-                Get.toNamed(AppRoutes.login);
-              },
-            ),
-            const SizedBox(height: 10),
-            Button(
-              title: 'New Customer - Sign Up',
-              icon: Icons.person_add,
-              buttonType: ButtonType.green,
-              onTap: () {
-                Get.toNamed(AppRoutes.createAccount);
-              },
-            ),
-            const SizedBox(height: 10),
-            const Text(
-              'By continuing, you agree to our Terms & Privacy Policy.',
-              style: TextStyle(color: AppTheme.textGrey, fontSize: 12),
-            ),
-          ],
+          ),
         ),
       ),
     );

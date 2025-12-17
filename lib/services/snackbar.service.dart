@@ -15,17 +15,54 @@ abstract class SnackbarService {
     Color? backgroundColor,
     Duration duration = const Duration(seconds: 3),
     VoidCallback? onTap,
+    BuildContext? context,
   }) {
     _dismiss();
 
     try {
-      final overlayState = getx.Get.overlayContext;
-      if (overlayState == null) {
+      BuildContext? overlayContext;
+
+      // Try Get.overlayContext first (more reliable)
+      overlayContext = getx.Get.overlayContext;
+
+      // If that fails, try the provided context
+      if (overlayContext == null && context != null) {
+        overlayContext = context;
+      }
+
+      // If still null, try navigator context
+      if (overlayContext == null && context != null) {
+        overlayContext = Navigator.maybeOf(context)?.context;
+      }
+
+      if (overlayContext == null) {
+        debugPrint('SnackbarService: No overlay context available');
+        // Fallback to Get.snackbar
+        getx.Get.snackbar(
+          title ?? "",
+          message,
+          backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
+          colorText: Colors.white,
+          snackPosition: getx.SnackPosition.TOP,
+          duration: duration,
+          titleText: const SizedBox.shrink(),
+        );
         return;
       }
 
-      final overlay = Overlay.maybeOf(overlayState);
+      final overlay = Overlay.maybeOf(overlayContext);
       if (overlay == null) {
+        debugPrint('SnackbarService: No overlay found, using fallback');
+        // Fallback to Get.snackbar
+        getx.Get.snackbar(
+          "",
+          message,
+          backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
+          colorText: Colors.white,
+          snackPosition: getx.SnackPosition.TOP,
+          duration: duration,
+          titleText: const SizedBox.shrink(),
+        );
         return;
       }
 
@@ -43,27 +80,51 @@ abstract class SnackbarService {
 
       overlay.insert(_currentSnackbar!);
     } catch (e) {
-      // Ignore errors showing snackbar
+      debugPrint('SnackbarService error: $e');
+      // Fallback to Get.snackbar on error
+      try {
+        getx.Get.snackbar(
+          "",
+          message,
+          backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
+          colorText: Colors.white,
+          snackPosition: getx.SnackPosition.TOP,
+          duration: duration,
+          titleText: const SizedBox.shrink(),
+        );
+      } catch (_) {}
     }
   }
 
-  static void showSuccess(String message, {String? title, Duration? duration}) {
+  static void showSuccess(
+    String message, {
+    String? title,
+    Duration? duration,
+    BuildContext? context,
+  }) {
     show(
       message,
       title: title,
       icon: Icons.check_circle_rounded,
       backgroundColor: AppTheme.success,
       duration: duration ?? const Duration(seconds: 3),
+      context: context,
     );
   }
 
-  static void showError(String message, {String? title, Duration? duration}) {
+  static void showError(
+    String message, {
+    String? title,
+    Duration? duration,
+    BuildContext? context,
+  }) {
     show(
       message,
       title: title,
       icon: Icons.error_rounded,
       backgroundColor: AppTheme.error,
       duration: duration ?? const Duration(seconds: 4),
+      context: context,
     );
   }
 
@@ -81,23 +142,35 @@ abstract class SnackbarService {
     showError(message, title: title, duration: duration);
   }
 
-  static void showWarning(String message, {String? title, Duration? duration}) {
+  static void showWarning(
+    String message, {
+    String? title,
+    Duration? duration,
+    BuildContext? context,
+  }) {
     show(
       message,
       title: title,
       icon: Icons.warning_rounded,
       backgroundColor: AppTheme.warning,
       duration: duration ?? const Duration(seconds: 3),
+      context: context,
     );
   }
 
-  static void showInfo(String message, {String? title, Duration? duration}) {
+  static void showInfo(
+    String message, {
+    String? title,
+    Duration? duration,
+    BuildContext? context,
+  }) {
     show(
       message,
       title: title,
       icon: Icons.info_rounded,
       backgroundColor: AppTheme.primaryBlueDark,
       duration: duration ?? const Duration(seconds: 3),
+      context: context,
     );
   }
 

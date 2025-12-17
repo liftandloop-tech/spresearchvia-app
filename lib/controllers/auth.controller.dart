@@ -113,18 +113,24 @@ class AuthController extends GetxController {
     required String phone,
   }) async {
     try {
+      print('DEBUG: createUser called with name: $fullName, phone: $phone');
       isLoading.value = true;
       final response = await _apiClient.post(
         ApiConfig.createUser,
         data: {'fullName': fullName, 'phone': phone},
       );
 
-      if (response.statusCode == 200) {
+      print('DEBUG: createUser response status: ${response.statusCode}');
+      print('DEBUG: createUser response data: ${response.data}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         final message = data['message'] ?? '';
 
         if (message.contains('already exist')) {
-          SnackbarService.showError('User already exists');
+          SnackbarService.showWarning(
+            'User already exists. Please login to continue',
+          );
           return false;
         }
 
@@ -137,14 +143,18 @@ class AuthController extends GetxController {
             'phone': phone,
             'tempUser': true,
           });
-          SnackbarService.showSuccess('OTP sent to your phone');
+          SnackbarService.showSuccess('OTP sent successfully!');
           return true;
         }
 
-        SnackbarService.showError('Failed to create user');
+        SnackbarService.showError(
+          'Failed to create account. Please try again.',
+        );
+        return false;
+      } else {
+        SnackbarService.showError('Server error: ${response.statusCode}');
         return false;
       }
-      return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);

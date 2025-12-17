@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../../core/utils/responsive.dart';
 import '../../../core/constants/app_dimensions.dart';
+import '../../../controllers/segment_plan.controller.dart';
 
 class SegmentDropdownController extends GetxController {
   final selectedSegment = 'Equity Cash'.obs;
@@ -16,11 +17,21 @@ class SegmentDropdownController extends GetxController {
     'Equity Cash',
     'MCX',
     'NCDEX',
+    'currency',
+    'HNI Custom Plan',
   ];
 
   void selectSegment(String segment) {
     selectedSegment.value = segment;
     isOpen.value = false;
+
+    // Trigger filtering in SegmentPlanController
+    try {
+      final segmentPlanController = Get.find<SegmentPlanController>();
+      segmentPlanController.filterBySegment(segment);
+    } catch (e) {
+      // Controller not found, ignore
+    }
   }
 
   void toggleDropdown() {
@@ -72,26 +83,29 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                 offset: Offset(0, size.height + 4),
                 child: Material(
                   elevation: 8,
-                  borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+                  borderRadius: BorderRadius.circular(
+                    responsive.radius(AppDimensions.radiusMedium),
+                  ),
                   child: Container(
                     constraints: const BoxConstraints(maxHeight: 300),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+                      borderRadius: BorderRadius.circular(
+                        responsive.radius(AppDimensions.radiusMedium),
+                      ),
                       border: Border.all(color: AppTheme.borderGrey),
                     ),
                     child: ListView.separated(
                       padding: EdgeInsets.zero,
                       shrinkWrap: true,
                       itemCount: controller.segments.length,
-                      separatorBuilder: (context, index) => const Divider(
-                        height: 1,
-                        color: AppTheme.borderGrey,
-                      ),
+                      separatorBuilder: (context, index) =>
+                          const Divider(height: 1, color: AppTheme.borderGrey),
                       itemBuilder: (context, index) {
                         final segment = controller.segments[index];
                         return Obx(() {
-                          final isSelected = segment == controller.selectedSegment.value;
+                          final isSelected =
+                              segment == controller.selectedSegment.value;
                           return InkWell(
                             onTap: () {
                               controller.selectSegment(segment);
@@ -112,7 +126,9 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                                       segment,
                                       style: TextStyle(
                                         fontSize: 16,
-                                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                                        fontWeight: isSelected
+                                            ? FontWeight.w600
+                                            : FontWeight.w400,
                                         color: AppTheme.primaryBlue,
                                       ),
                                     ),
@@ -161,7 +177,9 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
         () => InkWell(
           key: _key,
           onTap: _toggleDropdown,
-          borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+          borderRadius: BorderRadius.circular(
+            responsive.radius(AppDimensions.radiusMedium),
+          ),
           child: Container(
             padding: responsive.padding(
               horizontal: AppDimensions.paddingMedium,
@@ -170,9 +188,13 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
             decoration: BoxDecoration(
               color: Colors.white,
               border: Border.all(
-                color: controller.isOpen.value ? AppTheme.primaryBlue : AppTheme.borderGrey,
+                color: controller.isOpen.value
+                    ? AppTheme.primaryBlue
+                    : AppTheme.borderGrey,
               ),
-              borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+              borderRadius: BorderRadius.circular(
+                responsive.radius(AppDimensions.radiusMedium),
+              ),
             ),
             child: Row(
               children: [
@@ -187,7 +209,9 @@ class _SegmentDropdownMenuState extends State<SegmentDropdownMenu> {
                   ),
                 ),
                 Icon(
-                  controller.isOpen.value ? Icons.keyboard_arrow_up : Icons.keyboard_arrow_down,
+                  controller.isOpen.value
+                      ? Icons.keyboard_arrow_up
+                      : Icons.keyboard_arrow_down,
                   color: AppTheme.primaryBlue,
                   size: 24,
                 ),

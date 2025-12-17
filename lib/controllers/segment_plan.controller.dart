@@ -67,9 +67,11 @@ class SegmentPlanController extends GetxController {
   final SecureStorageService _storage = SecureStorageService();
 
   final isLoading = false.obs;
-  final availablePlans = <SegmentPlan>[].obs;
+  final allPlans = <SegmentPlan>[].obs; // Store all plans
+  final availablePlans = <SegmentPlan>[].obs; // Filtered plans
   final selectedPlanId = Rxn<String>();
   final error = Rxn<String>();
+  final selectedSegment = 'Equity Cash'.obs; // Track selected segment
 
   Future<String?> get userId => _storage.getUserId();
 
@@ -89,9 +91,12 @@ class SegmentPlanController extends GetxController {
       if (response.statusCode == 200) {
         final data = response.data;
         final List<dynamic> plansData = data['data']['data'] ?? [];
-        availablePlans.value = plansData
+        allPlans.value = plansData
             .map((json) => SegmentPlan.fromJson(json))
             .toList();
+
+        // Apply initial filter based on selected segment
+        filterBySegment(selectedSegment.value);
 
         if (selectedPlanId.value == null) {
           final popularPlan = availablePlans.firstWhereOrNull(
@@ -132,29 +137,60 @@ class SegmentPlanController extends GetxController {
     await fetchPlans();
   }
 
+  void filterBySegment(String segment) {
+    selectedSegment.value = segment;
+
+    // Filter plans where segmentName matches the selected segment
+    availablePlans.value = allPlans.where((plan) {
+      // Case-insensitive comparison
+      return plan.name.toLowerCase() == segment.toLowerCase();
+    }).toList();
+
+    // Reset selected plan if it's not in the filtered list
+    if (selectedPlanId.value != null &&
+        !availablePlans.any((p) => p.id == selectedPlanId.value)) {
+      selectedPlanId.value = null;
+
+      // Auto-select popular plan from filtered list if available
+      final popularPlan = availablePlans.firstWhereOrNull((p) => p.isPopular);
+      if (popularPlan != null) {
+        selectedPlanId.value = popularPlan.id;
+      }
+    }
+  }
+
   Future<Map<String, dynamic>?> purchaseSegment({
     required String segmentId,
   }) async {
     try {
+      print(
+        'DEBUG: purchaseSegment controller called with segmentId: $segmentId',
+      );
       isLoading.value = true;
 
       final uid = await userId;
+      print('DEBUG: User ID: $uid');
       if (uid == null) {
         throw Exception('User not logged in');
       }
 
+      print('DEBUG: Making API call to ${ApiConfig.segmentPurchase}');
       final response = await _apiClient.post(
         ApiConfig.segmentPurchase,
         data: {'userId': uid, 'segmentId': segmentId},
       );
 
-      if (response.statusCode == 200) {
+      print('DEBUG: API Response Status: ${response.statusCode}');
+      print('DEBUG: API Response Data: ${response.data}');
+
+      if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         return data['data'] ?? data;
       }
 
       throw Exception('Server returned status code: ${response.statusCode}');
     } catch (e) {
+      print('DEBUG: Error in purchaseSegment controller: $e');
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
       rethrow;

@@ -10,6 +10,7 @@ import '../../core/constants/app_strings.dart';
 import '../../controllers/auth.controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../services/snackbar.service.dart';
+import '../../core/utils/validators.dart';
 
 class CreateAccountController extends GetxController {
   final authController = Get.find<AuthController>();
@@ -24,41 +25,43 @@ class CreateAccountController extends GetxController {
     super.onClose();
   }
 
-  bool _isValidFullName(String name) {
-    return name.trim().length >= 2;
-  }
-
-  bool _isValidPhone(String phone) {
-    return RegExp(r'^\d{10}$').hasMatch(phone);
-  }
-
-  Future<void> handleContinue() async {
+  Future<void> handleContinue(BuildContext context) async {
     final name = fullNameController.text.trim();
     final phone = phoneController.text.trim();
 
-    if (!_isValidFullName(name)) {
-      SnackbarService.showError('Please enter your full name');
+    final nameError = Validators.validateName(name, fieldName: 'Full name');
+    if (nameError != null) {
+      SnackbarService.showError(nameError, context: context);
       return;
     }
-    if (!_isValidPhone(phone)) {
-      SnackbarService.showError('Enter a valid 10-digit mobile number');
+
+    final phoneError = Validators.validatePhone(phone);
+    if (phoneError != null) {
+      SnackbarService.showError(phoneError, context: context);
       return;
     }
 
     isLoading.value = true;
 
-    final success = await authController.createUser(
-      fullName: name,
-      phone: '91$phone',
-    );
-
-    isLoading.value = false;
-
-    if (success) {
-      Get.toNamed(
-        AppRoutes.otpVerification,
-        arguments: {'phone': '91$phone', 'fullName': name, 'flow': 'signup'},
+    try {
+      final success = await authController.createUser(
+        fullName: name,
+        phone: '91$phone',
       );
+
+      if (success) {
+        Get.toNamed(
+          AppRoutes.otpVerification,
+          arguments: {'phone': '91$phone', 'fullName': name, 'flow': 'signup'},
+        );
+      }
+    } catch (e) {
+      SnackbarService.showError(
+        'An error occurred. Please try again.',
+        context: context,
+      );
+    } finally {
+      isLoading.value = false;
     }
   }
 }
@@ -152,7 +155,7 @@ class CreateAccountScreen extends StatelessWidget {
                               buttonType: ButtonType.green,
                               onTap: controller.isLoading.value
                                   ? null
-                                  : controller.handleContinue,
+                                  : () => controller.handleContinue(context),
                               showLoading: controller.isLoading.value,
                             ),
                           ),

@@ -12,6 +12,7 @@ import '../../screens/auth/signup.screen.dart';
 import '../../screens/splash/splash.screen.dart';
 import '../../screens/auth/login.screen.dart';
 import '../../screens/auth/otp_verification.screen.dart';
+import '../../screens/auth/forgot_mpin.screen.dart';
 import '../../screens/auth/set_mpin.screen.dart';
 import '../../screens/tabs.screen.dart';
 import '../../screens/dashboard/dashboard.screen.dart';
@@ -70,6 +71,7 @@ class AppRoutes {
     GetPage(name: createAccount, page: () => const CreateAccountScreen()),
     GetPage(name: signup, page: () => const SignupScreen()),
     GetPage(name: otpVerification, page: () => const OtpVerificationScreen()),
+    GetPage(name: forgotMpin, page: () => const ForgotMpinScreen()),
     GetPage(name: setMpin, page: () => const SetMpinScreen()),
     GetPage(name: quickRenewal, page: () => const QuickRenewalScreen()),
     GetPage(name: tabs, page: () => const TabsScreen()),
@@ -83,7 +85,10 @@ class AppRoutes {
       page: () => ResearchReportDetailScreen(report: Get.arguments),
     ),
     GetPage(name: choosePlan, page: () => const ChoosePlanScreen()),
-    GetPage(name: subscriptionHistory, page: () => const SubscriptionHistoryScreen()),
+    GetPage(
+      name: subscriptionHistory,
+      page: () => const SubscriptionHistoryScreen(),
+    ),
     GetPage(
       name: selectSegment,
       page: () => SelectSegmentScreen(),

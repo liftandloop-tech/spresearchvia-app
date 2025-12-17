@@ -160,13 +160,15 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
   void handlePaymentError(String errorMessage) {
     isProcessing.value = false;
     SnackbarService.showError(errorMessage);
-    Get.offAllNamed(
-      AppRoutes.paymentFailure,
-      arguments: {
-        'message': errorMessage,
-        'backRoute': AppRoutes.selectSegment,
-      },
-    );
+    Future.delayed(const Duration(milliseconds: 500), () {
+      Get.offAllNamed(
+        AppRoutes.paymentFailure,
+        arguments: {
+          'message': errorMessage,
+          'backRoute': AppRoutes.selectSegment,
+        },
+      );
+    });
   }
 
   void handleExternalWallet(String walletName) {
@@ -175,7 +177,9 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
   }
 
   Future<void> _proceedToPay() async {
+    print('DEBUG: _proceedToPay called');
     if (!agreedToTerms.value || !authorizedPayment.value) {
+      print('DEBUG: Terms not agreed or payment not authorized');
       SnackbarService.showWarning(
         'Please agree to the terms and authorize payment',
       );
@@ -183,18 +187,23 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
     }
 
     if (selectedPlan == null) {
+      print('DEBUG: No plan selected');
       SnackbarService.showError('Invalid plan selected');
       return;
     }
 
+    print('DEBUG: Selected Plan ID: ${selectedPlan!.id}');
     isProcessing.value = true;
 
     try {
+      print('DEBUG: Calling purchaseSegment...');
       final responseData = await segmentPlanController.purchaseSegment(
         segmentId: selectedPlan!.id,
       );
+      print('DEBUG: purchaseSegment response: $responseData');
 
       final segmentsPayment = responseData?['segmentsPayment'];
+      print('DEBUG: segmentsPayment: $segmentsPayment');
 
       if (segmentsPayment == null) {
         throw Exception('Invalid response from server');
@@ -204,6 +213,10 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
       final razorpayOrderId = segmentsPayment['razorpayOrderId'];
       final amount = segmentsPayment['amount'];
 
+      print('DEBUG: Payment ID: $_currentPaymentId');
+      print('DEBUG: Razorpay Order ID: $razorpayOrderId');
+      print('DEBUG: Amount: $amount');
+
       if (razorpayOrderId == null) {
         throw Exception('Order ID not received from backend');
       }
@@ -212,6 +225,10 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
       final userEmail = user?.email ?? '';
       final userPhone = user?.phone ?? '';
       final userName = user?.name ?? 'User';
+
+      print(
+        'DEBUG: User Info - Email: $userEmail, Phone: $userPhone, Name: $userName',
+      );
 
       final options = RazorpayOptions(
         orderId: razorpayOrderId,
@@ -224,6 +241,8 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
         userName: userName,
       );
 
+      print('DEBUG: Initiating Razorpay with options: ${options.toMap()}');
+
       _paymentHandler.initiatePayment(
         options: options,
         callbacks: PaymentCallbacks(
@@ -233,6 +252,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
         ),
       );
     } catch (e) {
+      print('DEBUG: Error in _proceedToPay: $e');
       isProcessing.value = false;
       SnackbarService.showError('Failed to initiate payment: ${e.toString()}');
     }
