@@ -39,7 +39,7 @@ class SegmentPlan {
       perDay:
           json['perDay']?.toString() ??
           (json['daysCharge'] != null
-              ? 'Approx ₹${json['daysCharge']}/day'
+              ? 'Starts from ₹${json['daysCharge']}/day'
               : ''),
       benefits:
           (json['benefits'] as List?)?.map((e) => e.toString()).toList() ?? [],

@@ -32,6 +32,8 @@ abstract class ApiConfig {
 
   static String getUserPlan(String userId) =>
       '/user/purchase/user-active-plan/$userId';
+  static String userSubscriptionHistory(String userId) =>
+      '/user/purchase/user-subscription-history/$userId';
   static String toggleExpiryReminders(String userId) =>
       '/user/purchase/expiry-reminders/$userId';
 

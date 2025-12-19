@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:spresearchvia/services/snackbar.service.dart';
 import '../../../controllers/plan_purchase.controller.dart';
 import '../../subscription/quick_renewal.screen.dart';
 import '../../../widgets/button.dart';
+import '../../tabs.screen.dart';
+import '../../subscription/choose_plan.screen.dart';
+import '../../../core/routes/app_routes.dart';
 
 class PremiumPlanCard extends StatelessWidget {
   const PremiumPlanCard({super.key});
@@ -54,6 +58,28 @@ class PremiumPlanCard extends StatelessWidget {
                     color: Colors.white.withValues(alpha: 0.9),
                   ),
                 ),
+
+                const SizedBox(height: 24),
+                Button(
+                  title: 'Select a Plan',
+                  buttonType: ButtonType.green,
+                  onTap: () {
+                    if (Get.isRegistered<TabsController>()) {
+                      final tabs = Get.find<TabsController>();
+                      final idx = tabs.screens.indexWhere(
+                        (w) => w.runtimeType == ChoosePlanScreen,
+                      );
+
+                      if (idx != -1) {
+                        tabs.changeTab(idx);
+                        Get.toNamed(AppRoutes.tabs, arguments: idx);
+                        return;
+                      }
+                    } else {
+                      SnackbarService.showError('Tabs not registered');
+                    }
+                  },
+                ),
               ],
             ),
           );
@@ -84,15 +110,18 @@ class PremiumPlanCard extends StatelessWidget {
                   if (plan.name.isNotEmpty)
                     Text(
                       plan.name,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.white,
+                      style: const TextStyle(
+                        fontFamily: 'Poppins',
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white,
+                      ),
                     ),
-                  ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
                       color: const Color(0xff2C4D6F),
                       borderRadius: BorderRadius.circular(20),

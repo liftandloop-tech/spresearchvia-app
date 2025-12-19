@@ -221,4 +221,61 @@ class PlanPurchaseController extends GetxController {
       return [];
     }
   }
+
+  Future<Map<String, dynamic>> fetchUserSubscriptionHistoryApi({
+    required String userId,
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConfig.userSubscriptionHistory(userId),
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+          if (search != null && search.isNotEmpty) 'search': search,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] ?? {};
+        return Map<String, dynamic>.from(data as Map);
+      }
+
+      return {'totalCount': 0, 'userSubcriptionHistory': []};
+    } catch (e) {
+      ApiErrorHandler.handleError(e);
+      return {'totalCount': 0, 'userSubcriptionHistory': []};
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchSegmentsListApi({
+    int page = 1,
+    int pageSize = 20,
+    String? search,
+    String? category,
+  }) async {
+    try {
+      final response = await _apiClient.get(
+        ApiConfig.listSegments,
+        queryParameters: {
+          'page': page,
+          'pageSize': pageSize,
+          if (search != null && search.isNotEmpty) 'search': search,
+          if (category != null && category.isNotEmpty) 'category': category,
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] ?? {};
+        return Map<String, dynamic>.from(data as Map);
+      }
+
+      return {'totalCount': 0, 'data': []};
+    } catch (e) {
+      ApiErrorHandler.handleError(e);
+      return {'totalCount': 0, 'data': []};
+    }
+  }
 }

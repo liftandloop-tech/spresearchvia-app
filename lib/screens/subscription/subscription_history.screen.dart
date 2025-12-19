@@ -9,55 +9,125 @@ class SubscriptionHistoryController extends GetxController {
   final planController = Get.put(PlanPurchaseController());
 
   final RxString selectedFilter = 'Latest'.obs;
-  final RxList<SubscriptionHistory> subscriptions = <SubscriptionHistory>[].obs;
-  final RxList<SubscriptionHistory> _allSubscriptions =
-      <SubscriptionHistory>[].obs;
+  final RxString selectedSection = 'Registration'.obs; // Registration | Segment
+
+  // registration history mapped to SubscriptionHistory model
+  final RxList<SubscriptionHistory> registrations = <SubscriptionHistory>[].obs;
+  final RxList<Map<String, dynamic>> registrationsRaw =
+      <Map<String, dynamic>>[].obs;
+
+  // segment history raw list (map) - will map to UI when rendering
+  final RxList<Map<String, dynamic>> segments = <Map<String, dynamic>>[].obs;
+
   final RxBool isLoading = true.obs;
 
   @override
   void onInit() {
     super.onInit();
-    loadSubscriptionHistory();
+    loadRegistrationHistory();
 
     ever(selectedFilter, (_) => _applyFilter());
+    ever(selectedSection, (_) {
+      if (selectedSection.value == 'Registration') {
+        loadRegistrationHistory();
+      } else {
+        loadSegmentHistory();
+      }
+    });
   }
 
-  Future<void> loadSubscriptionHistory() async {
+  Future<void> loadRegistrationHistory({
+    int page = 1,
+    int pageSize = 20,
+  }) async {
     isLoading.value = true;
 
     try {
-      final plans = await planController.fetchSubscriptionHistory();
-      final loadedSubscriptions = plans
-          .map(
-            (plan) => SubscriptionHistory(
-              id: plan.id,
-              paymentDate: plan.startDate.toString().split(' ')[0],
-              amountPaid: '₹${(plan.validity * 10).toString()}',
-              validityDays: '${plan.validity} days',
-              expiryDate: plan.endDate.toString().split(' ')[0],
-              headerStatus: plan.isActive
-                  ? SubscriptionStatus.active
-                  : plan.isExpired
-                  ? SubscriptionStatus.expired
-                  : SubscriptionStatus.pending,
-              footerStatus: plan.isFailed
-                  ? SubscriptionStatus.failed
-                  : SubscriptionStatus.success,
-            ),
-          )
-          .toList();
+      final uid = await planController.userId;
+      if (uid == null) {
+        SnackbarService.showError('User not logged in');
+        return;
+      }
 
-      _allSubscriptions.value = loadedSubscriptions;
+      final data = await planController.fetchUserSubscriptionHistoryApi(
+        userId: uid,
+        page: page,
+        pageSize: pageSize,
+      );
+
+      final List items = data['userSubcriptionHistory'] ?? [];
+      registrationsRaw.value = items
+          .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+      final loaded = registrationsRaw.map<SubscriptionHistory>((item) {
+        final start = item['startDate'] != null
+            ? DateTime.parse(item['startDate']).toString().split(' ')[0]
+            : '';
+        final end = item['endDate'] != null
+            ? DateTime.parse(item['endDate']).toString().split(' ')[0]
+            : '';
+        final basic = (item['basicAmount'] ?? 0).toString();
+        final cgst = (item['cgstAmount'] ?? 0).toString();
+        final sgst = (item['sgstAmount'] ?? 0).toString();
+        final total =
+            double.tryParse(basic.toString()) ??
+            0.0 +
+                (double.tryParse(cgst.toString()) ?? 0.0) +
+                (double.tryParse(sgst.toString()) ?? 0.0);
+
+        return SubscriptionHistory(
+          id: item['_id'] ?? '',
+          paymentDate: start,
+          amountPaid: '₹${total.toStringAsFixed(2)}',
+          validityDays: '${item['validity'] ?? ''} days',
+          expiryDate: end,
+          headerStatus:
+              (item['status'] ?? '').toString().toLowerCase() == 'active'
+              ? SubscriptionStatus.active
+              : (item['status'] ?? '').toString().toLowerCase() == 'expired'
+              ? SubscriptionStatus.expired
+              : SubscriptionStatus.pending,
+          footerStatus:
+              (item['status'] ?? '').toString().toLowerCase() == 'failed'
+              ? SubscriptionStatus.failed
+              : SubscriptionStatus.success,
+        );
+      }).toList();
+
+      registrations.value = loaded;
       _applyFilter();
     } catch (e) {
-      SnackbarService.showError('Failed to load subscription history');
+      SnackbarService.showError('Failed to load registration history');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  Future<void> loadSegmentHistory({int page = 1, int pageSize = 20}) async {
+    isLoading.value = true;
+
+    try {
+      final data = await planController.fetchSegmentsListApi(
+        page: page,
+        pageSize: pageSize,
+      );
+
+      final List items = data['data'] ?? [];
+      // store raw segment maps
+      segments.value = items
+          .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e as Map))
+          .toList();
+    } catch (e) {
+      SnackbarService.showError('Failed to load segment history');
     } finally {
       isLoading.value = false;
     }
   }
 
   void _applyFilter() {
-    subscriptions.value = _filterSubscriptions(_allSubscriptions);
+    // apply filter only to registrations list
+    final filtered = _filterSubscriptions(registrations);
+    registrations.value = filtered;
   }
 
   List<SubscriptionHistory> _filterSubscriptions(
@@ -97,10 +167,31 @@ class SubscriptionHistoryScreen extends StatelessWidget {
   const SubscriptionHistoryScreen({super.key});
 
   void _showReceiptDialog(
-    BuildContext context,
-    SubscriptionHistory subscription,
-  ) {
-    Get.toNamed('/receipt');
+    BuildContext context, {
+    SubscriptionHistory? subscription,
+    Map<String, dynamic>? segment,
+    Map<String, dynamic>? purchase,
+  }) {
+    if (subscription != null) {
+      if (purchase != null) {
+        Get.toNamed(
+          '/receipt',
+          arguments: {'type': 'registration', 'purchase': purchase},
+        );
+      } else {
+        Get.toNamed(
+          '/receipt',
+          arguments: {'id': subscription.id, 'type': 'registration'},
+        );
+      }
+    } else if (segment != null) {
+      Get.toNamed(
+        '/receipt',
+        arguments: {'segmentId': segment['_id'], 'type': 'segment'},
+      );
+    } else {
+      Get.toNamed('/receipt');
+    }
   }
 
   @override
@@ -162,50 +253,201 @@ class SubscriptionHistoryScreen extends StatelessWidget {
           ),
         ],
       ),
-      body: Obx(
-        () => controller.isLoading.value
-            ? const Center(child: CircularProgressIndicator())
-            : controller.subscriptions.isEmpty
-            ? const Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.history, size: 64, color: Color(0xffD1D5DB)),
-                    SizedBox(height: 16),
-                    Text(
-                      'No subscription history',
-                      style: TextStyle(
-                        fontFamily: 'Poppins',
-                        fontSize: 16,
-                        fontWeight: FontWeight.w500,
-                        color: Color(0xff6B7280),
+      body: Obx(() {
+        if (controller.isLoading.value) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        return Column(
+          children: [
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () =>
+                          controller.selectedSection.value = 'Registration',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color:
+                              controller.selectedSection.value == 'Registration'
+                              ? Colors.white
+                              : const Color(0xffF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xffE5E7EB)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Registration',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  controller.selectedSection.value ==
+                                      'Registration'
+                                  ? const Color(0xff163174)
+                                  : const Color(0xff6B7280),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
-                  ],
-                ),
-              )
-            : RefreshIndicator(
-                onRefresh: controller.loadSubscriptionHistory,
-                child: ListView.builder(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: controller.subscriptions.length,
-                  itemBuilder: (context, index) {
-                    final subscription = controller.subscriptions[index];
-                    return SubscriptionCard(
-                      paymentDate: subscription.paymentDate,
-                      amountPaid: subscription.amountPaid,
-                      validityDays: subscription.validityDays,
-                      expiryDate: subscription.expiryDate,
-                      headerStatus: subscription.headerStatus,
-                      footerStatus: subscription.footerStatus,
-                      onTap: () {
-                        _showReceiptDialog(context, subscription);
-                      },
-                    );
-                  },
-                ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: GestureDetector(
+                      onTap: () => controller.selectedSection.value = 'Segment',
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        decoration: BoxDecoration(
+                          color: controller.selectedSection.value == 'Segment'
+                              ? Colors.white
+                              : const Color(0xffF3F4F6),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: const Color(0xffE5E7EB)),
+                        ),
+                        child: Center(
+                          child: Text(
+                            'Segment',
+                            style: TextStyle(
+                              fontFamily: 'Poppins',
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              color:
+                                  controller.selectedSection.value == 'Segment'
+                                  ? const Color(0xff163174)
+                                  : const Color(0xff6B7280),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
-      ),
+            ),
+            const SizedBox(height: 12),
+            Expanded(
+              child: controller.selectedSection.value == 'Registration'
+                  ? (controller.registrations.isEmpty
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  size: 64,
+                                  color: Color(0xffD1D5DB),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No registration history',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff6B7280),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () =>
+                                controller.loadRegistrationHistory(),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: controller.registrations.length,
+                              itemBuilder: (context, index) {
+                                final subscription =
+                                    controller.registrations[index];
+                                return SubscriptionCard(
+                                  paymentDate: subscription.paymentDate,
+                                  amountPaid: subscription.amountPaid,
+                                  validityDays: subscription.validityDays,
+                                  expiryDate: subscription.expiryDate,
+                                  headerStatus: subscription.headerStatus,
+                                  footerStatus: subscription.footerStatus,
+                                  onTap: () {
+                                    final raw =
+                                        controller.registrationsRaw[index];
+                                    _showReceiptDialog(
+                                      context,
+                                      subscription: subscription,
+                                      purchase: raw,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ))
+                  : (controller.segments.isEmpty
+                        ? const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.history,
+                                  size: 64,
+                                  color: Color(0xffD1D5DB),
+                                ),
+                                SizedBox(height: 16),
+                                Text(
+                                  'No segment history',
+                                  style: TextStyle(
+                                    fontFamily: 'Poppins',
+                                    fontSize: 16,
+                                    fontWeight: FontWeight.w500,
+                                    color: Color(0xff6B7280),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        : RefreshIndicator(
+                            onRefresh: () => controller.loadSegmentHistory(),
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount: controller.segments.length,
+                              itemBuilder: (context, index) {
+                                final segment = controller.segments[index];
+                                final paymentDate = segment['createdAt'] != null
+                                    ? segment['createdAt'].toString().split(
+                                        ' ',
+                                      )[0]
+                                    : '';
+                                final amount =
+                                    ((segment['amount'] ?? 0) +
+                                            (segment['gstAmount'] ?? 0))
+                                        .toString();
+                                final validity =
+                                    segment['validity']?.toString() ?? '';
+
+                                return SubscriptionCard(
+                                  paymentDate: paymentDate,
+                                  amountPaid: '₹$amount',
+                                  validityDays: validity,
+                                  expiryDate: '',
+                                  headerStatus: SubscriptionStatus.success,
+                                  footerStatus: SubscriptionStatus.success,
+                                  onTap: () {
+                                    _showReceiptDialog(
+                                      context,
+                                      segment: segment,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          )),
+            ),
+          ],
+        );
+      }),
     );
   }
 }

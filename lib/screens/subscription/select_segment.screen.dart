@@ -57,6 +57,8 @@ class SelectSegmentScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 15),
                 const SegmentDropdownMenu(),
+                const SizedBox(height: 10),
+                const Divider(color: AppTheme.infoBorder),
                 const SizedBox(height: 15),
 
                 Obx(() {
