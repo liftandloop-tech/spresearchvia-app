@@ -9,6 +9,8 @@ abstract class AppTheme {
   static const Color backgroundWhite = Colors.white;
   static const Color backgroundLightBlue = Color(0xffEFF6FF);
 
+  static const Color profileCardBackground = Color(0xffF9FAFB);
+
   static const Color textBlack = Colors.black;
   static const Color textWhite = Colors.white;
   static const Color textGrey = Color(0xff6B7280);

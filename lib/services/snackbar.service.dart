@@ -22,22 +22,22 @@ abstract class SnackbarService {
     try {
       BuildContext? overlayContext;
 
-      // Try Get.overlayContext first (more reliable)
+       
       overlayContext = getx.Get.overlayContext;
 
-      // If that fails, try the provided context
+       
       if (overlayContext == null && context != null) {
         overlayContext = context;
       }
 
-      // If still null, try navigator context
+       
       if (overlayContext == null && context != null) {
         overlayContext = Navigator.maybeOf(context)?.context;
       }
 
       if (overlayContext == null) {
         debugPrint('SnackbarService: No overlay context available');
-        // Fallback to Get.snackbar
+         
         getx.Get.snackbar(
           title ?? "",
           message,
@@ -53,7 +53,7 @@ abstract class SnackbarService {
       final overlay = Overlay.maybeOf(overlayContext);
       if (overlay == null) {
         debugPrint('SnackbarService: No overlay found, using fallback');
-        // Fallback to Get.snackbar
+         
         getx.Get.snackbar(
           "",
           message,
@@ -81,7 +81,7 @@ abstract class SnackbarService {
       overlay.insert(_currentSnackbar!);
     } catch (e) {
       debugPrint('SnackbarService error: $e');
-      // Fallback to Get.snackbar on error
+       
       try {
         getx.Get.snackbar(
           "",

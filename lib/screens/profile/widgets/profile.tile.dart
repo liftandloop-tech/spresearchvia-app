@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:spresearchvia/core/theme/app_theme.dart';
 
 class ProfileTile extends StatelessWidget {
   const ProfileTile({
@@ -24,7 +25,7 @@ class ProfileTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xffF9FAFB),
+        color: AppTheme.profileCardBackground,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -36,7 +37,7 @@ class ProfileTile extends StatelessWidget {
               color: const Color(0xffE3E6EE),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: Icon(icon, size: 14, color: const Color(0xff163174)),
+            child: Icon(icon, size: 20, color: const Color(0xff163174)),
           ),
           const SizedBox(width: 12),
 
@@ -48,9 +49,9 @@ class ProfileTile extends StatelessWidget {
                   title,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 12,
+                    fontSize: 13,
                     fontWeight: FontWeight.w400,
-                    color: Color(0xff6B7280),
+                    color: AppTheme.textGrey,
                   ),
                 ),
                 const SizedBox(height: 2),
@@ -58,9 +59,9 @@ class ProfileTile extends StatelessWidget {
                   value,
                   style: const TextStyle(
                     fontFamily: 'Poppins',
-                    fontSize: 14,
+                    fontSize: 16,
                     fontWeight: FontWeight.w500,
-                    color: Color(0xff11416B),
+                    color: AppTheme.primaryBlue,
                   ),
                 ),
               ],

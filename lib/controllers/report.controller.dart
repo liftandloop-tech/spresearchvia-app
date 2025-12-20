@@ -13,6 +13,7 @@ class ReportController extends GetxController {
   final reports = <ResearchReport>[].obs;
   final filteredReports = <ResearchReport>[].obs;
   final selectedCategory = Rxn<String>();
+  final selectedTabIndex = 0.obs;
 
   @override
   void onInit() {

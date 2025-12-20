@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../core/config/api.config.dart';
 import '../core/models/user.dart';
@@ -41,7 +42,7 @@ class AuthController extends GetxController {
         }
       }
     } catch (e) {
-      // Ignore auth check errors
+      Get.log('Error checking auth status: $e');
     }
   }
 
@@ -113,15 +114,17 @@ class AuthController extends GetxController {
     required String phone,
   }) async {
     try {
-      print('DEBUG: createUser called with name: $fullName, phone: $phone');
+      debugPrint(
+        'DEBUG: createUser called with name: $fullName, phone: $phone',
+      );
       isLoading.value = true;
       final response = await _apiClient.post(
         ApiConfig.createUser,
         data: {'fullName': fullName, 'phone': phone},
       );
 
-      print('DEBUG: createUser response status: ${response.statusCode}');
-      print('DEBUG: createUser response data: ${response.data}');
+      debugPrint('DEBUG: createUser response status: ${response.statusCode}');
+      debugPrint('DEBUG: createUser response data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
@@ -306,7 +309,6 @@ class AuthController extends GetxController {
 
       if (userId == null) {
         if (currentUser.value?.id != null && currentUser.value!.id.isNotEmpty) {
-          // Use currentUser.id as fallback
         } else {
           return false;
         }
@@ -423,53 +425,6 @@ class AuthController extends GetxController {
       isLoading.value = false;
     }
   }
-
-  /*
-  Future<bool> forgotPassword(String email) async {
-    try {
-      isLoading.value = true;
-
-      final response = await _apiClient.post(ApiConfig.forgotPassword(email));
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        SnackbarService.showSuccess('Password reset link sent to your email');
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      final error = ApiErrorHandler.handleError(e);
-      SnackbarService.showError(error.message);
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-
-  Future<bool> resetPassword(String token, String newPassword) async {
-    try {
-      isLoading.value = true;
-
-      final response = await _apiClient.post(
-        ApiConfig.resetPassword(token),
-        data: {'password': newPassword},
-      );
-
-      if (response.statusCode == 200 || response.statusCode == 201) {
-        SnackbarService.showSuccess('Password reset successfully');
-        return true;
-      }
-
-      return false;
-    } catch (e) {
-      final error = ApiErrorHandler.handleError(e);
-      SnackbarService.showError(error.message);
-      return false;
-    } finally {
-      isLoading.value = false;
-    }
-  }
-  */
 
   void resetOtpState() {
     isOtpSent.value = false;

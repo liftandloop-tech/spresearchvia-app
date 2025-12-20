@@ -67,6 +67,6 @@ Future<void> _checkPendingPayments() async {
       }
     }
   } catch (e) {
-    // Ignore pending payment check errors
+    Get.log('Error checking pending payment: $e');
   }
 }

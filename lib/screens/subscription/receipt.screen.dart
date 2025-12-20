@@ -70,7 +70,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         return;
       }
 
-      // If a segmentId is provided, call backend segment-invoice endpoint
+       
       final segmentId = args is Map<String, dynamic>
           ? args['segmentId'] ?? args['segment_id'] ?? args['id']
           : null;
@@ -92,7 +92,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
           _error = 'Failed to load invoice';
         }
       } else if (args is Map<String, dynamic> && args.isNotEmpty) {
-        // fall back to using whatever arguments are provided
+         
         _invoice = Map<String, dynamic>.from(args);
       } else {
         _error = 'No invoice identifier provided';
@@ -122,16 +122,33 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     } catch (_) {}
     String paymentMode = _invoice['paymentMode']?.toString() ?? '';
     String status = _invoice['status']?.toString() ?? '';
-    final user = _invoice['userId'] ?? {};
-    String clientName =
-        user['fullName']?.toString() ??
-        (user['userObject']?['APP_NAME']?.toString() ?? '');
-    String fatherName = user['userObject']?['fatherName']?.toString() ?? '';
-    String address = user['userObject']?['address']?.toString() ?? '';
-    String mobile = user['phone']?.toString() ?? '';
-    String pan = user['userObject']?['pan']?.toString() ?? '';
-    String email = user['userObject']?['APP_EMAIL']?.toString() ?? '';
-    String aadhaar = user['aadhaarNumber']?.toString() ?? '';
+    final user = _invoice['userId'];
+
+    String clientName = '';
+    String fatherName = '';
+    String address = '';
+    String mobile = '';
+    String pan = '';
+    String email = '';
+    String aadhaar = '';
+
+    if (user is Map) {
+      clientName =
+          (user['fullName']?.toString() ??
+          user['userObject']?['APP_NAME']?.toString() ??
+          '');
+      fatherName = user['userObject']?['fatherName']?.toString() ?? '';
+      address = user['userObject']?['address']?.toString() ?? '';
+      mobile = user['phone']?.toString() ?? '';
+      pan = user['userObject']?['pan']?.toString() ?? '';
+      email = user['userObject']?['APP_EMAIL']?.toString() ?? '';
+      aadhaar = user['aadhaarNumber']?.toString() ?? '';
+    } else if (user is String) {
+      clientName = user;
+    } else if (user != null) {
+       
+      clientName = user.toString();
+    }
 
     final segment = _invoice['segmentId'] ?? {};
     final double amount = _toDouble(segment['amount']);
@@ -583,7 +600,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                             segment['segmentName']?.toString() ??
                                 'Subscription',
                             '${segment['segmentName'] ?? ''} | ${validity.isNotEmpty ? '$validity Days' : ''}',
-                            '₹${subtotal}',
+                            '₹$subtotal',
                           ),
                           const SizedBox(height: 12),
                         ],

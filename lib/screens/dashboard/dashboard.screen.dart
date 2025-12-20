@@ -11,44 +11,7 @@ import 'widgets/quick_action_tile.dart';
 import '../../widgets/reminder.popup.dart';
 import '../../widgets/app_logo.dart';
 import 'widgets/premium_plan_card.dart';
-
-class DashboardController extends GetxController {
-  final RxBool showReminder = false.obs;
-  final RxInt reminderDays = 0.obs;
-
-  int? _computeDaysRemaining() {
-    if (!Get.isRegistered<UserController>()) return null;
-    final user = Get.find<UserController>().currentUser.value;
-    if (user == null) return null;
-
-    if (user.subscriptionExpiryDate != null) {
-      final now = DateTime.now();
-      final diff = user.subscriptionExpiryDate!.difference(now);
-      return diff.inDays;
-    }
-
-    return user.daysRemaining;
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-    Future.delayed(const Duration(seconds: 1), () {
-      final days = _computeDaysRemaining();
-      final shouldShow = days != null && days <= 7 && days >= 0;
-      showReminder.value = shouldShow;
-      reminderDays.value = (days ?? 0).clamp(0, 9999);
-    });
-  }
-
-  void closeReminder() {
-    showReminder.value = false;
-  }
-
-  void renewNow(BuildContext context) {
-    Get.toNamed(AppRoutes.quickRenewal);
-  }
-}
+import '../../controllers/dashboard.controller.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -268,13 +231,15 @@ class DashboardScreen extends StatelessWidget {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                Text(
-                                  'N/A',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: responsive.sp(20),
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.primaryBlue,
+                                Obx(
+                                  () => Text(
+                                    controller.researchHours.value.toString(),
+                                    style: TextStyle(
+                                      fontFamily: 'Poppins',
+                                      fontSize: responsive.sp(20),
+                                      fontWeight: FontWeight.w500,
+                                      color: AppTheme.primaryBlue,
+                                    ),
                                   ),
                                 ),
                                 Padding(

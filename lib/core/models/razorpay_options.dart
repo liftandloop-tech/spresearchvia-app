@@ -1,5 +1,5 @@
-import '../../../core/config/razorpay.config.dart';
-import '../../../core/models/payment.options.dart';
+import '../config/razorpay.config.dart';
+import 'payment.options.dart';
 
 class RazorpayOptions {
   final String orderId;

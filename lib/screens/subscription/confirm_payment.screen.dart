@@ -2,11 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 import '../../core/theme/app_theme.dart';
+import '../../services/razorpay_payment_handler.dart';
 import '../../widgets/button.dart';
 import '../../services/snackbar.service.dart';
-import '../../features/payment/services/razorpay_payment_handler.dart';
-import '../../features/payment/models/razorpay_options.dart';
-import '../../features/payment/models/payment_callbacks.dart';
+import '../../core/models/razorpay_options.dart';
+import '../../core/models/payment_callbacks.dart';
 import '../../controllers/user.controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../controllers/segment_plan.controller.dart';
@@ -177,9 +177,9 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
   }
 
   Future<void> _proceedToPay() async {
-    print('DEBUG: _proceedToPay called');
+    debugPrint('DEBUG: _proceedToPay called');
     if (!agreedToTerms.value || !authorizedPayment.value) {
-      print('DEBUG: Terms not agreed or payment not authorized');
+      debugPrint('DEBUG: Terms not agreed or payment not authorized');
       SnackbarService.showWarning(
         'Please agree to the terms and authorize payment',
       );
@@ -187,23 +187,23 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
     }
 
     if (selectedPlan == null) {
-      print('DEBUG: No plan selected');
+      debugPrint('DEBUG: No plan selected');
       SnackbarService.showError('Invalid plan selected');
       return;
     }
 
-    print('DEBUG: Selected Plan ID: ${selectedPlan!.id}');
+    debugPrint('DEBUG: Selected Plan ID: ${selectedPlan!.id}');
     isProcessing.value = true;
 
     try {
-      print('DEBUG: Calling purchaseSegment...');
+      debugPrint('DEBUG: Calling purchaseSegment...');
       final responseData = await segmentPlanController.purchaseSegment(
         segmentId: selectedPlan!.id,
       );
-      print('DEBUG: purchaseSegment response: $responseData');
+      debugPrint('DEBUG: purchaseSegment response: $responseData');
 
       final segmentsPayment = responseData?['segmentsPayment'];
-      print('DEBUG: segmentsPayment: $segmentsPayment');
+      debugPrint('DEBUG: segmentsPayment: $segmentsPayment');
 
       if (segmentsPayment == null) {
         throw Exception('Invalid response from server');
@@ -213,9 +213,9 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
       final razorpayOrderId = segmentsPayment['razorpayOrderId'];
       final amount = segmentsPayment['amount'];
 
-      print('DEBUG: Payment ID: $_currentPaymentId');
-      print('DEBUG: Razorpay Order ID: $razorpayOrderId');
-      print('DEBUG: Amount: $amount');
+      debugPrint('DEBUG: Payment ID: $_currentPaymentId');
+      debugPrint('DEBUG: Razorpay Order ID: $razorpayOrderId');
+      debugPrint('DEBUG: Amount: $amount');
 
       if (razorpayOrderId == null) {
         throw Exception('Order ID not received from backend');
@@ -226,7 +226,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
       final userPhone = user?.phone ?? '';
       final userName = user?.name ?? 'User';
 
-      print(
+      debugPrint(
         'DEBUG: User Info - Email: $userEmail, Phone: $userPhone, Name: $userName',
       );
 
@@ -241,7 +241,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
         userName: userName,
       );
 
-      print('DEBUG: Initiating Razorpay with options: ${options.toMap()}');
+      debugPrint('DEBUG: Initiating Razorpay with options: ${options.toMap()}');
 
       _paymentHandler.initiatePayment(
         options: options,
@@ -252,7 +252,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
         ),
       );
     } catch (e) {
-      print('DEBUG: Error in _proceedToPay: $e');
+      debugPrint('DEBUG: Error in _proceedToPay: $e');
       isProcessing.value = false;
       SnackbarService.showError('Failed to initiate payment: ${e.toString()}');
     }

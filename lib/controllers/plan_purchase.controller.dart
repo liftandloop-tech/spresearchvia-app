@@ -26,6 +26,8 @@ class PlanPurchaseController extends GetxController {
     required String packageName,
     required double amount,
     required int validity,
+    double cgstAmount = 0,
+    double sgstAmount = 0,
   }) async {
     try {
       isLoading.value = true;
@@ -39,6 +41,8 @@ class PlanPurchaseController extends GetxController {
         'packageName': packageName,
         'amount': amount,
         'validity': validity,
+        'cgstAmount': cgstAmount,
+        'sgstAmount': sgstAmount,
       };
 
       final response = await _apiClient.post(

@@ -8,90 +8,74 @@ import 'widgets/active_filter_chip.dart';
 import 'widgets/filter_chip_button.dart';
 import 'widgets/report_card.dart';
 
-class ResearchReportsScreen extends StatefulWidget {
+class ResearchReportsScreen extends StatelessWidget {
   const ResearchReportsScreen({super.key});
-
-  @override
-  State<ResearchReportsScreen> createState() => _ResearchReportsScreenState();
-}
-
-class _ResearchReportsScreenState extends State<ResearchReportsScreen>
-    with SingleTickerProviderStateMixin {
-  late TabController _tabController;
-
-  @override
-  void initState() {
-    super.initState();
-    _tabController = TabController(length: 2, vsync: this);
-  }
-
-  @override
-  void dispose() {
-    _tabController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final reportController = Get.put(ReportController());
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundWhite,
-      appBar: AppBar(
+    return DefaultTabController(
+      length: 2,
+      child: Scaffold(
         backgroundColor: AppTheme.backgroundWhite,
-        elevation: 0,
-        automaticallyImplyLeading: false,
-        title: const Text(
-          'Research Reports',
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 18,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.primaryBlueDark,
+        appBar: AppBar(
+          backgroundColor: AppTheme.backgroundWhite,
+          elevation: 0,
+          automaticallyImplyLeading: false,
+          title: const Text(
+            'Research Reports',
+            style: TextStyle(
+              fontFamily: 'Poppins',
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+              color: AppTheme.primaryBlueDark,
+            ),
           ),
-        ),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.search, color: AppTheme.primaryBlueDark),
-            onPressed: () {},
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(48),
-          child: Container(
-            color: AppTheme.backgroundWhite,
-            child: TabBar(
-              controller: _tabController,
-              indicatorColor: AppTheme.primaryBlue,
-              indicatorWeight: 3,
-              labelColor: AppTheme.primaryBlueDark,
-              unselectedLabelColor: AppTheme.textGrey,
-              labelStyle: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.search, color: AppTheme.primaryBlueDark),
+              onPressed: () {},
+            ),
+          ],
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(48),
+            child: Container(
+              color: AppTheme.backgroundWhite,
+              child: TabBar(
+                indicatorColor: AppTheme.primaryBlue,
+                indicatorWeight: 3,
+                labelColor: AppTheme.primaryBlueDark,
+                unselectedLabelColor: AppTheme.textGrey,
+                labelStyle: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontFamily: 'Poppins',
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
+                onTap: (index) {
+                  reportController.selectedTabIndex.value = index;
+                },
+                tabs: const [
+                  Tab(text: 'Trading Call'),
+                  Tab(text: 'Reports'),
+                ],
               ),
-              unselectedLabelStyle: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w500,
-              ),
-              tabs: const [
-                Tab(text: 'Trading Call'),
-                Tab(text: 'Reports'),
-              ],
             ),
           ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _buildTradingCallTab(reportController),
+        body: TabBarView(
+          children: [
+            _buildTradingCallTab(reportController),
 
-          _buildReportsTab(reportController),
-        ],
+            _buildReportsTab(context, reportController),
+          ],
+        ),
       ),
     );
   }
@@ -109,7 +93,10 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
     );
   }
 
-  Widget _buildReportsTab(ReportController reportController) {
+  Widget _buildReportsTab(
+    BuildContext context,
+    ReportController reportController,
+  ) {
     return Obx(() {
       if (reportController.isLoading.value &&
           reportController.reports.isEmpty) {
@@ -177,7 +164,9 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.circular(8),
-                              border: Border.all(color: const Color(0xFFE2E8F0)),
+                              border: Border.all(
+                                color: const Color(0xFFE2E8F0),
+                              ),
                             ),
                             child: const Row(
                               mainAxisSize: MainAxisSize.min,
@@ -265,7 +254,8 @@ class _ResearchReportsScreenState extends State<ResearchReportsScreen>
               return ListView.separated(
                 padding: const EdgeInsets.all(16),
                 itemCount: reports.length,
-                separatorBuilder: (context, index) => const SizedBox(height: 12),
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
                 itemBuilder: (context, index) {
                   final report = reports[index];
                   return ReportCard(

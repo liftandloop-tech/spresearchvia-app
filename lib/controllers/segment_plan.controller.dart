@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/snackbar.service.dart';
 import '../services/api_client.service.dart';
@@ -67,11 +68,11 @@ class SegmentPlanController extends GetxController {
   final SecureStorageService _storage = SecureStorageService();
 
   final isLoading = false.obs;
-  final allPlans = <SegmentPlan>[].obs; // Store all plans
-  final availablePlans = <SegmentPlan>[].obs; // Filtered plans
+  final allPlans = <SegmentPlan>[].obs;  
+  final availablePlans = <SegmentPlan>[].obs;  
   final selectedPlanId = Rxn<String>();
   final error = Rxn<String>();
-  final selectedSegment = 'Equity Cash'.obs; // Track selected segment
+  final selectedSegment = 'Equity Cash'.obs;  
 
   Future<String?> get userId => _storage.getUserId();
 
@@ -95,7 +96,7 @@ class SegmentPlanController extends GetxController {
             .map((json) => SegmentPlan.fromJson(json))
             .toList();
 
-        // Apply initial filter based on selected segment
+         
         filterBySegment(selectedSegment.value);
 
         if (selectedPlanId.value == null) {
@@ -140,18 +141,18 @@ class SegmentPlanController extends GetxController {
   void filterBySegment(String segment) {
     selectedSegment.value = segment;
 
-    // Filter plans where segmentName matches the selected segment
+     
     availablePlans.value = allPlans.where((plan) {
-      // Case-insensitive comparison
+       
       return plan.name.toLowerCase() == segment.toLowerCase();
     }).toList();
 
-    // Reset selected plan if it's not in the filtered list
+     
     if (selectedPlanId.value != null &&
         !availablePlans.any((p) => p.id == selectedPlanId.value)) {
       selectedPlanId.value = null;
 
-      // Auto-select popular plan from filtered list if available
+       
       final popularPlan = availablePlans.firstWhereOrNull((p) => p.isPopular);
       if (popularPlan != null) {
         selectedPlanId.value = popularPlan.id;
@@ -163,25 +164,25 @@ class SegmentPlanController extends GetxController {
     required String segmentId,
   }) async {
     try {
-      print(
+      debugPrint(
         'DEBUG: purchaseSegment controller called with segmentId: $segmentId',
       );
       isLoading.value = true;
 
       final uid = await userId;
-      print('DEBUG: User ID: $uid');
+      debugPrint('DEBUG: User ID: $uid');
       if (uid == null) {
         throw Exception('User not logged in');
       }
 
-      print('DEBUG: Making API call to ${ApiConfig.segmentPurchase}');
+      debugPrint('DEBUG: Making API call to ${ApiConfig.segmentPurchase}');
       final response = await _apiClient.post(
         ApiConfig.segmentPurchase,
         data: {'userId': uid, 'segmentId': segmentId},
       );
 
-      print('DEBUG: API Response Status: ${response.statusCode}');
-      print('DEBUG: API Response Data: ${response.data}');
+      debugPrint('DEBUG: API Response Status: ${response.statusCode}');
+      debugPrint('DEBUG: API Response Data: ${response.data}');
 
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
@@ -190,7 +191,7 @@ class SegmentPlanController extends GetxController {
 
       throw Exception('Server returned status code: ${response.statusCode}');
     } catch (e) {
-      print('DEBUG: Error in purchaseSegment controller: $e');
+      debugPrint('DEBUG: Error in purchaseSegment controller: $e');
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
       rethrow;

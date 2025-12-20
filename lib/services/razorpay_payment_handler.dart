@@ -1,7 +1,7 @@
 import 'package:razorpay_flutter/razorpay_flutter.dart';
 
-import '../models/payment_callbacks.dart';
-import '../models/razorpay_options.dart';
+import '../core/models/payment_callbacks.dart';
+import '../core/models/razorpay_options.dart';
 
 class RazorpayPaymentHandler {
   late final Razorpay _razorpay;

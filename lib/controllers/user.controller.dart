@@ -74,28 +74,7 @@ class UserController extends GetxController {
       isLoading.value = false;
       return false;
 
-      /* DISABLED - Backend route commented out
-      final response = await _apiClient.put(
-        ApiConfig.updateProfile(uid),
-        data: requestData,
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final userData = data['data']?['user'] ?? data['user'];
-
-        if (userData != null) {
-          final user = User.fromJson(userData);
-          currentUser.value = user;
-          await _storage.saveUserData(userData);
-        }
-
-        SnackbarService.showSuccess('Profile updated successfully');
-        return true;
-      }
-
-      return false;
-      */
+       
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
@@ -124,53 +103,7 @@ class UserController extends GetxController {
       );
       return false;
 
-      /* DISABLED - Backend route commented out
-      isLoading.value = true;
-
-      final formData = dio.FormData.fromMap({
-        'file': await dio.MultipartFile.fromFile(
-          imageFile.path,
-          filename: path.basename(imageFile.path),
-        ),
-      });
-
-      final response = await _apiClient.patch(
-        ApiConfig.changeImage(uid),
-        data: formData,
-        options: dio.Options(contentType: 'multipart/form-data'),
-      );
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final files = data['data']?['files'];
-
-        if (files != null && currentUser.value != null) {
-          final filePath = files['filesObj']?['path'];
-          if (filePath != null) {
-            String fullImageUrl = filePath;
-            if (!filePath.startsWith('http')) {
-              final baseUrl = _apiClient.dio.options.baseUrl.replaceAll(
-                '/api',
-                '',
-              );
-              fullImageUrl = '$baseUrl/$filePath';
-            }
-
-            currentUser.value = currentUser.value!.copyWith(
-              profileImage: fullImageUrl,
-            );
-
-            final userData = currentUser.value!.toJson();
-            await _storage.saveUserData(userData);
-          }
-        }
-
-        SnackbarService.showSuccess('Profile image updated successfully');
-        return true;
-      }
-
-      return false;
-      */
+       
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       ErrorMessageHandler.logError('Change Profile Image', error);
@@ -240,20 +173,7 @@ class UserController extends GetxController {
 
       loadUserData();
 
-      /* DISABLED - No backend route available
-      final response = await _apiClient.get(ApiConfig.getUserById(uid));
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final userData = data['data']?['user'] ?? data['user'];
-
-        if (userData != null) {
-          final user = User.fromJson(userData);
-          currentUser.value = user;
-          await _storage.saveUserData(userData);
-        }
-      }
-      */
+       
     } catch (e) {
       loadUserData();
     }

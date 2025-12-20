@@ -16,17 +16,26 @@ import '../../widgets/button.dart';
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
+  String _maskAadhar(String? aadhar) {
+    if (aadhar == null || aadhar.isEmpty) return 'Not Available';
+    if (aadhar.length < 4) return aadhar;
+
+    // Show last 4 digits, mask the rest
+    final last4 = aadhar.substring(aadhar.length - 4);
+    return 'XXXX XXXX $last4';
+  }
+
   String _getKycStatusText(KycStatus? status) {
     switch (status) {
       case KycStatus.verified:
         return 'Verified';
       case KycStatus.pending:
-        return 'Pending';
+        return 'In Progress';
       case KycStatus.rejected:
         return 'Rejected';
       case KycStatus.notStarted:
       default:
-        return 'Not Started';
+        return 'Not Verified';
     }
   }
 
@@ -49,7 +58,7 @@ class ProfileScreen extends StatelessWidget {
       case KycStatus.verified:
         return 'Completed';
       case KycStatus.pending:
-        return 'In Progress';
+        return 'Pending';
       case KycStatus.rejected:
         return 'Rejected';
       case KycStatus.notStarted:
@@ -66,7 +75,7 @@ class ProfileScreen extends StatelessWidget {
     if (!Get.isRegistered<AuthController>()) {
       Get.put(AuthController());
     }
-    
+
     final userController = Get.find<UserController>();
     final authController = Get.find<AuthController>();
 
@@ -93,9 +102,16 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(Icons.person_off, size: 80, color: AppTheme.iconGrey),
+                const Icon(
+                  Icons.person_off,
+                  size: 80,
+                  color: AppTheme.iconGrey,
+                ),
                 const SizedBox(height: 16),
-                const Text('No user data available', style: AppStyles.bodyLarge),
+                const Text(
+                  'No user data available',
+                  style: AppStyles.bodyLarge,
+                ),
                 const SizedBox(height: 24),
                 Button(
                   title: 'Logout',
@@ -134,6 +150,17 @@ class ProfileScreen extends StatelessWidget {
                 ),
               if (user.contactDetails?.phone != null || user.phone != null)
                 const SizedBox(height: 10),
+              ProfileTile(
+                icon: Icons.credit_card,
+                title: 'PAN Number',
+                value: user.panNumber ?? 'Not Available',
+              ),
+              const SizedBox(height: 10),
+              ProfileTile(
+                icon: Icons.badge,
+                title: 'Aadhar Number',
+                value: _maskAadhar(user.aadharNumber),
+              ),
               const SizedBox(height: 10),
               KycStatusItem(
                 icon: Icons.verified_user,

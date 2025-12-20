@@ -32,6 +32,8 @@ class User {
   final String? portfolioValue;
   final String? todayReturn;
   final String? totalInvestment;
+  final String? panNumber;
+  final String? aadharNumber;
 
   User({
     required this.id,
@@ -60,6 +62,8 @@ class User {
     this.portfolioValue,
     this.todayReturn,
     this.totalInvestment,
+    this.panNumber,
+    this.aadharNumber,
   });
 
   String get name => fullName ?? personalInformation?.fullName ?? 'User';
@@ -90,6 +94,11 @@ class User {
           : null,
       kycStatus: _parseKycStatus(json['kycStatus'] ?? 'notStarted'),
       currentPlan: _parsePlanType(json['currentPlan']),
+      panNumber:
+          userObject?['pan']?.toString() ?? json['panNumber']?.toString(),
+      aadharNumber:
+          json['aadhaarNumber']?.toString() ??
+          userObject?['aadhaarNumber']?.toString(),
     );
   }
 
