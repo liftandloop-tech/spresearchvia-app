@@ -20,6 +20,9 @@ class RegistrationScreenController extends GetxController {
   final Rxn<Plan> selectedPlan = Rxn<Plan>();
   final Rxn<PaymentMethod> selectedPaymentMethod = Rxn<PaymentMethod>();
 
+  // Store last payment options for retry
+  RazorpayOptions? _lastPaymentOptions;
+
   final RazorpayPaymentHandler _paymentHandler = RazorpayPaymentHandler();
   final paymentPreferenceService = PaymentPreferenceService();
   final secureStorage = SecureStorageService();
@@ -93,6 +96,34 @@ class RegistrationScreenController extends GetxController {
     paymentPreferenceService.savePaymentMethod(method);
   }
 
+  Future<void> retryLastPayment() async {
+    if (_lastPaymentOptions == null) {
+      SnackbarService.showError('No payment to retry');
+      return;
+    }
+
+    if (isProcessing.value) return;
+
+    isProcessing.value = true;
+
+    try {
+      Get.log('Retrying payment with stored options');
+
+      _paymentHandler.initiatePayment(
+        options: _lastPaymentOptions!,
+        callbacks: PaymentCallbacks(
+          onSuccess: handlePaymentSuccess,
+          onError: handlePaymentError,
+          onWallet: handleExternalWallet,
+        ),
+      );
+    } catch (e) {
+      isProcessing.value = false;
+      Get.log('Retry Payment Error: $e');
+      SnackbarService.showError('Failed to retry payment: ${e.toString()}');
+    }
+  }
+
   @override
   void onClose() {
     _paymentHandler.dispose();
@@ -138,16 +169,31 @@ class RegistrationScreenController extends GetxController {
 
   void handlePaymentError(String errorMessage) async {
     isProcessing.value = false;
-    currentPaymentId.value = null;
-    await secureStorage.clearPendingPayment();
-    SnackbarService.showError(errorMessage);
-    Get.offAllNamed(
-      AppRoutes.paymentFailure,
-      arguments: {
-        'message': errorMessage,
-        'backRoute': AppRoutes.registrationScreen,
-      },
-    );
+
+    // Check if payment was cancelled by user
+    final isCancelled =
+        errorMessage.toLowerCase().contains('cancel') ||
+        errorMessage.toLowerCase().contains('back');
+
+    if (isCancelled) {
+      // Just show message and stay on current screen
+      currentPaymentId.value = null;
+      await secureStorage.clearPendingPayment();
+      SnackbarService.showWarning('Payment cancelled');
+    } else {
+      // For actual errors, navigate to failure screen
+      currentPaymentId.value = null;
+      await secureStorage.clearPendingPayment();
+      SnackbarService.showError(errorMessage);
+      Get.toNamed(
+        AppRoutes.paymentFailure,
+        arguments: {
+          'message': errorMessage,
+          'backRoute': AppRoutes.registrationScreen,
+          'canRetry': true,
+        },
+      );
+    }
   }
 
   void handleExternalWallet(String walletName) async {
@@ -252,6 +298,9 @@ class RegistrationScreenController extends GetxController {
         userName: userName,
         hiddenMethod: selectedPaymentMethod.value,
       );
+
+      // Store options for retry
+      _lastPaymentOptions = options;
 
       Get.log('Razorpay Options: ${options.toMap()}');
 

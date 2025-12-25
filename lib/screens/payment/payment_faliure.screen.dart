@@ -11,6 +11,7 @@ class PaymentFaliureScreen extends StatelessWidget {
     final Map<String, dynamic> errorData = Get.arguments ?? {};
     final String errorMessage =
         errorData['message'] ?? 'Something went wrong, please try again';
+    final bool canRetry = errorData['canRetry'] ?? false;
 
     return Scaffold(
       body: Column(
@@ -47,24 +48,25 @@ class PaymentFaliureScreen extends StatelessWidget {
             ),
           ),
           const SizedBox(height: 20),
-          Button(
-            title: 'Retry Payment',
-            onTap: () {
-              // Try to get the registration controller to retry payment
-              if (Get.isRegistered<RegistrationScreenController>()) {
-                final controller = Get.find<RegistrationScreenController>();
-                Get.back();
-                // Retry the payment
-                controller.proceedToPay();
-              } else {
-                // If controller not registered, just go back
-                Get.back();
-              }
-            },
-            icon: Icons.refresh,
-            buttonType: ButtonType.green,
-          ),
-          const SizedBox(height: 10),
+          if (canRetry)
+            Button(
+              title: 'Retry Payment',
+              onTap: () {
+                // Try to get the registration controller to retry payment
+                if (Get.isRegistered<RegistrationScreenController>()) {
+                  final controller = Get.find<RegistrationScreenController>();
+                  Get.back();
+                  // Retry the payment with stored options
+                  controller.retryLastPayment();
+                } else {
+                  // If controller not registered, just go back
+                  Get.back();
+                }
+              },
+              icon: Icons.refresh,
+              buttonType: ButtonType.green,
+            ),
+          if (canRetry) const SizedBox(height: 10),
           Button(
             title: 'Back',
             onTap: () {
