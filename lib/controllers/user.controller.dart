@@ -1,5 +1,7 @@
 import 'dart:io';
+import 'package:dio/dio.dart' as dio;
 import 'package:get/get.dart';
+import 'package:path/path.dart' as path;
 import '../core/config/api.config.dart';
 import '../core/models/user.dart';
 import '../core/utils/file_validator.dart';
@@ -73,8 +75,6 @@ class UserController extends GetxController {
       );
       isLoading.value = false;
       return false;
-
-       
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
@@ -98,12 +98,28 @@ class UserController extends GetxController {
         return false;
       }
 
-      SnackbarService.showError(
-        'Profile image change is temporarily unavailable. Please contact support.',
-      );
-      return false;
+      isLoading.value = true;
 
-       
+      final formData = dio.FormData.fromMap({
+        'file': await dio.MultipartFile.fromFile(
+          imageFile.path,
+          filename: path.basename(imageFile.path),
+        ),
+      });
+
+      final response = await _apiClient.uploadFile(
+        ApiConfig.uploadProfileImage(uid),
+        formData: formData,
+        queryParameters: {'type': 'image'},
+      );
+
+      if (response.statusCode == 200) {
+        SnackbarService.showSuccess('Profile image updated successfully');
+        loadUserData();
+        return true;
+      }
+
+      return false;
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
       ErrorMessageHandler.logError('Change Profile Image', error);
@@ -111,7 +127,9 @@ class UserController extends GetxController {
         ErrorMessageHandler.getUserFriendlyMessage(error),
       );
       return false;
-    } finally {}
+    } finally {
+      isLoading.value = false;
+    }
   }
 
   Future<List<User>?> getUserList() async {
@@ -172,8 +190,6 @@ class UserController extends GetxController {
       if (uid == null) return;
 
       loadUserData();
-
-       
     } catch (e) {
       loadUserData();
     }

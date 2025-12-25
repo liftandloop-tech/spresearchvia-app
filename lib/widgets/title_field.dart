@@ -81,8 +81,13 @@ class TitleField extends StatelessWidget {
           padding: responsive.padding(horizontal: AppDimensions.spacing10),
           decoration: BoxDecoration(
             color: const Color(0xffF9FAFB),
-            border: Border.all(width: AppDimensions.borderThin, color: AppTheme.borderGrey),
-            borderRadius: BorderRadius.circular(responsive.radius(AppDimensions.radiusMedium)),
+            border: Border.all(
+              width: AppDimensions.borderThin,
+              color: AppTheme.borderGrey,
+            ),
+            borderRadius: BorderRadius.circular(
+              responsive.radius(AppDimensions.radiusMedium),
+            ),
           ),
           child: Align(
             alignment: Alignment.centerLeft,
@@ -96,6 +101,7 @@ class TitleField extends StatelessWidget {
                       keyboardType: keyboardType,
                       maxLength: maxLength,
                       readOnly: readOnly,
+                      enabled: !readOnly,
                       style: textStyle,
                       decoration: InputDecoration(
                         hintText: hint,
@@ -122,6 +128,7 @@ class TitleField extends StatelessWidget {
                     keyboardType: keyboardType,
                     maxLength: maxLength,
                     readOnly: readOnly,
+                    enabled: !readOnly,
                     style: textStyle,
                     decoration: InputDecoration(
                       hintText: hint,
@@ -131,7 +138,9 @@ class TitleField extends StatelessWidget {
                       suffixIcon: icon != null
                           ? Icon(
                               icon,
-                              size: responsive.spacing(AppDimensions.iconMedium),
+                              size: responsive.spacing(
+                                AppDimensions.iconMedium,
+                              ),
                             )
                           : null,
                     ),

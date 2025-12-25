@@ -187,6 +187,13 @@ class RegistrationScreenController extends GetxController {
       final cgstAmount = plan.cgstAmount;
       final sgstAmount = plan.sgstAmount;
 
+      Get.log('Creating order:');
+      Get.log('- Package: $planName');
+      Get.log('- Amount: $amount');
+      Get.log('- Validity: $validity days');
+      Get.log('- CGST: $cgstAmount');
+      Get.log('- SGST: $sgstAmount');
+
       final orderData = await planPurchaseController.purchasePlan(
         packageName: planName,
         amount: amount,
@@ -195,12 +202,26 @@ class RegistrationScreenController extends GetxController {
         sgstAmount: sgstAmount,
       );
 
-      currentPaymentId.value = orderData?['paymentId'];
-      final razorpayOrderId = orderData?['razorpayOrderId'];
+      if (orderData == null) {
+        throw Exception('Order creation failed - no response from server');
+      }
+
+      Get.log('Order Response: $orderData');
+
+      currentPaymentId.value = orderData['paymentId'];
+      final razorpayOrderId = orderData['razorpayOrderId'];
+
+      if (currentPaymentId.value == null) {
+        throw Exception('Payment ID not received from backend');
+      }
 
       if (razorpayOrderId == null) {
         throw Exception('Order ID not received from backend');
       }
+
+      Get.log('Order created successfully:');
+      Get.log('- Payment ID: ${currentPaymentId.value}');
+      Get.log('- Razorpay Order ID: $razorpayOrderId');
 
       await secureStorage.savePendingPayment(
         paymentId: currentPaymentId.value!,
@@ -212,6 +233,16 @@ class RegistrationScreenController extends GetxController {
       final userPhone = user?.phone ?? '';
       final userName = user?.name ?? 'User';
 
+      // Debug logging
+      Get.log('Payment Details:');
+      Get.log('- Order ID: $razorpayOrderId');
+      Get.log('- Amount: $amount');
+      Get.log('- Plan: $planName');
+      Get.log('- Email: $userEmail');
+      Get.log('- Phone: $userPhone');
+      Get.log('- Name: $userName');
+      Get.log('- Payment Method: ${selectedPaymentMethod.value}');
+
       final options = RazorpayOptions(
         orderId: razorpayOrderId,
         amount: amount,
@@ -221,6 +252,8 @@ class RegistrationScreenController extends GetxController {
         userName: userName,
         hiddenMethod: selectedPaymentMethod.value,
       );
+
+      Get.log('Razorpay Options: ${options.toMap()}');
 
       _paymentHandler.initiatePayment(
         options: options,
@@ -234,6 +267,7 @@ class RegistrationScreenController extends GetxController {
       isProcessing.value = false;
       currentPaymentId.value = null;
       await secureStorage.clearPendingPayment();
+      Get.log('Payment Error: $e');
       SnackbarService.showError('Failed to initiate payment: ${e.toString()}');
     }
   }

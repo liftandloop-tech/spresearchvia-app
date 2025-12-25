@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../widgets/button.dart';
+import '../../controllers/registration_screen.controller.dart';
 
 class PaymentFaliureScreen extends StatelessWidget {
   const PaymentFaliureScreen({super.key});
@@ -49,7 +50,16 @@ class PaymentFaliureScreen extends StatelessWidget {
           Button(
             title: 'Retry Payment',
             onTap: () {
-              Get.back();
+              // Try to get the registration controller to retry payment
+              if (Get.isRegistered<RegistrationScreenController>()) {
+                final controller = Get.find<RegistrationScreenController>();
+                Get.back();
+                // Retry the payment
+                controller.proceedToPay();
+              } else {
+                // If controller not registered, just go back
+                Get.back();
+              }
             },
             icon: Icons.refresh,
             buttonType: ButtonType.green,

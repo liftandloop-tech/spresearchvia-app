@@ -3,14 +3,46 @@ import 'package:get/get.dart';
 import 'package:spresearchvia/core/theme/app_theme.dart';
 import '../../core/routes/app_routes.dart';
 import '../../widgets/button.dart';
+import '../../controllers/digio.controller.dart';
+import '../../controllers/user.controller.dart';
+import '../../services/snackbar.service.dart';
 
 class DigioConnectScreen extends StatelessWidget {
   const DigioConnectScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    void onConnect() {
-      Get.offAllNamed(AppRoutes.registrationScreen);
+    final digioController = Get.put(DigioController());
+    final userController = Get.find<UserController>();
+
+    Future<void> onConnect() async {
+      final user = userController.currentUser.value;
+      final uid = await userController.userId;
+
+      if (user == null || uid == null) {
+        SnackbarService.showWarning('User not logged in');
+        return;
+      }
+
+      if (user.email == null || user.email!.isEmpty) {
+        SnackbarService.showWarning('Email not available');
+        return;
+      }
+
+      if (user.fullName == null || user.fullName!.isEmpty) {
+        SnackbarService.showWarning('Name not available');
+        return;
+      }
+
+      final response = await digioController.connectDigio(
+        email: user.email!,
+        name: user.fullName!,
+        userId: uid,
+      );
+
+      if (response != null) {
+        Get.offAllNamed(AppRoutes.registrationScreen);
+      }
     }
 
     return Scaffold(
@@ -100,6 +132,7 @@ class DigioConnectScreen extends StatelessWidget {
                         fontWeight: FontWeight.w400,
                       ),
                     ),
+
                     const SizedBox(height: 20),
 
                     _point(
@@ -121,11 +154,16 @@ class DigioConnectScreen extends StatelessWidget {
 
                     const SizedBox(height: 16),
 
-                    Button(
-                      title: 'Connect Digio',
-                      icon: Icons.link,
-                      buttonType: ButtonType.green,
-                      onTap: onConnect,
+                    Obx(
+                      () => Button(
+                        title: 'Connect Digio',
+                        icon: Icons.link,
+                        buttonType: ButtonType.green,
+                        onTap: digioController.connecting.value
+                            ? null
+                            : onConnect,
+                        showLoading: digioController.connecting.value,
+                      ),
                     ),
                   ],
                 ),

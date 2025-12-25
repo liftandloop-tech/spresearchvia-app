@@ -4,6 +4,7 @@ import '../../controllers/plan_purchase.controller.dart';
 import '../../core/models/subscription_history.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
+import '../../core/utils/responsive.dart';
 import 'widgets/subscription_card.dart';
 import '../../services/snackbar.service.dart';
 
@@ -25,7 +26,6 @@ class SubscriptionHistoryController extends GetxController {
   final RxBool isLoading = true.obs;
   final RxBool isLoadingMore = false.obs;
 
-   
   final RxInt registrationPage = 1.obs;
   final RxInt segmentPage = 1.obs;
   final RxBool hasMoreRegistrations = true.obs;
@@ -198,7 +198,6 @@ class SubscriptionHistoryController extends GetxController {
 
     switch (selectedFilter.value) {
       case 'Latest':
-         
         filtered.sort((a, b) {
           try {
             final dateA = DateTime.tryParse(a.paymentDate);
@@ -211,7 +210,6 @@ class SubscriptionHistoryController extends GetxController {
         });
         break;
       case 'Oldest':
-         
         filtered.sort((a, b) {
           try {
             final dateA = DateTime.tryParse(a.paymentDate);
@@ -227,7 +225,7 @@ class SubscriptionHistoryController extends GetxController {
         filtered = filtered
             .where((s) => s.headerStatus == SubscriptionStatus.active)
             .toList();
-         
+
         filtered.sort((a, b) {
           try {
             final dateA = DateTime.tryParse(a.paymentDate);
@@ -243,7 +241,7 @@ class SubscriptionHistoryController extends GetxController {
         filtered = filtered
             .where((s) => s.headerStatus == SubscriptionStatus.expired)
             .toList();
-         
+
         filtered.sort((a, b) {
           try {
             final dateA = DateTime.tryParse(a.paymentDate);
@@ -300,6 +298,7 @@ class SubscriptionHistoryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive.of(context);
     final controller = Get.put(SubscriptionHistoryController());
 
     return DefaultTabController(
@@ -404,7 +403,7 @@ class SubscriptionHistoryScreen extends StatelessWidget {
           return Column(
             children: [
               const SizedBox(height: 12),
-               
+
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 16),
                 child: Container(
@@ -443,23 +442,23 @@ class SubscriptionHistoryScreen extends StatelessWidget {
                 child: TabBarView(
                   children: [
                     (controller.registrations.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.history,
-                                  size: 64,
-                                  color: Color(0xffD1D5DB),
+                                  size: responsive.sp(64),
+                                  color: AppTheme.infoBorder,
                                 ),
-                                SizedBox(height: 16),
+                                SizedBox(height: responsive.hp(2)),
                                 Text(
                                   'No registration history',
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
-                                    fontSize: 16,
+                                    fontSize: responsive.sp(16),
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xff6B7280),
+                                    color: AppTheme.textGrey,
                                   ),
                                 ),
                               ],
@@ -521,23 +520,23 @@ class SubscriptionHistoryScreen extends StatelessWidget {
                           )),
 
                     (controller.segments.isEmpty
-                        ? const Center(
+                        ? Center(
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
                                 Icon(
                                   Icons.history,
-                                  size: 64,
-                                  color: Color(0xffD1D5DB),
+                                  size: responsive.sp(64),
+                                  color: AppTheme.infoBorder,
                                 ),
-                                SizedBox(height: 16),
+                                SizedBox(height: responsive.hp(2)),
                                 Text(
                                   'No segment history',
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
-                                    fontSize: 16,
+                                    fontSize: responsive.sp(16),
                                     fontWeight: FontWeight.w500,
-                                    color: Color(0xff6B7280),
+                                    color: AppTheme.textGrey,
                                   ),
                                 ),
                               ],

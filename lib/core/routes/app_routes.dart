@@ -17,7 +17,7 @@ import '../../screens/auth/set_mpin.screen.dart';
 import '../../screens/tabs.screen.dart';
 import '../../screens/dashboard/dashboard.screen.dart';
 import '../../screens/profile/profile.screen.dart';
-import '../../screens/profile/edit_profile.screen.dart';
+import '../../screens/profile/view_profile.screen.dart';
 import '../../screens/research/research_reports.screen.dart';
 import '../../screens/research/research_report_detail.screen.dart';
 import '../../screens/subscription/choose_plan.screen.dart';
@@ -77,7 +77,7 @@ class AppRoutes {
     GetPage(name: tabs, page: () => const TabsScreen()),
     GetPage(name: dashboard, page: () => const DashboardScreen()),
     GetPage(name: profile, page: () => const ProfileScreen()),
-    GetPage(name: editProfile, page: () => const EditProfileScreen()),
+    GetPage(name: editProfile, page: () => const ViewProfileScreen()),
     GetPage(name: researchReports, page: () => const ResearchReportsScreen()),
     GetPage(name: sebiCompilanceCheck, page: () => const SebiComplianceCheck()),
     GetPage(

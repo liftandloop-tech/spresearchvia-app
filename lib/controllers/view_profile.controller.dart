@@ -6,9 +6,11 @@ import '../controllers/user.controller.dart';
 import '../core/models/user.dart';
 import '../core/utils/error_message_handler.dart';
 import '../services/snackbar.service.dart';
+import '../services/secure_storage.service.dart';
 
-class EditProfileController extends GetxController {
+class ViewProfileController extends GetxController {
   final userController = Get.find<UserController>();
+  final _storage = SecureStorageService();
 
   final firstNameController = TextEditingController();
   final middleNameController = TextEditingController();
@@ -21,6 +23,9 @@ class EditProfileController extends GetxController {
   final pincodeController = TextEditingController();
   final phoneController = TextEditingController();
   final emailController = TextEditingController();
+  final panController = TextEditingController();
+  final dobController = TextEditingController();
+  final aadhaarController = TextEditingController();
 
   final Rxn<String> selectedState = Rxn<String>();
   final Rxn<File> selectedImage = Rxn<File>();
@@ -31,38 +36,49 @@ class EditProfileController extends GetxController {
     loadUserData();
   }
 
-  void loadUserData() {
+  void loadUserData() async {
     final user = userController.currentUser.value;
 
     if (user != null) {
-      String firstName = user.personalInformation?.firstName ?? '';
-      String lastName = user.personalInformation?.lastName ?? '';
+      // Get the raw user data to access userObject
+      final rawUserData = await _storage.getUserData();
+      final userObject = rawUserData?['userObject'] as Map<String, dynamic>?;
 
-      if (firstName.isEmpty &&
-          user.fullName != null &&
-          user.fullName!.isNotEmpty) {
-        final nameParts = user.fullName!.split(' ');
-        firstName = nameParts.first;
-        if (nameParts.length > 1) {
-          lastName = nameParts.last;
-        }
+      // Load full name
+      final fullName = user.fullName ?? '';
+      final nameParts = fullName.split(' ');
+      firstNameController.text = nameParts.isNotEmpty ? nameParts.first : '';
+      lastNameController.text = nameParts.length > 1 ? nameParts.last : '';
+      if (nameParts.length > 2) {
+        middleNameController.text = nameParts
+            .sublist(1, nameParts.length - 1)
+            .join(' ');
       }
 
-      firstNameController.text = firstName;
-      middleNameController.text = user.personalInformation?.middleName ?? '';
-      lastNameController.text = lastName;
-      fatherNameController.text = user.personalInformation?.fatherName ?? '';
+      // Load father's name from userObject
+      fatherNameController.text = userObject?['APP_F_NAME']?.toString() ?? '';
 
-      houseNoController.text = user.addressDetails?.houseNo ?? '';
-      streetAddressController.text = user.addressDetails?.streetAddress ?? '';
-      areaController.text = user.addressDetails?.area ?? '';
-      landmarkController.text = user.addressDetails?.landmark ?? '';
-      pincodeController.text = user.addressDetails?.pincode?.toString() ?? '';
-      selectedState.value = user.addressDetails?.state;
+      // Load address details from userObject
+      final add1 = userObject?['APP_COR_ADD1']?.toString() ?? '';
+      final add2 = userObject?['APP_COR_ADD2']?.toString() ?? '';
+      final add3 = userObject?['APP_COR_ADD3']?.toString() ?? '';
 
-      phoneController.text =
-          user.phone ?? user.contactDetails?.phone?.toString() ?? '';
-      emailController.text = user.email ?? user.contactDetails?.email ?? '';
+      houseNoController.text = add1;
+      streetAddressController.text = add2;
+      areaController.text = add3;
+      landmarkController.text = userObject?['APP_COR_CITY']?.toString() ?? '';
+      pincodeController.text = userObject?['APP_COR_PINCD']?.toString() ?? '';
+      selectedState.value = userObject?['APP_COR_STATE']?.toString();
+
+      // Load contact details - use phone and email from User model (already parsed from userObject)
+      phoneController.text = user.phone ?? '';
+      emailController.text = user.email ?? '';
+
+      // Load PAN, DOB, and Aadhaar
+      panController.text = user.panNumber ?? '';
+      dobController.text = userObject?['APP_DOB_DT']?.toString() ?? '';
+      aadhaarController.text =
+          user.aadharNumber ?? rawUserData?['aadhaarNumber']?.toString() ?? '';
     }
   }
 
@@ -140,6 +156,9 @@ class EditProfileController extends GetxController {
     pincodeController.dispose();
     phoneController.dispose();
     emailController.dispose();
+    panController.dispose();
+    dobController.dispose();
+    aadhaarController.dispose();
     super.onClose();
   }
 }

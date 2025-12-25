@@ -2,19 +2,22 @@ import 'package:get/get.dart';
 import '../../../controllers/segment_plan.controller.dart';
 
 class SegmentDropdownController extends GetxController {
-  final selectedSegment = 'Equity Cash'.obs;
+  final selectedSegment = 'SPARK'.obs;
   final isOpen = false.obs;
 
   List<String> get segments => [
-    'Index Future',
-    'Stock Future',
-    'Index Option',
-    'Stock Option',
-    'Equity Cash',
-    'MCX',
-    'NCDEX',
-    'currency',
-    'HNI Custom Plan',
+    // 'Index Future',
+    // 'Stock Future',
+    // 'Index Option',
+    // 'Stock Option',
+    // 'Equity Cash',
+    // 'MCX',
+    // 'NCDEX',
+    // 'currency',
+    // 'HNI Custom Plan',
+    'SPARK',
+    'SPLENDID',
+    'HNI CUSTOMIZE CORPORATE PLAN',
   ];
 
   void selectSegment(String segment) {

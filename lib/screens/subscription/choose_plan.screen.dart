@@ -164,7 +164,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
               const SizedBox(height: 12),
 
               const Text(
-                'Cancel anytime â€¢ 7-day free trial',
+                'Cancel anytime 7-day free trial',
                 style: TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 12,

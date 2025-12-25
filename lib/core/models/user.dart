@@ -95,7 +95,9 @@ class User {
       kycStatus: _parseKycStatus(json['kycStatus'] ?? 'notStarted'),
       currentPlan: _parsePlanType(json['currentPlan']),
       panNumber:
-          userObject?['pan']?.toString() ?? json['panNumber']?.toString(),
+          userObject?['APP_PAN_NO']?.toString() ??
+          userObject?['pan']?.toString() ??
+          json['panNumber']?.toString(),
       aadharNumber:
           json['aadhaarNumber']?.toString() ??
           userObject?['aadhaarNumber']?.toString(),

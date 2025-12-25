@@ -6,7 +6,7 @@ import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/models/user.dart';
 import '../notification/notification_settings.screen.dart';
-import 'edit_profile.screen.dart';
+import 'view_profile.screen.dart';
 import 'widgets/KycStatus.Item.dart';
 import 'widgets/profile.image.dart';
 import 'widgets/profile.tile.dart';
@@ -171,10 +171,10 @@ class ProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               Button(
-                title: 'Edit Profile',
+                title: 'View Profile',
                 buttonType: ButtonType.blue,
-                icon: Icons.edit_square,
-                onTap: () => Get.to(() => const EditProfileScreen()),
+                icon: Icons.person,
+                onTap: () => Get.to(() => const ViewProfileScreen()),
               ),
               const SizedBox(height: 10),
               Button(

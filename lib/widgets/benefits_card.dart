@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import '../core/utils/responsive.dart';
 
 class BenefitsCard extends StatelessWidget {
   const BenefitsCard({
@@ -13,43 +14,44 @@ class BenefitsCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive.of(context);
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: responsive.padding(all: 16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7FAFC),
-        borderRadius: BorderRadius.circular(12),
+        color: AppTheme.profileCardBackground,
+        borderRadius: BorderRadius.circular(responsive.radius(12)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             title,
-            style: const TextStyle(
+            style: TextStyle(
               fontFamily: 'Poppins',
-              fontSize: 14,
+              fontSize: responsive.sp(14),
               fontWeight: FontWeight.w600,
               color: AppTheme.primaryBlueDark,
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: responsive.hp(1.5)),
           ...benefits.map(
             (benefit) => Padding(
-              padding: const EdgeInsets.only(bottom: 8),
+              padding: responsive.padding(bottom: 8),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
-                    color: Color(0xFF10B981),
-                    size: 20,
+                    color: AppTheme.successGreen,
+                    size: responsive.sp(20),
                   ),
-                  const SizedBox(width: 12),
+                  SizedBox(width: responsive.wp(3)),
                   Expanded(
                     child: Text(
                       benefit,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontFamily: 'Poppins',
-                        fontSize: 14,
+                        fontSize: responsive.sp(14),
                         color: AppTheme.primaryBlueDark,
                       ),
                     ),

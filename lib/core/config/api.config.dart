@@ -13,6 +13,8 @@ abstract class ApiConfig {
 
   static const String userList = '/user/user-list';
   static String deleteUser(String userId) => '/user/delete-user/$userId';
+  static String uploadProfileImage(String userId) =>
+      '/user/image-change/$userId';
 
   static String uploadAadhar(String userId) =>
       '/user/kyc/aadhaar-upload/$userId';

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../core/theme/app_theme.dart';
+import '../core/utils/responsive.dart';
 
 class _DropdownController extends GetxController {
   final isOpen = false.obs;
@@ -88,6 +90,7 @@ class StateSelector extends StatelessWidget {
     BuildContext context,
     _DropdownController controller,
   ) {
+    final responsive = Responsive.of(context);
     RenderBox renderBox = context.findRenderObject() as RenderBox;
     Size size = renderBox.size;
     Offset offset = renderBox.localToGlobal(Offset.zero);
@@ -99,29 +102,30 @@ class StateSelector extends StatelessWidget {
         children: [
           Positioned(
             left: offset.dx,
-            top: offset.dy + size.height + 4,
+            top: offset.dy + size.height + responsive.hp(0.5),
             width: size.width,
             child: CompositedTransformFollower(
               link: controller.layerLink,
               showWhenUnlinked: false,
               child: Material(
                 elevation: 6.0,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(responsive.radius(12)),
                 child: Container(
-                  constraints: const BoxConstraints(maxHeight: 220),
+                  constraints: BoxConstraints(maxHeight: responsive.hp(30)),
                   decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: Colors.grey.shade300),
+                    color: AppTheme.backgroundWhite,
+                    borderRadius: BorderRadius.circular(responsive.radius(12)),
+                    border: Border.all(color: AppTheme.borderGrey),
                   ),
                   child: indianStates.isEmpty
-                      ? const Padding(
-                          padding: EdgeInsets.all(16.0),
+                      ? Padding(
+                          padding: responsive.padding(all: 16.0),
                           child: Text(
                             'No options',
                             style: TextStyle(
                               fontFamily: 'Poppins',
-                              color: Colors.grey,
+                              color: AppTheme.textGrey,
+                              fontSize: responsive.sp(14),
                             ),
                           ),
                         )
@@ -138,26 +142,29 @@ class StateSelector extends StatelessWidget {
                                 controller.closeDropdown();
                               },
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
+                                padding: responsive.padding(
                                   horizontal: 16,
                                   vertical: 14,
                                 ),
                                 decoration: BoxDecoration(
                                   color: selected
-                                      ? Colors.blue.shade50
+                                      ? AppTheme.backgroundLightBlue
                                       : Colors.transparent,
-                                  borderRadius: BorderRadius.circular(8),
+                                  borderRadius: BorderRadius.circular(
+                                    responsive.radius(8),
+                                  ),
                                 ),
                                 child: Text(
                                   item,
                                   style: TextStyle(
                                     fontFamily: 'Poppins',
                                     color: selected
-                                        ? Colors.blue
-                                        : Colors.black87,
+                                        ? AppTheme.primaryBlue
+                                        : AppTheme.textBlack,
                                     fontWeight: selected
                                         ? FontWeight.w600
                                         : FontWeight.normal,
+                                    fontSize: responsive.sp(14),
                                   ),
                                 ),
                               ),
@@ -175,6 +182,7 @@ class StateSelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final responsive = Responsive.of(context);
     final controller = Get.put(_DropdownController(), tag: '$label-$hashCode');
 
     return Column(
@@ -182,14 +190,14 @@ class StateSelector extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
+          style: TextStyle(
             fontFamily: 'Poppins',
             fontWeight: FontWeight.w500,
-            fontSize: 14,
-            color: Colors.black,
+            fontSize: responsive.sp(14),
+            color: AppTheme.textBlack,
           ),
         ),
-        const SizedBox(height: 6),
+        SizedBox(height: responsive.hp(0.75)),
         CompositedTransformTarget(
           link: controller.layerLink,
           child: GestureDetector(
@@ -199,14 +207,11 @@ class StateSelector extends StatelessWidget {
             ),
             child: Obx(
               () => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 14,
-                ),
+                padding: responsive.padding(horizontal: 16, vertical: 14),
                 decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: Colors.grey.shade300),
+                  color: AppTheme.infoBackground,
+                  borderRadius: BorderRadius.circular(responsive.radius(12)),
+                  border: Border.all(color: AppTheme.borderGrey),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -216,8 +221,10 @@ class StateSelector extends StatelessWidget {
                         value ?? hint ?? 'Select $label',
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          color: value != null ? Colors.black87 : Colors.grey,
-                          fontSize: 16,
+                          color: value != null
+                              ? AppTheme.textBlack
+                              : AppTheme.textGrey,
+                          fontSize: responsive.sp(16),
                         ),
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -226,7 +233,8 @@ class StateSelector extends StatelessWidget {
                       controller.isOpen.value
                           ? Icons.keyboard_arrow_up
                           : Icons.keyboard_arrow_down,
-                      color: Colors.grey,
+                      color: AppTheme.textGrey,
+                      size: responsive.sp(24),
                     ),
                   ],
                 ),
