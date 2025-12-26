@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import '../../../core/routes/app_routes.dart';
 import '../../../widgets/button.dart';
 
 class PaymentFaliureScreen extends StatelessWidget {
@@ -9,7 +8,8 @@ class PaymentFaliureScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final Map<String, dynamic> errorData = Get.arguments ?? {};
-    final String errorMessage = errorData['message'] ?? 'Something went wrong, please try again';
+    final String errorMessage =
+        errorData['message'] ?? 'Something went wrong, please try again';
 
     return Scaffold(
       body: Column(
@@ -49,7 +49,8 @@ class PaymentFaliureScreen extends StatelessWidget {
           Button(
             title: 'Retry Payment',
             onTap: () {
-              Get.back();
+              // Replace with actual retry logic or navigate to payment screen
+              Get.offAllNamed('/subscription/payment');
             },
             icon: Icons.refresh,
             buttonType: ButtonType.green,
@@ -58,7 +59,8 @@ class PaymentFaliureScreen extends StatelessWidget {
           Button(
             title: 'Back',
             onTap: () {
-              Get.offAllNamed(AppRoutes.registrationScreen);
+              // Navigate to registration or segment selection screen
+              Get.offAllNamed('/registration');
             },
             icon: Icons.arrow_back,
             buttonType: ButtonType.greyBorder,

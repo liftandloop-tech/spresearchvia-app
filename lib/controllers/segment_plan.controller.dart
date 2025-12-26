@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../services/snackbar.service.dart';
 import '../services/api_client.service.dart';
@@ -8,6 +7,7 @@ import '../core/config/api.config.dart';
 
 class SegmentPlan {
   final String id;
+  final String category;
   final String name;
   final String description;
   final String amount;
@@ -18,6 +18,7 @@ class SegmentPlan {
 
   SegmentPlan({
     required this.id,
+    required this.category,
     required this.name,
     required this.description,
     required this.amount,
@@ -30,6 +31,7 @@ class SegmentPlan {
   factory SegmentPlan.fromJson(Map<String, dynamic> json) {
     return SegmentPlan(
       id: json['id']?.toString() ?? json['_id']?.toString() ?? '',
+      category: json['category']?.toString() ?? '',
       name: json['name']?.toString() ?? json['segmentName']?.toString() ?? '',
       description:
           json['description']?.toString() ??
@@ -52,6 +54,7 @@ class SegmentPlan {
   Map<String, dynamic> toJson() {
     return {
       'id': id,
+      'category': category,
       'name': name,
       'description': description,
       'amount': amount,
@@ -64,134 +67,23 @@ class SegmentPlan {
 }
 
 class SegmentPlanController extends GetxController {
-  final ApiClient _apiClient = ApiClient();
-  final SecureStorageService _storage = SecureStorageService();
-
-  final isLoading = false.obs;
-  final allPlans = <SegmentPlan>[].obs;  
-  final availablePlans = <SegmentPlan>[].obs;  
-  final selectedPlanId = Rxn<String>();
-  final error = Rxn<String>();
-  final selectedSegment = 'Equity Cash'.obs;  
-
-  Future<String?> get userId => _storage.getUserId();
-
-  @override
-  void onInit() {
-    super.onInit();
-    fetchPlans();
-  }
-
-  Future<void> fetchPlans() async {
-    try {
-      isLoading.value = true;
-      error.value = null;
-
-      final response = await _apiClient.get(ApiConfig.listSegments);
-
-      if (response.statusCode == 200) {
-        final data = response.data;
-        final List<dynamic> plansData = data['data']['data'] ?? [];
-        allPlans.value = plansData
-            .map((json) => SegmentPlan.fromJson(json))
-            .toList();
-
-         
-        filterBySegment(selectedSegment.value);
-
-        if (selectedPlanId.value == null) {
-          final popularPlan = availablePlans.firstWhereOrNull(
-            (p) => p.isPopular,
-          );
-          if (popularPlan != null) {
-            selectedPlanId.value = popularPlan.id;
-          }
-        }
-      } else {
-        throw Exception('Failed to load plans');
-      }
-
-      isLoading.value = false;
-    } catch (e) {
-      isLoading.value = false;
-      error.value = e.toString();
-      SnackbarService.showError('Failed to load plans: ${e.toString()}');
-    }
-  }
-
-  void selectPlan(String planId) {
-    selectedPlanId.value = planId;
-  }
-
-  SegmentPlan? get selectedPlan {
-    if (selectedPlanId.value == null) return null;
-    return availablePlans.firstWhereOrNull(
-      (plan) => plan.id == selectedPlanId.value,
-    );
-  }
-
-  bool isPlanSelected(String planId) {
-    return selectedPlanId.value == planId;
-  }
-
-  Future<void> retry() async {
-    await fetchPlans();
-  }
-
-  void filterBySegment(String segment) {
-    selectedSegment.value = segment;
-
-     
-    availablePlans.value = allPlans.where((plan) {
-       
-      return plan.name.toLowerCase() == segment.toLowerCase();
-    }).toList();
-
-     
-    if (selectedPlanId.value != null &&
-        !availablePlans.any((p) => p.id == selectedPlanId.value)) {
-      selectedPlanId.value = null;
-
-       
-      final popularPlan = availablePlans.firstWhereOrNull((p) => p.isPopular);
-      if (popularPlan != null) {
-        selectedPlanId.value = popularPlan.id;
-      }
-    }
-  }
-
   Future<Map<String, dynamic>?> purchaseSegment({
     required String segmentId,
   }) async {
     try {
-      debugPrint(
-        'DEBUG: purchaseSegment controller called with segmentId: $segmentId',
-      );
       isLoading.value = true;
-
       final uid = await userId;
-      debugPrint('DEBUG: User ID: $uid');
-      if (uid == null) {
-        throw Exception('User not logged in');
-      }
-
-      debugPrint('DEBUG: Making API call to ${ApiConfig.segmentPurchase}');
+      if (uid == null) throw Exception('User not logged in');
       final response = await _apiClient.post(
         ApiConfig.segmentPurchase,
         data: {'userId': uid, 'segmentId': segmentId},
       );
-
-      debugPrint('DEBUG: API Response Status: ${response.statusCode}');
-      debugPrint('DEBUG: API Response Data: ${response.data}');
-
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
         return data['data'] ?? data;
       }
-
       throw Exception('Server returned status code: ${response.statusCode}');
     } catch (e) {
-      debugPrint('DEBUG: Error in purchaseSegment controller: $e');
       final error = ApiErrorHandler.handleError(e);
       SnackbarService.showError(error.message);
       rethrow;
@@ -208,7 +100,6 @@ class SegmentPlanController extends GetxController {
   }) async {
     try {
       isLoading.value = true;
-
       final response = await _apiClient.post(
         ApiConfig.segmentPaymentVerify,
         data: {
@@ -218,17 +109,14 @@ class SegmentPlanController extends GetxController {
           'razorpay_signature': razorpaySignature,
         },
       );
-
       if (response.statusCode == 200) {
         final data = response.data;
         final success = data['success'] ?? false;
-
         if (success) {
           SnackbarService.showSuccess('Payment verified successfully!');
           return true;
         }
       }
-
       throw Exception('Payment verification failed');
     } catch (e) {
       final error = ApiErrorHandler.handleError(e);
@@ -237,5 +125,73 @@ class SegmentPlanController extends GetxController {
     } finally {
       isLoading.value = false;
     }
+  }
+
+  final ApiClient _apiClient = ApiClient();
+  final SecureStorageService _storage = SecureStorageService();
+
+  final isLoading = false.obs;
+  final availablePlans = <SegmentPlan>[].obs;
+  final selectedPlanId = Rxn<String>();
+  final error = Rxn<String>();
+  final selectedSegment = 'SPARK'.obs;
+
+  Future<String?> get userId => _storage.getUserId();
+
+  @override
+  void onInit() {
+    super.onInit();
+    fetchPlans();
+  }
+
+  Future<void> fetchPlans({String? category}) async {
+    try {
+      isLoading.value = true;
+      error.value = null;
+
+      final categoryFilter = category ?? selectedSegment.value;
+      final url = '${ApiConfig.listSegments}?category=$categoryFilter';
+      final response = await _apiClient.get(url);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        final List<dynamic> plansData = data['data']['data'] ?? [];
+        availablePlans.value = plansData
+            .map((json) => SegmentPlan.fromJson(json))
+            .toList();
+
+        // Auto-select a popular plan if none selected
+        if (selectedPlanId.value == null && availablePlans.isNotEmpty) {
+          final popularPlan = availablePlans.firstWhereOrNull(
+            (p) => p.isPopular,
+          );
+          selectedPlanId.value = popularPlan?.id ?? availablePlans.first.id;
+        }
+      } else {
+        throw Exception('Failed to load plans');
+      }
+    } catch (e) {
+      error.value = e.toString();
+      SnackbarService.showError('Failed to load plans: ${e.toString()}');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void selectPlan(String planId) {
+    selectedPlanId.value = planId;
+  }
+
+  SegmentPlan? get selectedPlan => availablePlans.firstWhereOrNull(
+    (plan) => plan.id == selectedPlanId.value,
+  );
+
+  bool isPlanSelected(String planId) => selectedPlanId.value == planId;
+
+  Future<void> retry() async => fetchPlans();
+
+  void filterBySegment(String segment) {
+    selectedSegment.value = segment;
+    fetchPlans(category: segment);
   }
 }

@@ -232,9 +232,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
 
       final options = RazorpayOptions(
         orderId: razorpayOrderId,
-        amount: amount is int
-            ? amount.toDouble()
-            : (amount as double? ?? totalPayable.value),
+        amount: totalPayable.value,
         planName: selectedPlan!.name,
         userEmail: userEmail,
         userPhone: userPhone,

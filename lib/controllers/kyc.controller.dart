@@ -27,7 +27,7 @@ class KycController extends GetxController {
     required String panNumber,
   }) async {
     try {
-      final uid = userId;
+      final uid = _storage.getUserId();
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;
@@ -85,7 +85,7 @@ class KycController extends GetxController {
     required String aadharNumber,
   }) async {
     try {
-      final uid = userId;
+      final uid = _storage.getUserId();
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;
@@ -155,7 +155,7 @@ class KycController extends GetxController {
     required String signType,
   }) async {
     try {
-      final uid = userId;
+      final uid = _storage.getUserId();
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;

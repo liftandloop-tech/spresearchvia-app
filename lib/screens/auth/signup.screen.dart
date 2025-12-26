@@ -84,7 +84,11 @@ class SignupScreen extends StatelessWidget {
     }
 
     void back() {
-      Get.back();
+      if (Navigator.of(context).canPop()) {
+        Get.back();
+      } else {
+        Get.offAllNamed('/get-started');
+      }
     }
 
     return Scaffold(

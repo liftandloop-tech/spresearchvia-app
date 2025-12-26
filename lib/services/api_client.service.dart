@@ -42,7 +42,7 @@ class ApiClient {
   ) async {
     final token = await _storage.getAuthToken();
     if (token != null && token.isNotEmpty) {
-      options.headers['Authorization'] = token;
+      options.headers['authorization'] = token;
     }
 
     handler.next(options);

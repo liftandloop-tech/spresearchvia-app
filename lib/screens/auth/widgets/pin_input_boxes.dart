@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:otp_autofill/otp_autofill.dart';
 
 class PinInputBoxes extends StatefulWidget {
   final int length;
@@ -20,16 +21,40 @@ class PinInputBoxes extends StatefulWidget {
 class _PinInputBoxesState extends State<PinInputBoxes> {
   late List<TextEditingController> controllers;
   late List<FocusNode> focusNodes;
+  late OTPTextEditController otpController;
+  late OTPInteractor otpInteractor;
 
   @override
   void initState() {
     super.initState();
     controllers = List.generate(widget.length, (_) => TextEditingController());
     focusNodes = List.generate(widget.length, (_) => FocusNode());
+    otpInteractor = OTPInteractor();
+    otpController =
+        OTPTextEditController(
+          codeLength: widget.length,
+          onCodeReceive: (code) {
+            _fillOTP(code);
+          },
+        )..startListenUserConsent((code) {
+          final exp = RegExp(r'(\d{4})');
+          return exp.stringMatch(code ?? '') ?? '';
+        });
+  }
+
+  void _fillOTP(String code) {
+    for (int i = 0; i < code.length && i < widget.length; i++) {
+      controllers[i].text = code[i];
+    }
+    setState(() {});
+    if (code.length == widget.length) {
+      widget.onCompleted(code);
+    }
   }
 
   @override
   void dispose() {
+    otpController.stopListen();
     for (var controller in controllers) {
       controller.dispose();
     }
@@ -82,7 +107,7 @@ class _PinInputBoxesState extends State<PinInputBoxes> {
               if (value.isEmpty && index > 0) {
                 focusNodes[index - 1].requestFocus();
               }
-              
+
               final pin = controllers.map((c) => c.text).join();
               if (pin.length == widget.length) {
                 widget.onCompleted(pin);

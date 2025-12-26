@@ -266,22 +266,12 @@ class AuthController extends GetxController {
         final userData = data['data']?['user'];
 
         if (token != null && userData != null) {
-          final user = User.fromJson(userData);
-          currentUser.value = user;
-
           await _storage.saveAuthToken(token);
-          await _storage.saveUserId(user.id);
-          await _storage.saveUserData(userData);
           await _storage.setLoggedIn(true);
-
-          if (Get.isRegistered<UserController>()) {
-            final userController = Get.find<UserController>();
-            userController.currentUser.value = user;
-
-            userController.loadUserData();
-          } else {
-            Get.put(UserController()).currentUser.value = user;
-          }
+          final userController = Get.isRegistered<UserController>()
+              ? Get.find<UserController>()
+              : Get.put(UserController());
+          await userController.updateUserFromBackend(userData);
         }
         return true;
       }

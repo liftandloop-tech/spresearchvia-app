@@ -12,6 +12,14 @@ import '../core/utils/error_message_handler.dart';
 import '../services/snackbar.service.dart';
 
 class UserController extends GetxController {
+  /// Update user from backend response and persist to storage
+  Future<void> updateUserFromBackend(Map<String, dynamic> userData) async {
+    final user = User.fromJson(userData);
+    currentUser.value = user;
+    await _storage.saveUserData(userData);
+    await _storage.saveUserId(user.id);
+  }
+
   final ApiClient _apiClient = ApiClient();
   final SecureStorageService _storage = SecureStorageService();
 

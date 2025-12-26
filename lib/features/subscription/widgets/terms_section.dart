@@ -5,6 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../core/theme/app_theme.dart';
 
 class TermsSection extends StatelessWidget {
+  static final _policyURL = Uri.parse('https://researchvia.in/privacy-policy/');
+
   final bool agreedToTerms;
   final bool authorizedPayment;
   final ValueChanged<bool> onTermsChanged;
@@ -17,6 +19,12 @@ class TermsSection extends StatelessWidget {
     required this.onTermsChanged,
     required this.onAuthorizationChanged,
   });
+
+  Future<void> _launchPolicyURL() async {
+    if (await canLaunchUrl(_policyURL)) {
+      await launchUrl(_policyURL, mode: LaunchMode.externalApplication);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -41,6 +49,7 @@ class TermsSection extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
                   ),
+                  recognizer: TapGestureRecognizer()..onTap = _launchPolicyURL,
                 ),
                 const TextSpan(text: ' and '),
                 TextSpan(
@@ -50,15 +59,7 @@ class TermsSection extends StatelessWidget {
                     fontWeight: FontWeight.w600,
                     decoration: TextDecoration.underline,
                   ),
-                  recognizer: TapGestureRecognizer()
-                    ..onTap = () async {
-                      final url = Uri.parse(
-                        'https://researchvia.in/privacy-policy/',
-                      );
-                      if (await canLaunchUrl(url)) {
-                        await launchUrl(url, mode: LaunchMode.inAppWebView);
-                      }
-                    },
+                  recognizer: TapGestureRecognizer()..onTap = _launchPolicyURL,
                 ),
               ],
             ),

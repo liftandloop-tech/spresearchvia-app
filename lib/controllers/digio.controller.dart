@@ -4,6 +4,7 @@ import 'package:spresearchvia/core/config/api.config.dart';
 import '../services/api_client.service.dart';
 import '../services/api_exception.service.dart';
 import '../services/snackbar.service.dart';
+import '../services/secure_storage.service.dart';
 
 class DigioController extends GetxController {
   final RxBool connecting = false.obs;
@@ -16,6 +17,12 @@ class DigioController extends GetxController {
   }) async {
     try {
       connecting.value = true;
+
+      final token = await SecureStorageService().getAuthToken();
+      if (token == null || token.isEmpty) {
+        SnackbarService.showError('User token missing. Please login again.');
+        return null;
+      }
 
       final response = await _apiClient.post(
         ApiConfig.documentKYC(userId),
