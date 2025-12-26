@@ -4,6 +4,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../controllers/view_profile.controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
+import '../../core/routes/app_routes.dart';
 import 'widgets/profile.image.dart';
 import '../../widgets/state_selector.dart';
 import '../../widgets/title_field.dart';
@@ -174,7 +175,9 @@ class ViewProfileScreen extends StatelessWidget {
               ),
               const SizedBox(height: 15),
               GestureDetector(
-                onTap: () {},
+                onTap: () {
+                  Get.toNamed(AppRoutes.setMpin);
+                },
                 child: const SizedBox(
                   height: 60,
                   child: Row(

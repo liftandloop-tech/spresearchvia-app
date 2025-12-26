@@ -70,7 +70,6 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
         return;
       }
 
-       
       final segmentId = args is Map<String, dynamic>
           ? args['segmentId'] ?? args['segment_id'] ?? args['id']
           : null;
@@ -92,7 +91,6 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
           _error = 'Failed to load invoice';
         }
       } else if (args is Map<String, dynamic> && args.isNotEmpty) {
-         
         _invoice = Map<String, dynamic>.from(args);
       } else {
         _error = 'No invoice identifier provided';
@@ -110,9 +108,28 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     }
   }
 
+  String _formatInvoiceNumber(String invoiceNo) {
+    if (invoiceNo.isEmpty) return 'N/A';
+
+    // If it's a MongoDB ID (24 hex characters), take first 12 characters
+    if (invoiceNo.length >= 24 &&
+        RegExp(r'^[a-f0-9]+$').hasMatch(invoiceNo.substring(0, 24))) {
+      return invoiceNo.substring(0, 12).toUpperCase();
+    }
+
+    // If it's too long, truncate to reasonable length
+    if (invoiceNo.length > 20) {
+      return invoiceNo.substring(0, 20).toUpperCase();
+    }
+
+    return invoiceNo.toUpperCase();
+  }
+
   @override
   Widget build(BuildContext context) {
-    String invoiceNo = _invoice['invoiceNumber']?.toString() ?? '';
+    String invoiceNo = _formatInvoiceNumber(
+      _invoice['invoiceNumber']?.toString() ?? '',
+    );
     String date = '';
     try {
       date =
@@ -146,7 +163,6 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
     } else if (user is String) {
       clientName = user;
     } else if (user != null) {
-       
       clientName = user.toString();
     }
 
@@ -189,73 +205,7 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
             color: Color(0xff163174),
           ),
         ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
-            child: Row(
-              children: [
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff163174),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  icon: const Icon(Icons.print, size: 18, color: Colors.white),
-                  label: const Text(
-                    'Print',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  onPressed: () {
-                    SnackbarService.showInfo('Print functionality coming soon');
-                  },
-                ),
-                const SizedBox(width: 8),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xff10B981),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 8,
-                    ),
-                  ),
-                  icon: const Icon(
-                    Icons.picture_as_pdf,
-                    size: 18,
-                    color: Colors.white,
-                  ),
-                  label: const Text(
-                    'PDF',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 14,
-                      color: Colors.white,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  onPressed: () {
-                    SnackbarService.showInfo('PDF download coming soon');
-                  },
-                ),
-                const SizedBox(width: 8),
-              ],
-            ),
-          ),
-        ],
+        actions: const [],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
