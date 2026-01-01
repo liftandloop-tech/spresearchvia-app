@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../core/theme/app_theme.dart';
+import 'profile_image_content.dart';
 
 class ProfileImageAvatar extends StatelessWidget {
   const ProfileImageAvatar({
@@ -36,50 +37,9 @@ class ProfileImageAvatar extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipOval(child: _buildImage()),
-    );
-  }
-
-  Widget _buildImage() {
-    if (imagePath.startsWith('https://')) {
-      return Image.network(
-        imagePath,
-        fit: BoxFit.cover,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildPlaceholder();
-        },
-        loadingBuilder: (context, child, loadingProgress) {
-          if (loadingProgress == null) return child;
-          return Center(
-            child: CircularProgressIndicator(
-              value: loadingProgress.expectedTotalBytes != null
-                  ? loadingProgress.cumulativeBytesLoaded /
-                        loadingProgress.expectedTotalBytes!
-                  : null,
-              color: AppTheme.primaryBlue,
-            ),
-          );
-        },
-      );
-    } else {
-      try {
-        return Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          errorBuilder: (context, error, stackTrace) {
-            return _buildPlaceholder();
-          },
-        );
-      } catch (e) {
-        return _buildPlaceholder();
-      }
-    }
-  }
-
-  Widget _buildPlaceholder() {
-    return Container(
-      color: AppTheme.backgroundLightBlue,
-      child: Icon(Icons.person, size: size * 0.5, color: AppTheme.primaryBlue),
+      child: ClipOval(
+        child: ProfileImageContent(imagePath: imagePath, size: size),
+      ),
     );
   }
 }

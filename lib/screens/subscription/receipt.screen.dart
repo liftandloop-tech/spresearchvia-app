@@ -3,6 +3,9 @@ import 'package:get/get.dart';
 import '../../services/snackbar.service.dart';
 import '../../services/api_client.service.dart';
 import '../../services/api_exception.service.dart';
+import 'widgets/receipt_info_row.dart';
+import 'widgets/receipt_service_item.dart';
+import 'widgets/receipt_price_row.dart';
 
 class ReceiptScreen extends StatefulWidget {
   const ReceiptScreen({super.key});
@@ -502,23 +505,36 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _buildInfoRow('Name:', clientName),
+                          ReceiptInfoRow(label: 'Name:', value: clientName),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Father\'s Name:', fatherName),
+                          ReceiptInfoRow(
+                            label: 'Father\'s Name:',
+                            value: fatherName,
+                          ),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Address:', address),
+                          ReceiptInfoRow(label: 'Address:', value: address),
                           const SizedBox(height: 8),
                           Row(
                             children: [
-                              Expanded(child: _buildInfoRow('Mobile:', mobile)),
+                              Expanded(
+                                child: ReceiptInfoRow(
+                                  label: 'Mobile:',
+                                  value: mobile,
+                                ),
+                              ),
                               const SizedBox(width: 16),
-                              Expanded(child: _buildInfoRow('PAN:', pan)),
+                              Expanded(
+                                child: ReceiptInfoRow(
+                                  label: 'PAN:',
+                                  value: pan,
+                                ),
+                              ),
                             ],
                           ),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Email:', email),
+                          ReceiptInfoRow(label: 'Email:', value: email),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Aadhaar:', aadhaar),
+                          ReceiptInfoRow(label: 'Aadhaar:', value: aadhaar),
                         ],
                       ),
                     ),
@@ -545,12 +561,14 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                             ),
                           ),
                           const SizedBox(height: 16),
-                          _buildServiceItem(
-                            '1.',
-                            segment['segmentName']?.toString() ??
+                          ReceiptServiceItem(
+                            number: '1.',
+                            title:
+                                segment['segmentName']?.toString() ??
                                 'Subscription',
-                            '${segment['segmentName'] ?? ''} | ${validity.isNotEmpty ? '$validity Days' : ''}',
-                            '₹$subtotal',
+                            subtitle:
+                                '${segment['segmentName'] ?? ''} | ${validity.isNotEmpty ? '$validity Days' : ''}',
+                            amount: '₹$subtotal',
                           ),
                           const SizedBox(height: 12),
                         ],
@@ -563,13 +581,16 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                       padding: const EdgeInsets.symmetric(horizontal: 20),
                       child: Column(
                         children: [
-                          _buildPriceRow('Subtotal:', subtotal),
+                          ReceiptPriceRow(label: 'Subtotal:', amount: subtotal),
                           const SizedBox(height: 8),
-                          _buildPriceRow('CGST (9%):', cgstStr),
+                          ReceiptPriceRow(label: 'CGST (9%):', amount: cgstStr),
                           const SizedBox(height: 8),
-                          _buildPriceRow('SGST (9%):', sgstStr),
+                          ReceiptPriceRow(label: 'SGST (9%):', amount: sgstStr),
                           const SizedBox(height: 8),
-                          _buildPriceRow('Total GST (18%):', totalGst),
+                          ReceiptPriceRow(
+                            label: 'Total GST (18%):',
+                            amount: totalGst,
+                          ),
                           const SizedBox(height: 16),
                           const Divider(color: Color(0xffE5E7EB), thickness: 1),
                           const SizedBox(height: 16),
@@ -670,11 +691,20 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                             ),
                           ),
                           const SizedBox(height: 12),
-                          _buildInfoRow('Service Validity:', validity),
+                          ReceiptInfoRow(
+                            label: 'Service Validity:',
+                            value: validity,
+                          ),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Payment Ref ID:', paymentRefId),
+                          ReceiptInfoRow(
+                            label: 'Payment Ref ID:',
+                            value: paymentRefId,
+                          ),
                           const SizedBox(height: 8),
-                          _buildInfoRow('Generated By:', 'ResearchVia Admin'),
+                          ReceiptInfoRow(
+                            label: 'Generated By:',
+                            value: 'ResearchVia Admin',
+                          ),
                           const SizedBox(height: 12),
                           const Text(
                             'Authorized Signatory:',
@@ -747,122 +777,6 @@ class _ReceiptScreenState extends State<ReceiptScreen> {
                 ),
               ),
             ),
-    );
-  }
-
-  Widget _buildInfoRow(String label, String value) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SizedBox(
-          width: 120,
-          child: Text(
-            label,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              color: Color(0xff6B7280),
-            ),
-          ),
-        ),
-        Expanded(
-          child: Text(
-            value,
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: Color(0xff163174),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildServiceItem(
-    String number,
-    String title,
-    String subtitle,
-    String amount,
-  ) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              number,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: Color(0xff163174),
-              ),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xff163174),
-                    ),
-                  ),
-                  Text(
-                    subtitle,
-                    style: const TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 11,
-                      color: Color(0xff6B7280),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Text(
-              amount,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 13,
-                fontWeight: FontWeight.w600,
-                color: Color(0xff163174),
-              ),
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPriceRow(String label, String amount) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: Color(0xff6B7280),
-          ),
-        ),
-        Text(
-          amount,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: Color(0xff163174),
-          ),
-        ),
-      ],
     );
   }
 

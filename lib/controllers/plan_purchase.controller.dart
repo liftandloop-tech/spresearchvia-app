@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../core/config/api.config.dart';
 import '../core/models/plan.dart';
@@ -280,6 +281,39 @@ class PlanPurchaseController extends GetxController {
     } catch (e) {
       ApiErrorHandler.handleError(e);
       return {'totalCount': 0, 'data': []};
+    }
+  }
+
+  Future<Map<String, dynamic>> fetchSegmentPaymentHistoryApi({
+    required String userId,
+    int page = 1,
+    int pageSize = 20,
+  }) async {
+    try {
+      debugPrint(
+        'DEBUG: fetchSegmentPaymentHistoryApi - userId: $userId, page: $page, pageSize: $pageSize',
+      );
+      final url = ApiConfig.segmentPaymentHistory(userId);
+      debugPrint('DEBUG: API URL: $url');
+
+      final response = await _apiClient.get(
+        url,
+        queryParameters: {'page': page, 'pageSize': pageSize},
+      );
+
+      debugPrint('DEBUG: Response status: ${response.statusCode}');
+      debugPrint('DEBUG: Response data: ${response.data}');
+
+      if (response.statusCode == 200) {
+        final data = response.data['data'] ?? {};
+        return Map<String, dynamic>.from(data as Map);
+      }
+
+      return {'segmentsPaymentCount': 0, 'segmentsPayment': []};
+    } catch (e) {
+      debugPrint('DEBUG: Error in fetchSegmentPaymentHistoryApi: $e');
+      ApiErrorHandler.handleError(e);
+      return {'segmentsPaymentCount': 0, 'segmentsPayment': []};
     }
   }
 }

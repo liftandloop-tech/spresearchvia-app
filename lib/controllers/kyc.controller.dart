@@ -28,6 +28,7 @@ class KycController extends GetxController {
   }) async {
     try {
       final uid = _storage.getUserId();
+
       if (uid == null) {
         SnackbarService.showWarning('User not logged in');
         return false;

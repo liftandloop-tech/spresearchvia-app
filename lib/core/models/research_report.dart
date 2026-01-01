@@ -14,10 +14,6 @@ class ResearchReport {
   final String? publishedDate;
   final String? executiveSummary;
   final List<String>? keyHighlights;
-  final int? pages;
-  final String? fileSize;
-  final String? researchTeam;
-  final String? language;
 
   ResearchReport({
     required this.id,
@@ -34,10 +30,6 @@ class ResearchReport {
     this.publishedDate,
     this.executiveSummary,
     this.keyHighlights,
-    this.pages,
-    this.fileSize,
-    this.researchTeam,
-    this.language,
   });
 
   bool get isPublished => publishedStatus == 'published';
@@ -62,10 +54,6 @@ class ResearchReport {
       publishedDate: json['createdAt']?.toString().split('T')[0],
       executiveSummary: json['description']?.toString(),
       keyHighlights: ['Key insights from ${json['title'] ?? 'report'}'],
-      pages: 20,
-      fileSize: '2.0 MB',
-      researchTeam: 'Research Team',
-      language: 'English',
     );
   }
 

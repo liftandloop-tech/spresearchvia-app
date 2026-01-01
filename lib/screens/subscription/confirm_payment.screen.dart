@@ -10,7 +10,11 @@ import '../../core/models/payment_callbacks.dart';
 import '../../controllers/user.controller.dart';
 import '../../core/routes/app_routes.dart';
 import '../../controllers/segment_plan.controller.dart';
-import '../../features/subscription/widgets/terms_section.dart';
+import '../../widgets/terms_section.dart';
+import 'widgets/detail_row.dart';
+import 'widgets/breakdown_row.dart';
+import 'widgets/payment_option.dart';
+import 'widgets/payment_icon_widget.dart';
 
 class ConfirmPaymentScreen extends StatefulWidget {
   const ConfirmPaymentScreen({super.key});
@@ -23,7 +27,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
   final RxBool agreedToTerms = false.obs;
   final RxBool authorizedPayment = false.obs;
   final RxBool isProcessing = false.obs;
-  final Rx<int> selectedPaymentMethod = 1.obs;
+  final RxInt selectedPaymentMethod = 1.obs;
   final customAmountController = TextEditingController();
 
   final RxDouble baseAmount = 0.0.obs;
@@ -130,7 +134,7 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
       }
 
       final verified = await segmentPlanController.verifySegmentPayment(
-        segmentId: _currentPaymentId!,
+        segmentId: selectedPlan!.id,
         razorpayOrderId: orderId,
         razorpayPaymentId: paymentId,
         razorpaySignature: signature,
@@ -199,6 +203,8 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
       debugPrint('DEBUG: Calling purchaseSegment...');
       final responseData = await segmentPlanController.purchaseSegment(
         segmentId: selectedPlan!.id,
+        totalAmount: totalPayable.value,
+        gstAmount: gstAmount.value,
       );
       debugPrint('DEBUG: purchaseSegment response: $responseData');
 
@@ -357,16 +363,19 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
                     ],
                   ),
                   const SizedBox(height: 12),
-                  _buildDetailRow('Duration', '1 Year'),
+                  DetailRow(label: 'Duration', value: '1 Year'),
                   const SizedBox(height: 8),
-                  _buildDetailRow('Base Price', selectedPlan?.amount ?? '₹0'),
-                  const SizedBox(height: 8),
-                  _buildDetailRow(
-                    'Per-Day Cost',
-                    selectedPlan?.perDay.split('\n')[0] ?? '',
+                  DetailRow(
+                    label: 'Base Price',
+                    value: selectedPlan?.amount ?? '₹0',
                   ),
                   const SizedBox(height: 8),
-                  _buildDetailRow('Trader Type', 'Professional Trader'),
+                  DetailRow(
+                    label: 'Per-Day Cost',
+                    value: selectedPlan?.perDay.split('\n')[0] ?? '',
+                  ),
+                  const SizedBox(height: 8),
+                  DetailRow(label: 'Trader Type', value: 'Professional Trader'),
                 ],
               ),
             ),
@@ -484,14 +493,14 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
             Obx(
               () => Column(
                 children: [
-                  _buildBreakdownRow(
-                    'Subtotal',
-                    _formatCurrency(baseAmount.value),
+                  BreakdownRow(
+                    label: 'Subtotal',
+                    value: _formatCurrency(baseAmount.value),
                   ),
                   const SizedBox(height: 12),
-                  _buildBreakdownRow(
-                    'GST (18%)',
-                    _formatCurrency(gstAmount.value),
+                  BreakdownRow(
+                    label: 'GST (18%)',
+                    value: _formatCurrency(gstAmount.value),
                   ),
                   const SizedBox(height: 12),
                   const Divider(color: AppTheme.borderGrey),
@@ -534,20 +543,32 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
               ),
             ),
             const SizedBox(height: 16),
-            _buildPaymentOption(1, 'Credit / Debit Card', Icons.credit_card),
-            const SizedBox(height: 12),
-            _buildPaymentOption(
-              2,
-              'UPI (Google Pay, Paytm, PhonePe)',
-              Icons.smartphone,
+            PaymentOption(
+              value: 1,
+              groupValue: selectedPaymentMethod,
+              title: 'Credit / Debit Card',
+              icon: Icons.credit_card,
             ),
             const SizedBox(height: 12),
-            _buildPaymentOption(3, 'Net Banking', Icons.account_balance),
+            PaymentOption(
+              value: 2,
+              groupValue: selectedPaymentMethod,
+              title: 'UPI (Google Pay, Paytm, PhonePe)',
+              icon: Icons.smartphone,
+            ),
             const SizedBox(height: 12),
-            _buildPaymentOption(
-              4,
-              'EMI / Wallet',
-              Icons.account_balance_wallet,
+            PaymentOption(
+              value: 3,
+              groupValue: selectedPaymentMethod,
+              title: 'Net Banking',
+              icon: Icons.account_balance,
+            ),
+            const SizedBox(height: 12),
+            PaymentOption(
+              value: 4,
+              groupValue: selectedPaymentMethod,
+              title: 'EMI / Wallet',
+              icon: Icons.account_balance_wallet,
             ),
             const SizedBox(height: 24),
 
@@ -590,9 +611,11 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildPaymentIcon('assets/icons/visa.png'),
+                      PaymentIconWidget(assetPath: 'assets/icons/visa.png'),
                       const SizedBox(width: 8),
-                      _buildPaymentIcon('assets/icons/mastercard.png'),
+                      PaymentIconWidget(
+                        assetPath: 'assets/icons/mastercard.png',
+                      ),
                       const SizedBox(width: 8),
                       const Icon(
                         Icons.lock,
@@ -619,124 +642,6 @@ class _ConfirmPaymentScreenState extends State<ConfirmPaymentScreen> {
             const SizedBox(height: 20),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildDetailRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 13,
-            color: AppTheme.textGrey,
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.primaryBlueDark,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildBreakdownRow(String label, String value) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: AppTheme.textBlack,
-          ),
-        ),
-        Text(
-          value,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.textBlack,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildPaymentOption(int value, String title, IconData icon) {
-    return Obx(
-      () => Container(
-        decoration: BoxDecoration(
-          border: Border.all(
-            color: selectedPaymentMethod.value == value
-                ? AppTheme.primaryBlue
-                : AppTheme.borderGrey,
-          ),
-          borderRadius: BorderRadius.circular(8),
-          color: selectedPaymentMethod.value == value
-              ? const Color(0xFFF0F9FF)
-              : Colors.white,
-        ),
-        child: ListTile(
-          onTap: () => selectedPaymentMethod.value = value,
-          leading: Icon(
-            selectedPaymentMethod.value == value
-                ? Icons.radio_button_checked
-                : Icons.radio_button_unchecked,
-            color: selectedPaymentMethod.value == value
-                ? AppTheme.primaryBlue
-                : AppTheme.textGrey,
-          ),
-          title: Row(
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color: selectedPaymentMethod.value == value
-                    ? AppTheme.primaryBlue
-                    : AppTheme.textGrey,
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Text(
-                  title,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.textBlack,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-          dense: true,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentIcon(String assetPath) {
-    return Container(
-      width: 32,
-      height: 20,
-      decoration: BoxDecoration(
-        color: Colors.grey[200],
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Center(
-        child: Icon(Icons.payment, size: 12, color: Colors.grey[600]),
       ),
     );
   }

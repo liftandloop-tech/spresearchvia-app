@@ -22,10 +22,6 @@ class MockApiService {
             'Growth in tech sector',
             'Emerging markets expansion',
           ],
-          pages: 25,
-          fileSize: '2.5 MB',
-          researchTeam: 'SP Research Team',
-          language: 'English',
         ),
       ];
     } else {

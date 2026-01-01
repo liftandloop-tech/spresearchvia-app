@@ -75,7 +75,10 @@ class SecureStorageService {
     if (_useSecureStorage) {
       return await _secureStorage.read(key: _userIdKey);
     } else {
-      return _regularStorage.read(_userIdKey);
+      final value = _regularStorage.read(_userIdKey);
+      if (value is String) return value;
+      if (value is Map && value['userId'] is String) return value['userId'];
+      return null;
     }
   }
 

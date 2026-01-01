@@ -31,6 +31,10 @@ abstract class ApiConfig {
   static const String updateSegments = '/serments/update-segments';
   static const String deleteSegments = '/serments/delete-segments';
   static const String listSegments = '/serments/list-segments';
+  static String segmentPaymentHistory(String userId) =>
+      '/serments/segment-payment-history/$userId';
+  static String getUserActiveSegment(String userId) =>
+      '/serments/user-active-segment?userId=$userId';
 
   static String getUserPlan(String userId) =>
       '/user/purchase/user-active-plan/$userId';
@@ -40,27 +44,41 @@ abstract class ApiConfig {
       '/user/purchase/expiry-reminders/$userId';
 
   static const String createReport = '/reports/create-report';
-  static const String reportList = '/reports/report-list';
+
+  static String reportList({
+    int page = 1,
+    int pageSize = 10,
+    String search = '',
+    String? startDate,
+    String? endDate,
+  }) {
+    final buffer = StringBuffer(
+      '/reports/report-list?page=$page&pageSize=$pageSize',
+    );
+    if (search.isNotEmpty) {
+      buffer.write('&search=${Uri.encodeComponent(search)}');
+    }
+    if (startDate != null && startDate.isNotEmpty) {
+      buffer.write('&startDate=${Uri.encodeComponent(startDate)}');
+    }
+    if (endDate != null && endDate.isNotEmpty) {
+      buffer.write('&endDate=${Uri.encodeComponent(endDate)}');
+    }
+    return buffer.toString();
+  }
+
+  static String userReportList(
+    String userId, {
+    String reportType = 'Trading calls',
+    int page = 1,
+    int pageSize = 10,
+  }) =>
+      '/reports/user-report-list/$userId?reportType=${Uri.encodeComponent(reportType)}&page=$page&pageSize=$pageSize';
+
   static String downloadReport(String reportId) =>
       '/reports/download-report/$reportId';
   static String deleteReport(String reportId) =>
       '/reports/report-delete/$reportId';
   static const String reportPublicStatusChange =
       '/reports/report-public-status-change';
-
-  static String reportListWithFilters({
-    String? category,
-    String search = '',
-    String? date,
-  }) {
-    final buffer = StringBuffer('/reports/report-list?');
-    if (category != null && category.isNotEmpty) {
-      buffer.write('category=$category&');
-    }
-    buffer.write('search=${Uri.encodeComponent(search)}&');
-    if (date != null && date.isNotEmpty) {
-      buffer.write('date=${Uri.encodeComponent(date)}');
-    }
-    return buffer.toString();
-  }
 }

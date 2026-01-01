@@ -3,7 +3,7 @@ import 'package:spresearchvia/screens/kyc/sebi_compilance_check.dart';
 import 'package:spresearchvia/screens/renewal/quick_renewal.screen.dart';
 import 'package:spresearchvia/screens/subscription/registration.screen.dart';
 import 'package:spresearchvia/screens/subscription/select_segment.screen.dart';
-import 'package:spresearchvia/controllers/segment_plan.controller.dart';
+import '../bindings/segment_plan_binding.dart';
 import '../../screens/subscription/receipt.screen.dart';
 import '../../screens/subscription/confirm_payment.screen.dart';
 import '../../screens/auth/get_started.dart';
@@ -92,9 +92,7 @@ class AppRoutes {
     GetPage(
       name: selectSegment,
       page: () => SelectSegmentScreen(),
-      binding: BindingsBuilder(() {
-        Get.put(SegmentPlanController());
-      }),
+      binding: SegmentPlanBinding(),
     ),
     GetPage(
       name: notificationSettings,

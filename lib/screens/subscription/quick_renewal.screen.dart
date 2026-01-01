@@ -12,6 +12,7 @@ import '../../widgets/payment_method_card.dart';
 import '../../widgets/benefits_card.dart';
 import '../../widgets/secure_payment_footer.dart';
 import '../../widgets/section_header.dart';
+import 'widgets/payment_method_section.dart';
 
 class QuickRenewalScreen extends StatefulWidget {
   const QuickRenewalScreen({super.key});
@@ -197,6 +198,11 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                   perDayCost: perDayCost,
                   totalPaid: totalPaid,
                   completionPercentage: completionPercentage,
+                  daysElapsed: (validityDays - daysRemaining).clamp(
+                    0,
+                    validityDays,
+                  ),
+                  totalDays: validityDays,
                   onRenew: _renewPlan,
                   onViewInvoice: () {},
                   tags: const ['Index Option', 'Trader'],
@@ -204,7 +210,10 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
                 const SizedBox(height: 20),
                 const SectionHeader(title: 'Payment Method'),
                 const SizedBox(height: 12),
-                _buildPaymentMethodSection(),
+                PaymentMethodSection(
+                  isLoadingPayment: isLoadingPayment,
+                  savedPaymentMethod: savedPaymentMethod,
+                ),
                 const SizedBox(height: 24),
                 Button(
                   title: 'Renew with One Click',
@@ -242,65 +251,6 @@ class _QuickRenewalScreenState extends State<QuickRenewalScreen> {
           ),
         );
       }),
-    );
-  }
-
-  Widget _buildPaymentMethodSection() {
-    if (isLoadingPayment) {
-      return Container(
-        padding: const EdgeInsets.all(24),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: const Center(child: CircularProgressIndicator()),
-      );
-    }
-
-    if (savedPaymentMethod == null) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: const Color(0xFFF7FAFC),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
-        ),
-        child: Column(
-          children: [
-            const Icon(Icons.payment, size: 48, color: AppTheme.textGrey),
-            const SizedBox(height: 12),
-            const Text(
-              'No payment method saved',
-              style: TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-                color: AppTheme.primaryBlueDark,
-              ),
-            ),
-            const SizedBox(height: 8),
-            TextButton.icon(
-              onPressed: () {
-                SnackbarService.showInfo(
-                  'Add payment method feature will be available soon',
-                );
-              },
-              icon: const Icon(Icons.add_circle_outline),
-              label: const Text('Add Payment Method'),
-            ),
-          ],
-        ),
-      );
-    }
-
-    return PaymentMethodCard(
-      paymentMethod: savedPaymentMethod!,
-      onTap: () {
-        SnackbarService.showInfo(
-          'Change payment method feature will be available soon',
-        );
-      },
     );
   }
 }

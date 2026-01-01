@@ -9,18 +9,21 @@ class CreateAccountController extends GetxController {
   final authController = Get.find<AuthController>();
   final fullNameController = TextEditingController();
   final phoneController = TextEditingController();
+  final emailController = TextEditingController();
   final isLoading = false.obs;
 
   @override
   void onClose() {
     fullNameController.dispose();
     phoneController.dispose();
+    emailController.dispose();
     super.onClose();
   }
 
   Future<void> handleContinue(BuildContext context) async {
     final name = fullNameController.text.trim();
     final phone = phoneController.text.trim();
+    final email = emailController.text.trim();
 
     final nameError = Validators.validateName(name, fieldName: 'Full name');
     if (nameError != null) {
@@ -34,18 +37,32 @@ class CreateAccountController extends GetxController {
       return;
     }
 
+    if (email.isNotEmpty) {
+      final emailError = Validators.validateEmail(email);
+      if (emailError != null) {
+        SnackbarService.showError(emailError, context: context);
+        return;
+      }
+    }
+
     isLoading.value = true;
 
     try {
       final success = await authController.createUser(
         fullName: name,
         phone: '91$phone',
+        email: email,
       );
 
       if (success) {
         Get.toNamed(
           AppRoutes.otpVerification,
-          arguments: {'phone': '91$phone', 'fullName': name, 'flow': 'signup'},
+          arguments: {
+            'phone': '91$phone',
+            'fullName': name,
+            'email': email,
+            'flow': 'signup',
+          },
         );
       }
     } catch (e) {

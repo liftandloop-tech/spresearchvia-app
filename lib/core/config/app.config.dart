@@ -4,6 +4,8 @@ enum FeatureFlag { paymentMockEnabled, debugLogsEnabled, crashReportingEnabled }
 
 class AppConfig {
   static const AppMode _mode = AppMode.production;
+  static final policyURL = Uri.parse('https://researchvia.in/privacy-policy/');
+  static final deleteURL = Uri.parse('https://researchvia.in/delete-account/');
 
   static const Map<FeatureFlag, bool> _defaultFlags = {
     FeatureFlag.paymentMockEnabled: false,

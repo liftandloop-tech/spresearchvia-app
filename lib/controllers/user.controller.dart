@@ -14,9 +14,27 @@ import '../services/snackbar.service.dart';
 class UserController extends GetxController {
   /// Update user from backend response and persist to storage
   Future<void> updateUserFromBackend(Map<String, dynamic> userData) async {
-    final user = User.fromJson(userData);
+    final clean = Map<String, dynamic>.from(userData);
+
+    // Preserve locally stored email if not present in backend response
+    if (clean['email'] == null || clean['email'].toString().isEmpty) {
+      final storedData = await _storage.getUserData();
+      if (storedData != null &&
+          storedData['email'] != null &&
+          storedData['email'].toString().isNotEmpty) {
+        clean['email'] = storedData['email'];
+      }
+    }
+
+    if (clean['_id'] == null &&
+        clean['id'] == null &&
+        clean['userId'] != null) {
+      clean['_id'] = clean['userId'];
+    }
+
+    final user = User.fromJson(clean);
     currentUser.value = user;
-    await _storage.saveUserData(userData);
+    await _storage.saveUserData(clean);
     await _storage.saveUserId(user.id);
   }
 
@@ -37,11 +55,14 @@ class UserController extends GetxController {
       final userData = await _storage.getUserData();
 
       if (userData != null && userData.isNotEmpty) {
-        if (userData.containsKey('tempUser')) {
-          currentUser.value = null;
-          return;
+        // Provide fallback for missing id using stored userId
+        final merged = Map<String, dynamic>.from(userData);
+        if ((merged['_id'] == null && merged['id'] == null) &&
+            merged['userId'] != null) {
+          merged['_id'] = merged['userId'];
         }
-        currentUser.value = User.fromJson(userData);
+
+        currentUser.value = User.fromJson(merged);
       } else {}
     } catch (e) {
       currentUser.value = null;

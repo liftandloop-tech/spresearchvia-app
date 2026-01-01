@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
 import '../core/models/plan.dart';
 import '../core/utils/responsive.dart';
+import 'info_column.dart';
 
 class ActivePlanCard extends StatelessWidget {
   const ActivePlanCard({
@@ -12,6 +13,8 @@ class ActivePlanCard extends StatelessWidget {
     required this.perDayCost,
     required this.totalPaid,
     required this.completionPercentage,
+    required this.daysElapsed,
+    required this.totalDays,
     this.onRenew,
     this.onViewInvoice,
     this.tags = const ['Index Option', 'Trader'],
@@ -23,6 +26,8 @@ class ActivePlanCard extends StatelessWidget {
   final int perDayCost;
   final double totalPaid;
   final int completionPercentage;
+  final int daysElapsed;
+  final int totalDays;
   final VoidCallback? onRenew;
   final VoidCallback? onViewInvoice;
   final List<String> tags;
@@ -30,28 +35,25 @@ class ActivePlanCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final responsive = Responsive.of(context);
-    return Stack(
-      children: [
-        Container(
-          margin: EdgeInsets.only(left: responsive.wp(1.5)),
-          decoration: BoxDecoration(
-            color: AppTheme.primaryBlue,
-            borderRadius: BorderRadius.circular(responsive.radius(16)),
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.backgroundWhite,
+        borderRadius: BorderRadius.circular(responsive.radius(16)),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.shadowMedium,
+            blurRadius: 20,
+            offset: const Offset(0, 4),
           ),
-        ),
-        Container(
-          margin: EdgeInsets.only(left: responsive.wp(1.5)),
-          decoration: BoxDecoration(
-            color: AppTheme.backgroundWhite,
-            borderRadius: BorderRadius.circular(responsive.radius(16)),
-            border: Border.all(color: AppTheme.borderGrey, width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: AppTheme.shadowMedium,
-                blurRadius: 20,
-                offset: const Offset(0, 4),
-              ),
-            ],
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(responsive.radius(16)),
+        child: Container(
+          decoration: const BoxDecoration(
+            border: Border(
+              left: BorderSide(color: AppTheme.primaryBlue, width: 6),
+            ),
           ),
           child: Padding(
             padding: responsive.padding(all: 20),
@@ -62,21 +64,20 @@ class ActivePlanCard extends StatelessWidget {
                   children: [
                     Expanded(
                       child: Text(
-                        plan.name.isNotEmpty
-                            ? plan.name
-                            : 'Index Option – Splendid Plan',
+                        plan.name,
                         style: TextStyle(
                           fontFamily: 'Poppins',
-                          fontSize: responsive.sp(18),
+                          fontSize: responsive.sp(16),
                           fontWeight: FontWeight.w600,
                           color: AppTheme.primaryBlueDark,
+                          overflow: TextOverflow.ellipsis,
                         ),
                       ),
                     ),
                     Container(
                       padding: responsive.padding(horizontal: 10, vertical: 5),
                       decoration: BoxDecoration(
-                        color: AppTheme.successGreen,
+                        color: AppTheme.successGreen.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(
                           responsive.radius(12),
                         ),
@@ -88,7 +89,7 @@ class ActivePlanCard extends StatelessWidget {
                             width: responsive.wp(1.5),
                             height: responsive.wp(1.5),
                             decoration: const BoxDecoration(
-                              color: AppTheme.textWhite,
+                              color: AppTheme.successGreen,
                               shape: BoxShape.circle,
                             ),
                           ),
@@ -99,7 +100,7 @@ class ActivePlanCard extends StatelessWidget {
                               fontFamily: 'Poppins',
                               fontSize: responsive.sp(12),
                               fontWeight: FontWeight.w500,
-                              color: AppTheme.textWhite,
+                              color: AppTheme.successGreen,
                             ),
                           ),
                         ],
@@ -108,113 +109,157 @@ class ActivePlanCard extends StatelessWidget {
                   ],
                 ),
                 SizedBox(height: responsive.hp(1.5)),
-                Wrap(
-                  spacing: responsive.wp(2),
-                  children: tags
-                      .map((tag) => _buildTag(tag, responsive))
-                      .toList(),
-                ),
-                SizedBox(height: responsive.hp(2.5)),
                 Row(
                   children: [
-                    Expanded(
-                      child: _buildInfoColumn(
-                        'Start Date',
-                        startDateText,
-                        responsive,
+                    if (tags.isNotEmpty)
+                      Container(
+                        padding: responsive.padding(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.infoBackground,
+                          borderRadius: BorderRadius.circular(
+                            responsive.radius(6),
+                          ),
+                        ),
+                        child: Text(
+                          tags[0],
+                          style: TextStyle(
+                            fontFamily: 'Poppins',
+                            fontSize: responsive.sp(12),
+                            fontWeight: FontWeight.w500,
+                            color: AppTheme.textGrey,
+                          ),
+                        ),
                       ),
-                    ),
-                    Expanded(
-                      child: _buildInfoColumn(
-                        'Expiry Date',
-                        expiryDateText,
-                        responsive,
+                    if (tags.length > 1) ...[
+                      SizedBox(width: responsive.wp(3)),
+                      Text(
+                        tags[1],
+                        style: TextStyle(
+                          fontFamily: 'Poppins',
+                          fontSize: responsive.sp(12),
+                          fontWeight: FontWeight.w500,
+                          color: AppTheme.textGrey,
+                        ),
                       ),
-                    ),
+                    ],
                   ],
                 ),
                 SizedBox(height: responsive.hp(2.5)),
-                Row(
-                  children: [
-                    Expanded(
-                      child: Container(
-                        padding: responsive.padding(all: 16),
-                        decoration: BoxDecoration(
-                          color: AppTheme.profileCardBackground,
-                          borderRadius: BorderRadius.circular(
-                            responsive.radius(8),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Per Day Cost',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsive.sp(12),
-                                color: AppTheme.textGrey,
-                              ),
-                            ),
-                            SizedBox(height: responsive.hp(0.5)),
-                            Text(
-                              '₹$perDayCost',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsive.sp(20),
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.primaryBlueDark,
-                              ),
-                            ),
-                          ],
+                Container(
+                  padding: responsive.padding(all: 16),
+                  decoration: BoxDecoration(
+                    color: AppTheme.infoBackground.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(responsive.radius(8)),
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: InfoColumn(
+                          label: 'Start Date',
+                          value: startDateText,
+                          responsive: responsive,
                         ),
                       ),
-                    ),
-                    SizedBox(width: responsive.wp(3)),
-                    Expanded(
-                      child: Container(
-                        padding: responsive.padding(all: 16),
-                        decoration: BoxDecoration(
-                          color: AppTheme.successGreen.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(
-                            responsive.radius(8),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Total Paid',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsive.sp(12),
-                                color: AppTheme.textGrey,
-                              ),
-                            ),
-                            SizedBox(height: responsive.hp(0.5)),
-                            Text(
-                              '₹${totalPaid.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsive.sp(20),
-                                fontWeight: FontWeight.w600,
-                                color: AppTheme.successGreen,
-                              ),
-                            ),
-                            SizedBox(height: responsive.hp(0.25)),
-                            Text(
-                              'Excl. GST',
-                              style: TextStyle(
-                                fontFamily: 'Poppins',
-                                fontSize: responsive.sp(10),
-                                color: AppTheme.textGrey,
-                              ),
-                            ),
-                          ],
+                      Expanded(
+                        child: InfoColumn(
+                          label: 'Expiry Date',
+                          value: expiryDateText,
+                          responsive: responsive,
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
+                ),
+                SizedBox(height: responsive.hp(2.5)),
+                IntrinsicHeight(
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(
+                        child: Container(
+                          padding: responsive.padding(all: 16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(
+                              responsive.radius(8),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Per Day Cost',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(12),
+                                  color: AppTheme.textGrey,
+                                ),
+                              ),
+                              SizedBox(height: responsive.hp(0.5)),
+                              Text(
+                                '₹$perDayCost',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(20),
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.primaryBlueDark,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      SizedBox(width: responsive.wp(3)),
+                      Expanded(
+                        child: Container(
+                          padding: responsive.padding(all: 16),
+                          decoration: BoxDecoration(
+                            color: AppTheme.successGreen.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(
+                              responsive.radius(8),
+                            ),
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                'Total Paid',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(12),
+                                  color: AppTheme.textGrey,
+                                ),
+                              ),
+                              SizedBox(height: responsive.hp(0.5)),
+                              Text(
+                                '₹${totalPaid.toStringAsFixed(0).replaceAllMapped(RegExp(r'(\d{1,3})(?=(\d{3})+(?!\d))'), (Match m) => '${m[1]},')}',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(20),
+                                  fontWeight: FontWeight.w600,
+                                  color: AppTheme.successGreen,
+                                ),
+                              ),
+                              SizedBox(height: responsive.hp(0.25)),
+                              Text(
+                                'Excl. GST',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(10),
+                                  color: AppTheme.textGrey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
                 SizedBox(height: responsive.hp(2.5)),
                 Row(
@@ -229,12 +274,12 @@ class ActivePlanCard extends StatelessWidget {
                       ),
                     ),
                     Text(
-                      '$completionPercentage% Complete',
+                      '$daysElapsed/$totalDays Days',
                       style: TextStyle(
                         fontFamily: 'Poppins',
                         fontSize: responsive.sp(12),
                         fontWeight: FontWeight.w600,
-                        color: AppTheme.primaryBlueDark,
+                        color: AppTheme.successGreen,
                       ),
                     ),
                   ],
@@ -251,106 +296,11 @@ class ActivePlanCard extends StatelessWidget {
                     ),
                   ),
                 ),
-                SizedBox(height: responsive.hp(2.5)),
-                Row(
-                  children: [
-                    if (onRenew != null)
-                      Expanded(
-                        child: ElevatedButton.icon(
-                          onPressed: onRenew,
-                          icon: Icon(Icons.refresh, size: responsive.sp(18)),
-                          label: const Text('Renew Plan'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.successGreen,
-                            foregroundColor: AppTheme.textWhite,
-                            padding: responsive.padding(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                responsive.radius(8),
-                              ),
-                            ),
-                            elevation: 0,
-                          ),
-                        ),
-                      ),
-                    if (onRenew != null && onViewInvoice != null)
-                      SizedBox(width: responsive.wp(3)),
-                    if (onViewInvoice != null)
-                      Expanded(
-                        child: OutlinedButton.icon(
-                          onPressed: onViewInvoice,
-                          icon: Icon(
-                            Icons.receipt_long,
-                            size: responsive.sp(18),
-                          ),
-                          label: const Text('View Invoice'),
-                          style: OutlinedButton.styleFrom(
-                            foregroundColor: AppTheme.primaryBlueDark,
-                            side: const BorderSide(
-                              color: AppTheme.primaryBlue,
-                              width: 1.5,
-                            ),
-                            padding: responsive.padding(vertical: 14),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                responsive.radius(8),
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
               ],
             ),
           ),
         ),
-      ],
-    );
-  }
-
-  Widget _buildTag(String text, Responsive responsive) {
-    return Container(
-      padding: responsive.padding(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppTheme.infoBackground,
-        borderRadius: BorderRadius.circular(responsive.radius(6)),
       ),
-      child: Text(
-        text,
-        style: TextStyle(
-          fontFamily: 'Poppins',
-          fontSize: responsive.sp(12),
-          fontWeight: FontWeight.w500,
-          color: AppTheme.primaryBlueDark,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildInfoColumn(String label, String value, Responsive responsive) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: responsive.sp(12),
-            color: AppTheme.textGrey,
-          ),
-        ),
-        SizedBox(height: responsive.hp(0.5)),
-        Text(
-          value,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: responsive.sp(14),
-            fontWeight: FontWeight.w600,
-            color: AppTheme.primaryBlueDark,
-          ),
-        ),
-      ],
     );
   }
 }

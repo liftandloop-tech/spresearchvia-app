@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import '../../core/models/research_report.dart';
 import 'widgets/report_header_card.dart';
 import 'widgets/key_highlight_item.dart';
-import 'widgets/report_detail_row.dart';
 import 'widgets/subscriber_badge.dart';
 import '../../widgets/button.dart';
 
@@ -39,7 +38,6 @@ class ResearchReportDetailScreen extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.all(16),
               child: ReportHeaderCard(
-                category: 'Market Analysis',
                 title: report.title,
                 publishedDate: report.publishedDate ?? 'Not available',
               ),
@@ -99,70 +97,6 @@ class ResearchReportDetailScreen extends StatelessWidget {
                 ],
               ),
             ),
-            const SizedBox(height: 12),
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.all(20),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'Report Details',
-                    style: TextStyle(
-                      fontFamily: 'Poppins',
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xff163174),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: const Color(0xffF9FAFB),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
-                      children: [
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ReportDetailRow(
-                                label: 'Pages',
-                                value: (report.pages ?? 0).toString(),
-                              ),
-                            ),
-                            Expanded(
-                              child: ReportDetailRow(
-                                label: 'File Size',
-                                value: report.fileSize ?? 'Unknown size',
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          children: [
-                            Expanded(
-                              child: ReportDetailRow(
-                                label: 'Research Team',
-                                value: report.researchTeam ?? 'Research Team',
-                              ),
-                            ),
-                            Expanded(
-                              child: ReportDetailRow(
-                                label: 'Language',
-                                value: report.language ?? 'English',
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
             const SizedBox(height: 20),
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 16),
@@ -174,16 +108,9 @@ class ResearchReportDetailScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Button(
-                    title: 'Download PDF',
+                    title: 'View PDF Report',
                     buttonType: ButtonType.green,
-                    icon: Icons.download,
-                    onTap: () {},
-                  ),
-                  const SizedBox(height: 12),
-                  Button(
-                    title: 'Download Excel',
-                    buttonType: ButtonType.greyBorder,
-                    icon: Icons.download,
+                    icon: Icons.visibility,
                     onTap: () {},
                   ),
                   const SizedBox(height: 20),

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/gestures.dart';
 import 'package:get/get.dart';
+import 'package:url_launcher/url_launcher.dart';
+import '../../core/config/app.config.dart';
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_theme.dart';
 import '../../widgets/button.dart';
@@ -73,9 +76,52 @@ class GetStartedScreen extends StatelessWidget {
                   },
                 ),
                 const SizedBox(height: 10),
-                const Text(
-                  'By continuing, you agree to our Terms & Privacy Policy.',
-                  style: TextStyle(color: AppTheme.textGrey, fontSize: 12),
+                RichText(
+                  textAlign: TextAlign.center,
+                  text: TextSpan(
+                    style: const TextStyle(
+                      color: AppTheme.textGrey,
+                      fontSize: 12,
+                      fontFamily: 'Poppins',
+                    ),
+                    children: [
+                      const TextSpan(text: 'By continuing, you agree to our '),
+                      TextSpan(
+                        text: 'Terms',
+                        style: const TextStyle(
+                          color: AppTheme.primaryBlue,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () async {
+                            if (await canLaunchUrl(AppConfig.policyURL)) {
+                              await launchUrl(
+                                AppConfig.policyURL,
+                                mode: LaunchMode.inAppBrowserView,
+                              );
+                            }
+                          },
+                      ),
+                      const TextSpan(text: ' & '),
+                      TextSpan(
+                        text: 'Privacy Policy',
+                        style: const TextStyle(
+                          color: AppTheme.primaryBlue,
+                          decoration: TextDecoration.underline,
+                        ),
+                        recognizer: TapGestureRecognizer()
+                          ..onTap = () async {
+                            if (await canLaunchUrl(AppConfig.policyURL)) {
+                              await launchUrl(
+                                AppConfig.policyURL,
+                                mode: LaunchMode.inAppBrowserView,
+                              );
+                            }
+                          },
+                      ),
+                      const TextSpan(text: '.'),
+                    ],
+                  ),
                 ),
               ],
             ),

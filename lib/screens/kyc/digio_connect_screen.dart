@@ -6,6 +6,9 @@ import '../../widgets/button.dart';
 import '../../controllers/digio.controller.dart';
 import '../../controllers/user.controller.dart';
 import '../../services/snackbar.service.dart';
+import '../../services/secure_storage.service.dart';
+import '../../core/models/user.dart';
+import 'package:flutter/foundation.dart';
 
 class DigioConnectScreen extends StatelessWidget {
   const DigioConnectScreen({super.key});
@@ -16,27 +19,60 @@ class DigioConnectScreen extends StatelessWidget {
     final userController = Get.find<UserController>();
 
     Future<void> onConnect() async {
-      final user = userController.currentUser.value;
-      final uid = await userController.userId;
+      var user = userController.currentUser.value;
+      var uid = await userController.userId;
+
+      final storage = SecureStorageService();
+
+      if (user == null || uid == null) {
+        final storedUserData = await storage.getUserData();
+        final storedUid = await storage.getUserId();
+
+        if (user == null &&
+            storedUserData != null &&
+            storedUserData.isNotEmpty) {
+          final merged = Map<String, dynamic>.from(storedUserData);
+          if ((merged['_id'] == null && merged['id'] == null) &&
+              merged['userId'] != null) {
+            merged['_id'] = merged['userId'];
+          }
+          try {
+            user = User.fromJson(merged);
+          } catch (e) {
+            if (kDebugMode) debugPrint('Failed to parse stored userData: $e');
+          }
+        }
+        uid ??= storedUid;
+      }
 
       if (user == null || uid == null) {
         SnackbarService.showWarning('User not logged in');
         return;
       }
 
-      if (user.email == null || user.email!.isEmpty) {
+      final name = user.fullName ?? user.name;
+
+      var email = user.email;
+      if (email == null || email.isEmpty) {
+        final storedUserData = await storage.getUserData();
+        email = storedUserData?['email'] as String?;
+      }
+
+      debugPrint('DEBUG: DigioConnectScreen - Found email: $email');
+
+      if (email == null || email.isEmpty) {
         SnackbarService.showWarning('Email not available');
         return;
       }
 
-      if (user.fullName == null || user.fullName!.isEmpty) {
+      if (name.isEmpty) {
         SnackbarService.showWarning('Name not available');
         return;
       }
 
       final response = await digioController.connectDigio(
-        email: user.email!,
-        name: user.fullName!,
+        email: email,
+        name: name,
         userId: uid,
       );
 

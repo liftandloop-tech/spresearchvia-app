@@ -69,6 +69,8 @@ class SegmentPlan {
 class SegmentPlanController extends GetxController {
   Future<Map<String, dynamic>?> purchaseSegment({
     required String segmentId,
+    required double totalAmount,
+    required double gstAmount,
   }) async {
     try {
       isLoading.value = true;
@@ -76,7 +78,12 @@ class SegmentPlanController extends GetxController {
       if (uid == null) throw Exception('User not logged in');
       final response = await _apiClient.post(
         ApiConfig.segmentPurchase,
-        data: {'userId': uid, 'segmentId': segmentId},
+        data: {
+          'userId': uid,
+          'segmentId': segmentId,
+          'amount': totalAmount,
+          'gstAmount': gstAmount,
+        },
       );
       if (response.statusCode == 200 || response.statusCode == 201) {
         final data = response.data;
@@ -114,6 +121,7 @@ class SegmentPlanController extends GetxController {
         final success = data['success'] ?? false;
         if (success) {
           SnackbarService.showSuccess('Payment verified successfully!');
+          await fetchActiveSegment(); // Refresh active segment
           return true;
         }
       }
@@ -135,6 +143,9 @@ class SegmentPlanController extends GetxController {
   final selectedPlanId = Rxn<String>();
   final error = Rxn<String>();
   final selectedSegment = 'SPARK'.obs;
+  final activeSegment = Rxn<Map<String, dynamic>>();
+  final hasActiveSegment = false.obs;
+  final isLoadingSegment = false.obs;
 
   Future<String?> get userId => _storage.getUserId();
 
@@ -142,6 +153,40 @@ class SegmentPlanController extends GetxController {
   void onInit() {
     super.onInit();
     fetchPlans();
+    fetchActiveSegment();
+  }
+
+  Future<void> fetchActiveSegment() async {
+    try {
+      isLoadingSegment.value = true;
+      final uid = await userId;
+      if (uid == null) {
+        hasActiveSegment.value = false;
+        return;
+      }
+
+      final url = ApiConfig.getUserActiveSegment(uid);
+      final response = await _apiClient.get(url);
+
+      if (response.statusCode == 200) {
+        final data = response.data;
+        if (data['data'] != null) {
+          activeSegment.value = data['data'];
+          hasActiveSegment.value = true;
+        } else {
+          activeSegment.value = null;
+          hasActiveSegment.value = false;
+        }
+      } else {
+        activeSegment.value = null;
+        hasActiveSegment.value = false;
+      }
+    } catch (e) {
+      activeSegment.value = null;
+      hasActiveSegment.value = false;
+    } finally {
+      isLoadingSegment.value = false;
+    }
   }
 
   Future<void> fetchPlans({String? category}) async {
@@ -193,5 +238,9 @@ class SegmentPlanController extends GetxController {
   void filterBySegment(String segment) {
     selectedSegment.value = segment;
     fetchPlans(category: segment);
+  }
+
+  Future<void> refreshActiveSegment() async {
+    await fetchActiveSegment();
   }
 }

@@ -1,12 +1,12 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:spresearchvia/core/config/app.config.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/theme/app_theme.dart';
+import '../core/theme/app_theme.dart';
+import 'checkbox_row.dart';
 
 class TermsSection extends StatelessWidget {
-  static final _policyURL = Uri.parse('https://researchvia.in/privacy-policy/');
-
   final bool agreedToTerms;
   final bool authorizedPayment;
   final ValueChanged<bool> onTermsChanged;
@@ -21,8 +21,8 @@ class TermsSection extends StatelessWidget {
   });
 
   Future<void> _launchPolicyURL() async {
-    if (await canLaunchUrl(_policyURL)) {
-      await launchUrl(_policyURL, mode: LaunchMode.externalApplication);
+    if (await canLaunchUrl(AppConfig.policyURL)) {
+      await launchUrl(AppConfig.policyURL, mode: LaunchMode.inAppBrowserView);
     }
   }
 
@@ -30,7 +30,7 @@ class TermsSection extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        _buildCheckboxRow(
+        CheckboxRow(
           value: agreedToTerms,
           onChanged: (value) => onTermsChanged(value ?? false),
           label: RichText(
@@ -66,7 +66,7 @@ class TermsSection extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 12),
-        _buildCheckboxRow(
+        CheckboxRow(
           value: authorizedPayment,
           onChanged: (value) => onAuthorizationChanged(value ?? false),
           label: const Text(
@@ -77,27 +77,6 @@ class TermsSection extends StatelessWidget {
               color: Colors.black87,
             ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCheckboxRow({
-    required bool value,
-    required ValueChanged<bool?> onChanged,
-    required Widget label,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Checkbox(
-          value: value,
-          onChanged: onChanged,
-          activeColor: AppTheme.primaryGreen,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        ),
-        Expanded(
-          child: Padding(padding: const EdgeInsets.only(top: 12), child: label),
         ),
       ],
     );

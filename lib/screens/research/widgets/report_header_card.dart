@@ -3,12 +3,10 @@ import 'package:flutter/material.dart';
 class ReportHeaderCard extends StatelessWidget {
   const ReportHeaderCard({
     super.key,
-    required this.category,
     required this.title,
     required this.publishedDate,
   });
 
-  final String category;
   final String title;
   final String publishedDate;
 
@@ -27,23 +25,6 @@ class ReportHeaderCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(6),
-            ),
-            child: Text(
-              category,
-              style: const TextStyle(
-                fontFamily: 'Poppins',
-                fontSize: 12,
-                fontWeight: FontWeight.w500,
-                color: Colors.white,
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
           Text(
             title,
             style: const TextStyle(

@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:spresearchvia/screens/renewal/widgets/current_plan_card.dart';
-import '../../controllers/plan_purchase.controller.dart';
+import 'package:intl/intl.dart';
+import '../../widgets/active_plan_card.dart';
+import '../../core/models/plan.dart';
+import '../../controllers/segment_plan.controller.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/routes/app_routes.dart';
 import '../../widgets/button.dart';
+import 'widgets/feature_item.dart';
 
 class ChoosePlanScreen extends StatefulWidget {
   const ChoosePlanScreen({super.key});
@@ -14,12 +17,12 @@ class ChoosePlanScreen extends StatefulWidget {
 }
 
 class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
-  final planController = Get.find<PlanPurchaseController>();
+  final segmentController = Get.put(SegmentPlanController());
 
   @override
   void initState() {
     super.initState();
-    planController.fetchUserPlan();
+    segmentController.fetchActiveSegment();
   }
 
   @override
@@ -85,8 +88,10 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
               const SizedBox(height: 24),
 
               Obx(() {
-                final plan = planController.currentPlan.value;
-                final isLoading = planController.isLoading.value;
+                final segment = segmentController.activeSegment.value;
+                final isLoading = segmentController.isLoadingSegment.value;
+                final hasActiveSegment =
+                    segmentController.hasActiveSegment.value;
 
                 if (isLoading) {
                   return const Center(
@@ -96,7 +101,7 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   );
                 }
 
-                if (plan == null) {
+                if (!hasActiveSegment || segment == null) {
                   return Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
@@ -120,12 +125,70 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   );
                 }
 
-                return CurrentPlanCard(
-                  description: plan.description ?? 'No description',
-                  planName: plan.name,
-                  price: plan.amount.toString(),
-                  validity: plan.validityDays.toString(),
-                  expiryDate: plan.expiryDate.toString(),
+                final segmentData =
+                    segment['segmentId'] as Map<String, dynamic>?;
+                final segmentName = segmentData?['segmentName'] ?? 'Segment';
+                final amountStr = segmentData?['amount']?.toString() ?? '0';
+                final amount = double.tryParse(amountStr) ?? 0;
+
+                // Parse validity handling "365 days" format
+                var validityStr = segmentData?['validity']?.toString() ?? '0';
+                final validity =
+                    int.tryParse(
+                      validityStr.replaceAll(RegExp(r'[^0-9]'), ''),
+                    ) ??
+                    0;
+
+                // Get daysCharge directly
+                final daysChargeStr =
+                    segmentData?['daysCharge']?.toString() ?? '0';
+                final daysCharge = int.tryParse(daysChargeStr) ?? 0;
+
+                final endDate = segment['expiryDate'] != null
+                    ? DateTime.parse(segment['expiryDate'])
+                    : DateTime.now().add(Duration(days: validity));
+
+                final startDate = segment['startDate'] != null
+                    ? DateTime.parse(segment['startDate'])
+                    : (segment['purchaseDate'] != null
+                          ? DateTime.parse(segment['purchaseDate'])
+                          : endDate.subtract(Duration(days: validity)));
+
+                final now = DateTime.now();
+                final totalDuration = endDate.difference(startDate).inDays;
+                final elapsed = now.difference(startDate).inDays;
+                var completion = 0;
+                if (totalDuration > 0) {
+                  completion = ((elapsed / totalDuration) * 100)
+                      .clamp(0, 100)
+                      .toInt();
+                }
+
+                final perDayCost = daysCharge > 0
+                    ? daysCharge
+                    : (validity > 0 ? (amount / validity).round() : 0);
+
+                return ActivePlanCard(
+                  plan: Plan(
+                    id: segment['id'] ?? '',
+                    name: segmentName,
+                    amount: amount,
+                    validity: validityStr,
+                  ),
+                  startDateText: DateFormat('dd MMM yyyy').format(startDate),
+                  expiryDateText: DateFormat('dd MMM yyyy').format(endDate),
+                  perDayCost: perDayCost,
+                  totalPaid: amount,
+                  completionPercentage: completion,
+                  daysElapsed: elapsed.clamp(0, totalDuration),
+                  totalDays: totalDuration,
+                  onRenew: () {
+                    // TODO: Implement renewal navigation
+                  },
+                  onViewInvoice: () {
+                    // TODO: Implement invoice view
+                  },
+                  tags: const ['Index Option', 'Trader'],
                 );
               }),
 
@@ -145,13 +208,16 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
               ),
               const SizedBox(height: 16),
 
-              _buildFeatureItem(Icons.show_chart, 'Advanced Analytics'),
+              FeatureItem(icon: Icons.show_chart, text: 'Advanced Analytics'),
               const SizedBox(height: 12),
-              _buildFeatureItem(Icons.all_inclusive, 'Unlimited Transactions'),
+              FeatureItem(
+                icon: Icons.all_inclusive,
+                text: 'Unlimited Transactions',
+              ),
               const SizedBox(height: 12),
-              _buildFeatureItem(Icons.headset_mic, 'Priority Support'),
+              FeatureItem(icon: Icons.headset_mic, text: 'Priority Support'),
               const SizedBox(height: 12),
-              _buildFeatureItem(Icons.security, 'Enhanced Security'),
+              FeatureItem(icon: Icons.security, text: 'Enhanced Security'),
               const SizedBox(height: 32),
 
               Button(
@@ -161,38 +227,11 @@ class _ChoosePlanScreenState extends State<ChoosePlanScreen> {
                   Get.toNamed(AppRoutes.selectSegment);
                 },
               ),
-              const SizedBox(height: 12),
-
-              const Text(
-                'Cancel anytime 7-day free trial',
-                style: TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 12,
-                  color: AppTheme.textGrey,
-                ),
-              ),
               const SizedBox(height: 20),
             ],
           ),
         ),
       ),
-    );
-  }
-
-  Widget _buildFeatureItem(IconData icon, String text) {
-    return Row(
-      children: [
-        Icon(icon, color: const Color(0xFF10B981), size: 20),
-        const SizedBox(width: 12),
-        Text(
-          text,
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            color: AppTheme.primaryBlueDark,
-          ),
-        ),
-      ],
     );
   }
 }

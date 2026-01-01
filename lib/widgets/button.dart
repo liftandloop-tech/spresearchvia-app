@@ -4,7 +4,7 @@ import '../core/theme/app_styles.dart';
 import '../core/constants/app_dimensions.dart';
 import '../core/utils/responsive.dart';
 
-enum ButtonType { green, blue, blueBorder, greyBorder }
+enum ButtonType { green, blue, blueBorder, greyBorder, red }
 
 class Button extends StatelessWidget {
   const Button({
@@ -65,6 +65,13 @@ class Button extends StatelessWidget {
         iconColor = AppTheme.textBlack;
         borderColor = AppTheme.borderGrey;
         break;
+
+      case ButtonType.red:
+        backgroundColor = onTap != null ? Colors.red : AppTheme.buttonDisabled;
+        textColor = AppTheme.textWhite;
+        iconColor = AppTheme.textWhite;
+        borderColor = null;
+        break;
     }
 
     final buttonHeight = responsive.spacing(AppDimensions.buttonHeight);
@@ -79,7 +86,10 @@ class Button extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(borderRadius),
           border: borderColor != null
-              ? Border.all(color: borderColor, width: AppDimensions.borderMedium)
+              ? Border.all(
+                  color: borderColor,
+                  width: AppDimensions.borderMedium,
+                )
               : null,
           boxShadow: buttonType == ButtonType.greyBorder
               ? null

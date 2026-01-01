@@ -22,28 +22,25 @@ abstract class SnackbarService {
     try {
       BuildContext? overlayContext;
 
-       
       overlayContext = getx.Get.overlayContext;
 
-       
       if (overlayContext == null && context != null) {
         overlayContext = context;
       }
 
-       
       if (overlayContext == null && context != null) {
         overlayContext = Navigator.maybeOf(context)?.context;
       }
 
       if (overlayContext == null) {
         debugPrint('SnackbarService: No overlay context available');
-         
+
         getx.Get.snackbar(
           title ?? "",
           message,
           backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
           colorText: Colors.white,
-          snackPosition: getx.SnackPosition.TOP,
+          snackPosition: getx.SnackPosition.BOTTOM,
           duration: duration,
           titleText: const SizedBox.shrink(),
         );
@@ -53,13 +50,13 @@ abstract class SnackbarService {
       final overlay = Overlay.maybeOf(overlayContext);
       if (overlay == null) {
         debugPrint('SnackbarService: No overlay found, using fallback');
-         
+
         getx.Get.snackbar(
           "",
           message,
           backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
           colorText: Colors.white,
-          snackPosition: getx.SnackPosition.TOP,
+          snackPosition: getx.SnackPosition.BOTTOM,
           duration: duration,
           titleText: const SizedBox.shrink(),
         );
@@ -81,14 +78,14 @@ abstract class SnackbarService {
       overlay.insert(_currentSnackbar!);
     } catch (e) {
       debugPrint('SnackbarService error: $e');
-       
+
       try {
         getx.Get.snackbar(
           "",
           message,
           backgroundColor: backgroundColor ?? AppTheme.primaryBlueDark,
           colorText: Colors.white,
-          snackPosition: getx.SnackPosition.TOP,
+          snackPosition: getx.SnackPosition.BOTTOM,
           duration: duration,
           titleText: const SizedBox.shrink(),
         );

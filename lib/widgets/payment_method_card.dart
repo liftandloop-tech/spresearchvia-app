@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../core/theme/app_theme.dart';
+import 'payment_icon.dart';
+import 'payment_details.dart';
 
 enum PaymentMethodType {
   visa,
@@ -131,9 +133,9 @@ class PaymentMethodCard extends StatelessWidget {
         ),
         child: Row(
           children: [
-            _buildPaymentIcon(),
+            PaymentIcon(paymentMethod: paymentMethod),
             const SizedBox(width: 12),
-            Expanded(child: _buildPaymentDetails()),
+            Expanded(child: PaymentDetails(paymentMethod: paymentMethod)),
             if (showCheckmark && paymentMethod.isSelected)
               const Icon(
                 Icons.check_circle,
@@ -143,143 +145,6 @@ class PaymentMethodCard extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-
-  Widget _buildPaymentIcon() {
-    if (paymentMethod.type == PaymentMethodType.upi) {
-      return Container(
-        width: 48,
-        height: 32,
-        decoration: BoxDecoration(
-          color: paymentMethod.brandColor,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Center(
-          child: Icon(
-            Icons.account_balance_wallet,
-            color: Colors.white,
-            size: 20,
-          ),
-        ),
-      );
-    }
-
-    if (paymentMethod.type == PaymentMethodType.netbanking) {
-      return Container(
-        width: 48,
-        height: 32,
-        decoration: BoxDecoration(
-          color: paymentMethod.brandColor,
-          borderRadius: BorderRadius.circular(6),
-        ),
-        child: const Center(
-          child: Icon(Icons.account_balance, color: Colors.white, size: 20),
-        ),
-      );
-    }
-
-    return Container(
-      width: 48,
-      height: 32,
-      decoration: BoxDecoration(
-        color: paymentMethod.brandColor,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Center(
-        child: Text(
-          paymentMethod.displayName,
-          style: TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: paymentMethod.type == PaymentMethodType.mastercard
-                ? 8
-                : 12,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildPaymentDetails() {
-    if (paymentMethod.type == PaymentMethodType.upi) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            paymentMethod.upiId ?? 'UPI ID',
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryBlueDark,
-            ),
-          ),
-          const SizedBox(height: 2),
-          const Text(
-            'UPI Payment',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              color: AppTheme.textGrey,
-            ),
-          ),
-        ],
-      );
-    }
-
-    if (paymentMethod.type == PaymentMethodType.netbanking) {
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            paymentMethod.bankName ?? 'Bank Account',
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryBlueDark,
-            ),
-          ),
-          const SizedBox(height: 2),
-          const Text(
-            'Net Banking',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              color: AppTheme.textGrey,
-            ),
-          ),
-        ],
-      );
-    }
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          '**** **** **** ${paymentMethod.lastFourDigits.padLeft(4, '0')}',
-          style: const TextStyle(
-            fontFamily: 'Poppins',
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-            color: AppTheme.primaryBlueDark,
-          ),
-        ),
-        if (paymentMethod.expiryDate != null) ...[
-          const SizedBox(height: 2),
-          Text(
-            'Expires ${paymentMethod.expiryDate}',
-            style: const TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 12,
-              color: AppTheme.textGrey,
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

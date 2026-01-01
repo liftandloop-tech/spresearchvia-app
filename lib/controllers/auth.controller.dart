@@ -8,6 +8,7 @@ import '../services/api_exception.service.dart';
 import '../services/secure_storage.service.dart';
 import '../services/snackbar.service.dart';
 import 'user.controller.dart';
+import 'segment_plan.controller.dart';
 import '../core/utils/validators.dart';
 
 class AuthController extends GetxController {
@@ -112,10 +113,11 @@ class AuthController extends GetxController {
   Future<bool> createUser({
     required String fullName,
     required String phone,
+    String? email,
   }) async {
     try {
       debugPrint(
-        'DEBUG: createUser called with name: $fullName, phone: $phone',
+        'DEBUG: createUser called with name: $fullName, phone: $phone, email: $email',
       );
       isLoading.value = true;
       final response = await _apiClient.post(
@@ -144,7 +146,7 @@ class AuthController extends GetxController {
             'userId': userId,
             'fullName': fullName,
             'phone': phone,
-            'tempUser': true,
+            if (email != null && email.isNotEmpty) 'email': email,
           });
           SnackbarService.showSuccess('OTP sent successfully!');
           return true;
@@ -200,15 +202,11 @@ class AuthController extends GetxController {
         if (message.contains('signed up successfully')) {
           final userData = data['data']?['existUser'];
           if (userData != null) {
-            final phone = userData['phone'];
-            if (phone != null) {
-              await _storage.saveUserData({
-                'userId': userId,
-                'phone': phone,
-                'userObject': userData['userObject'],
-                'tempUser': true,
-              });
-            }
+            // Save the full user object and update UserController
+            final userController = Get.isRegistered<UserController>()
+                ? Get.find<UserController>()
+                : Get.put(UserController());
+            await userController.updateUserFromBackend(userData);
             SnackbarService.showSuccess('KYC completed successfully');
             return true;
           }
@@ -272,6 +270,10 @@ class AuthController extends GetxController {
               ? Get.find<UserController>()
               : Get.put(UserController());
           await userController.updateUserFromBackend(userData);
+
+          if (Get.isRegistered<SegmentPlanController>()) {
+            Get.find<SegmentPlanController>().fetchActiveSegment();
+          }
         }
         return true;
       }
@@ -362,23 +364,17 @@ class AuthController extends GetxController {
         final token = data['data']?['token'];
         final userData = data['data']?['user'];
 
-        if (token != null) {
+        if (token != null && userData != null) {
           await _storage.saveAuthToken(token);
-        }
-        if (userData != null) {
-          final user = User.fromJson(userData);
-          currentUser.value = user;
-          await _storage.saveUserId(user.id);
-
-          await _storage.clearAuthData();
-          await _storage.saveAuthToken(token!);
-          await _storage.saveUserData(userData);
           await _storage.setLoggedIn(true);
 
-          if (Get.isRegistered<UserController>()) {
-            Get.find<UserController>().currentUser.value = user;
-          } else {
-            Get.put(UserController()).currentUser.value = user;
+          final userController = Get.isRegistered<UserController>()
+              ? Get.find<UserController>()
+              : Get.put(UserController());
+          await userController.updateUserFromBackend(userData);
+
+          if (Get.isRegistered<SegmentPlanController>()) {
+            Get.find<SegmentPlanController>().fetchActiveSegment();
           }
         }
         SnackbarService.showSuccess('MPIN set successfully');

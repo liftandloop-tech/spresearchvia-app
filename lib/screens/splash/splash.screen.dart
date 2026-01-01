@@ -49,11 +49,6 @@ class _SplashScreenState extends State<SplashScreen>
       final hasToken = await storage.hasAuthToken();
       final userData = await storage.getUserData();
 
-      if (userData != null && userData['tempUser'] != null) {
-        Get.offAllNamed(AppRoutes.getStarted);
-        return;
-      }
-
       if (isLoggedIn && hasToken && userData != null) {
         try {
           authController.currentUser.value = User.fromJson(userData);

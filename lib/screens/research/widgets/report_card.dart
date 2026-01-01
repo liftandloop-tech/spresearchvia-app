@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'category_chip.dart';
 
 class ReportCard extends StatelessWidget {
   const ReportCard({
@@ -8,18 +7,16 @@ class ReportCard extends StatelessWidget {
     required this.category,
     required this.date,
     required this.description,
-    required this.isDownloaded,
     required this.onTap,
-    required this.onDownload,
+    required this.onView,
   });
 
   final String title;
   final String category;
   final String date;
   final String description;
-  final bool isDownloaded;
   final VoidCallback onTap;
-  final VoidCallback onDownload;
+  final VoidCallback onView;
 
   @override
   Widget build(BuildContext context) {
@@ -52,19 +49,17 @@ class ReportCard extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 GestureDetector(
-                  onTap: onDownload,
+                  onTap: onView,
                   child: Container(
                     width: 40,
                     height: 40,
                     decoration: BoxDecoration(
-                      color: isDownloaded
-                          ? const Color(0xffF3F4F6)
-                          : const Color(0xff2C7F38),
+                      color: const Color(0xff2C7F38),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: Icon(
-                      Icons.download,
-                      color: isDownloaded ? const Color(0xff6B7280) : Colors.white,
+                    child: const Icon(
+                      Icons.visibility,
+                      color: Colors.white,
                       size: 20,
                     ),
                   ),
@@ -72,20 +67,14 @@ class ReportCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            Row(
-              children: [
-                CategoryChip(category: category),
-                const SizedBox(width: 12),
-                Text(
-                  date,
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 12,
-                    fontWeight: FontWeight.w400,
-                    color: Color(0xff6B7280),
-                  ),
-                ),
-              ],
+            Text(
+              date,
+              style: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 12,
+                fontWeight: FontWeight.w400,
+                color: Color(0xff6B7280),
+              ),
             ),
             const SizedBox(height: 12),
             Text(

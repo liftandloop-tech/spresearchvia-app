@@ -8,8 +8,10 @@ import '../../core/utils/responsive.dart';
 import 'widgets/subscription_card.dart';
 import '../../services/snackbar.service.dart';
 
-class SubscriptionHistoryController extends GetxController {
+class SubscriptionHistoryController extends GetxController
+    with GetSingleTickerProviderStateMixin {
   final planController = Get.put(PlanPurchaseController());
+  late TabController tabController;
 
   final RxString selectedFilter = 'Latest'.obs;
   final RxString selectedSection = 'Registration'.obs;
@@ -23,7 +25,8 @@ class SubscriptionHistoryController extends GetxController {
 
   final RxList<Map<String, dynamic>> segments = <Map<String, dynamic>>[].obs;
 
-  final RxBool isLoading = true.obs;
+  final RxBool isRegistrationLoading = true.obs;
+  final RxBool isSegmentLoading = false.obs;
   final RxBool isLoadingMore = false.obs;
 
   final RxInt registrationPage = 1.obs;
@@ -35,16 +38,27 @@ class SubscriptionHistoryController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    tabController = TabController(length: 2, vsync: this);
+    tabController.addListener(() {
+      if (tabController.index == 0) {
+        selectedSection.value = 'Registration';
+      } else {
+        selectedSection.value = 'Segment';
+        if (segments.isEmpty) {
+          loadSegmentHistory();
+        }
+      }
+    });
+
     loadRegistrationHistory();
 
     ever(selectedFilter, (_) => _applyFilter());
-    ever(selectedSection, (_) {
-      if (selectedSection.value == 'Registration') {
-        loadRegistrationHistory();
-      } else {
-        loadSegmentHistory();
-      }
-    });
+  }
+
+  @override
+  void onClose() {
+    tabController.dispose();
+    super.onClose();
   }
 
   Future<void> loadRegistrationHistory({
@@ -56,7 +70,7 @@ class SubscriptionHistoryController extends GetxController {
       if (!hasMoreRegistrations.value || isLoadingMore.value) return;
       isLoadingMore.value = true;
     } else {
-      isLoading.value = true;
+      isRegistrationLoading.value = true;
       registrationPage.value = 1;
       hasMoreRegistrations.value = true;
     }
@@ -138,7 +152,7 @@ class SubscriptionHistoryController extends GetxController {
       if (loadMore) {
         isLoadingMore.value = false;
       } else {
-        isLoading.value = false;
+        isRegistrationLoading.value = false;
       }
     }
   }
@@ -148,25 +162,43 @@ class SubscriptionHistoryController extends GetxController {
     int? pageSize,
     bool loadMore = false,
   }) async {
+    debugPrint('DEBUG: loadSegmentHistory called with loadMore: $loadMore');
     if (loadMore) {
       if (!hasMoreSegments.value || isLoadingMore.value) return;
       isLoadingMore.value = true;
     } else {
-      isLoading.value = true;
+      isSegmentLoading.value = true;
       segmentPage.value = 1;
       hasMoreSegments.value = true;
     }
 
     try {
+      final uid = await planController.userId;
+      debugPrint('DEBUG: User ID: $uid');
+      if (uid == null) {
+        SnackbarService.showError('User not logged in');
+        return;
+      }
+
       final currentPage = page ?? segmentPage.value;
       final currentPageSize = pageSize ?? this.pageSize;
+      debugPrint(
+        'DEBUG: Fetching page $currentPage with size $currentPageSize',
+      );
 
-      final data = await planController.fetchSegmentsListApi(
+      final data = await planController.fetchSegmentPaymentHistoryApi(
+        userId: uid,
         page: currentPage,
         pageSize: currentPageSize,
       );
 
-      final List items = data['data'] ?? [];
+      debugPrint('DEBUG: API Response keys: ${data.keys}');
+      debugPrint('DEBUG: API Response: $data');
+      final List items = data['segmentsPayment'] ?? [];
+      debugPrint('DEBUG: Items count: ${items.length}');
+      if (items.isNotEmpty) {
+        debugPrint('DEBUG: First item: ${items[0]}');
+      }
 
       if (items.isEmpty || items.length < currentPageSize) {
         hasMoreSegments.value = false;
@@ -182,13 +214,16 @@ class SubscriptionHistoryController extends GetxController {
       } else {
         segments.value = newSegments;
       }
+      debugPrint('DEBUG: Total segments loaded: ${segments.length}');
+      debugPrint('DEBUG: segments is now: $segments');
     } catch (e) {
+      debugPrint('DEBUG: Error loading segment history: $e');
       SnackbarService.showError('Failed to load segment history');
     } finally {
       if (loadMore) {
         isLoadingMore.value = false;
       } else {
-        isLoading.value = false;
+        isSegmentLoading.value = false;
       }
     }
   }
@@ -301,312 +336,316 @@ class SubscriptionHistoryScreen extends StatelessWidget {
     final responsive = Responsive.of(context);
     final controller = Get.put(SubscriptionHistoryController());
 
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
+    return Scaffold(
+      backgroundColor: AppTheme.backgroundWhite,
+      appBar: AppBar(
         backgroundColor: AppTheme.backgroundWhite,
-        appBar: AppBar(
-          backgroundColor: AppTheme.backgroundWhite,
-          elevation: 0,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
-            onPressed: () => Navigator.pop(context),
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppTheme.primaryBlueDark),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Subscription History',
+          style: TextStyle(
+            fontFamily: 'Poppins',
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: AppTheme.primaryBlueDark,
           ),
-          title: const Text(
-            'Subscription History',
-            style: TextStyle(
-              fontFamily: 'Poppins',
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: AppTheme.primaryBlueDark,
+        ),
+        centerTitle: true,
+        actions: [
+          Container(
+            margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            decoration: BoxDecoration(
+              border: Border.all(color: AppTheme.borderGrey, width: 1),
+              borderRadius: BorderRadius.circular(8),
             ),
-          ),
-          centerTitle: true,
-          actions: [
-            Container(
-              margin: const EdgeInsets.only(right: 16, top: 8, bottom: 8),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
-              decoration: BoxDecoration(
-                border: Border.all(color: AppTheme.borderGrey, width: 1),
-                borderRadius: BorderRadius.circular(8),
-              ),
-              child: Obx(
-                () => DropdownButton<String>(
-                  value: controller.selectedFilter.value,
-                  underline: const SizedBox(),
-                  icon: const Icon(
-                    Icons.keyboard_arrow_down,
-                    color: AppTheme.textGrey,
-                    size: 20,
-                  ),
-                  style: const TextStyle(
-                    fontFamily: 'Poppins',
-                    fontSize: 14,
-                    fontWeight: FontWeight.w500,
-                    color: AppTheme.textBlack,
-                  ),
-                  items: ['Latest', 'Oldest', 'Active', 'Expired'].map((
-                    String value,
-                  ) {
-                    return DropdownMenuItem<String>(
-                      value: value,
-                      child: Text(value),
-                    );
-                  }).toList(),
-                  onChanged: controller.changeFilter,
+            child: Obx(
+              () => DropdownButton<String>(
+                value: controller.selectedFilter.value,
+                underline: const SizedBox(),
+                icon: const Icon(
+                  Icons.keyboard_arrow_down,
+                  color: AppTheme.textGrey,
+                  size: 20,
                 ),
-              ),
-            ),
-          ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(48),
-            child: Container(
-              color: AppTheme.backgroundWhite,
-              child: TabBar(
-                indicatorColor: AppTheme.primaryBlue,
-                indicatorWeight: 3,
-                labelColor: AppTheme.primaryBlueDark,
-                unselectedLabelColor: AppTheme.textGrey,
-                labelStyle: const TextStyle(
-                  fontFamily: 'Poppins',
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                ),
-                unselectedLabelStyle: const TextStyle(
+                style: const TextStyle(
                   fontFamily: 'Poppins',
                   fontSize: 14,
                   fontWeight: FontWeight.w500,
+                  color: AppTheme.textBlack,
                 ),
-                tabs: const [
-                  Tab(text: 'Registration'),
-                  Tab(text: 'Segment'),
-                ],
-                onTap: (index) {
-                  controller.selectedTabIndex.value = index;
-                  controller.selectedSection.value = index == 0
-                      ? 'Registration'
-                      : 'Segment';
-                  if (index == 0) {
-                    controller.loadRegistrationHistory();
-                  } else {
-                    controller.loadSegmentHistory();
-                  }
-                },
+                items: ['Latest', 'Oldest', 'Active', 'Expired'].map((
+                  String value,
+                ) {
+                  return DropdownMenuItem<String>(
+                    value: value,
+                    child: Text(value),
+                  );
+                }).toList(),
+                onChanged: controller.changeFilter,
               ),
             ),
           ),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(48),
+          child: Container(
+            color: AppTheme.backgroundWhite,
+            child: TabBar(
+              controller: controller.tabController,
+              indicatorColor: AppTheme.primaryBlue,
+              indicatorWeight: 3,
+              labelColor: AppTheme.primaryBlueDark,
+              unselectedLabelColor: AppTheme.textGrey,
+              labelStyle: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontFamily: 'Poppins',
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+              ),
+              tabs: const [
+                Tab(text: 'Registration'),
+                Tab(text: 'Segment'),
+              ],
+            ),
+          ),
         ),
-        body: Obx(() {
-          if (controller.isLoading.value) {
-            return const Center(child: CircularProgressIndicator());
-          }
-          return Column(
-            children: [
-              const SizedBox(height: 12),
+      ),
+      body: Column(
+        children: [
+          const SizedBox(height: 12),
 
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 8,
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppTheme.backgroundWhite,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Row(
+                children: [
+                  Obx(
+                    () => Text(
+                      'Filter: ${controller.selectedFilter.value}',
+                      style: AppStyles.bodySmall.copyWith(
+                        color: AppTheme.textGrey,
+                      ),
+                    ),
                   ),
-                  decoration: BoxDecoration(
-                    color: AppTheme.backgroundWhite,
-                    borderRadius: BorderRadius.circular(8),
+                  const Spacer(),
+                  GestureDetector(
+                    onTap: () {},
+                    child: const Icon(
+                      Icons.search,
+                      color: AppTheme.primaryBlueDark,
+                    ),
                   ),
-                  child: Row(
-                    children: [
-                      Obx(
-                        () => Text(
-                          'Filter: ${controller.selectedFilter.value}',
-                          style: AppStyles.bodySmall.copyWith(
-                            color: AppTheme.textGrey,
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 12),
+          Expanded(
+            child: TabBarView(
+              controller: controller.tabController,
+              children: [
+                Obx(
+                  () => controller.isRegistrationLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : controller.registrations.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.history,
+                                size: responsive.sp(64),
+                                color: AppTheme.infoBorder,
+                              ),
+                              SizedBox(height: responsive.hp(2)),
+                              Text(
+                                'No registration history',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(16),
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textGrey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => controller.loadRegistrationHistory(),
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (ScrollNotification scrollInfo) {
+                              if (!controller.isLoadingMore.value &&
+                                  controller.hasMoreRegistrations.value &&
+                                  scrollInfo.metrics.pixels >=
+                                      scrollInfo.metrics.maxScrollExtent -
+                                          200) {
+                                controller.loadRegistrationHistory(
+                                  loadMore: true,
+                                );
+                              }
+                              return false;
+                            },
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount:
+                                  controller.registrations.length +
+                                  (controller.isLoadingMore.value ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == controller.registrations.length) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                final subscription =
+                                    controller.registrations[index];
+                                return SubscriptionCard(
+                                  paymentDate: subscription.paymentDate,
+                                  amountPaid: subscription.amountPaid,
+                                  validityDays: subscription.validityDays,
+                                  expiryDate: subscription.expiryDate,
+                                  headerStatus: subscription.headerStatus,
+                                  footerStatus: subscription.footerStatus,
+                                  onTap: () {
+                                    final raw =
+                                        controller.registrationsRaw[index];
+                                    _showReceiptDialog(
+                                      context,
+                                      subscription: subscription,
+                                      purchase: raw,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
                           ),
                         ),
-                      ),
-                      const Spacer(),
-                      GestureDetector(
-                        onTap: () {},
-                        child: const Icon(
-                          Icons.search,
-                          color: AppTheme.primaryBlueDark,
+                ),
+
+                Obx(
+                  () => controller.isSegmentLoading.value
+                      ? const Center(child: CircularProgressIndicator())
+                      : controller.segments.isEmpty
+                      ? Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.history,
+                                size: responsive.sp(64),
+                                color: AppTheme.infoBorder,
+                              ),
+                              SizedBox(height: responsive.hp(2)),
+                              Text(
+                                'No segment history',
+                                style: TextStyle(
+                                  fontFamily: 'Poppins',
+                                  fontSize: responsive.sp(16),
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.textGrey,
+                                ),
+                              ),
+                            ],
+                          ),
+                        )
+                      : RefreshIndicator(
+                          onRefresh: () => controller.loadSegmentHistory(),
+                          child: NotificationListener<ScrollNotification>(
+                            onNotification: (ScrollNotification scrollInfo) {
+                              if (!controller.isLoadingMore.value &&
+                                  controller.hasMoreSegments.value &&
+                                  scrollInfo.metrics.pixels >=
+                                      scrollInfo.metrics.maxScrollExtent -
+                                          200) {
+                                controller.loadSegmentHistory(loadMore: true);
+                              }
+                              return false;
+                            },
+                            child: ListView.builder(
+                              padding: const EdgeInsets.all(16),
+                              itemCount:
+                                  controller.segments.length +
+                                  (controller.isLoadingMore.value ? 1 : 0),
+                              itemBuilder: (context, index) {
+                                if (index == controller.segments.length) {
+                                  return const Center(
+                                    child: Padding(
+                                      padding: EdgeInsets.all(16.0),
+                                      child: CircularProgressIndicator(),
+                                    ),
+                                  );
+                                }
+                                final segment = controller.segments[index];
+                                debugPrint(
+                                  'DEBUG: Rendering segment $index: $segment',
+                                );
+
+                                final segmentIdRaw = segment['segmentId'];
+                                final segmentInfo = segmentIdRaw is Map
+                                    ? Map<String, dynamic>.from(segmentIdRaw)
+                                    : null;
+                                debugPrint('DEBUG: segmentInfo: $segmentInfo');
+
+                                // Pass the full ISO date string to SubscriptionCard for formatting
+                                final paymentDate =
+                                    segment['createdAt']?.toString() ?? '';
+
+                                double safeParse(dynamic value) {
+                                  if (value == null) return 0.0;
+                                  if (value is num) return value.toDouble();
+                                  if (value is String) {
+                                    return double.tryParse(value) ?? 0.0;
+                                  }
+                                  return 0.0;
+                                }
+
+                                final amountVal =
+                                    safeParse(segment['amount']) +
+                                    safeParse(segment['gstAmount']);
+                                final amount = amountVal.toStringAsFixed(2);
+
+                                final validity =
+                                    segmentInfo?['validity']?.toString() ?? '';
+
+                                return SubscriptionCard(
+                                  paymentDate: paymentDate,
+                                  amountPaid: '₹$amount',
+                                  validityDays: validity,
+                                  expiryDate: '',
+                                  headerStatus: SubscriptionStatus.success,
+                                  footerStatus: SubscriptionStatus.success,
+                                  onTap: () {
+                                    _showReceiptDialog(
+                                      context,
+                                      segment: segment,
+                                    );
+                                  },
+                                );
+                              },
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
                 ),
-              ),
-              const SizedBox(height: 12),
-              Expanded(
-                child: TabBarView(
-                  children: [
-                    (controller.registrations.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.history,
-                                  size: responsive.sp(64),
-                                  color: AppTheme.infoBorder,
-                                ),
-                                SizedBox(height: responsive.hp(2)),
-                                Text(
-                                  'No registration history',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: responsive.sp(16),
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.textGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () =>
-                                controller.loadRegistrationHistory(),
-                            child: NotificationListener<ScrollNotification>(
-                              onNotification: (ScrollNotification scrollInfo) {
-                                if (!controller.isLoadingMore.value &&
-                                    controller.hasMoreRegistrations.value &&
-                                    scrollInfo.metrics.pixels >=
-                                        scrollInfo.metrics.maxScrollExtent -
-                                            200) {
-                                  controller.loadRegistrationHistory(
-                                    loadMore: true,
-                                  );
-                                }
-                                return false;
-                              },
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount:
-                                    controller.registrations.length +
-                                    (controller.isLoadingMore.value ? 1 : 0),
-                                itemBuilder: (context, index) {
-                                  if (index ==
-                                      controller.registrations.length) {
-                                    return const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-                                  final subscription =
-                                      controller.registrations[index];
-                                  return SubscriptionCard(
-                                    paymentDate: subscription.paymentDate,
-                                    amountPaid: subscription.amountPaid,
-                                    validityDays: subscription.validityDays,
-                                    expiryDate: subscription.expiryDate,
-                                    headerStatus: subscription.headerStatus,
-                                    footerStatus: subscription.footerStatus,
-                                    onTap: () {
-                                      final raw =
-                                          controller.registrationsRaw[index];
-                                      _showReceiptDialog(
-                                        context,
-                                        subscription: subscription,
-                                        purchase: raw,
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          )),
-
-                    (controller.segments.isEmpty
-                        ? Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(
-                                  Icons.history,
-                                  size: responsive.sp(64),
-                                  color: AppTheme.infoBorder,
-                                ),
-                                SizedBox(height: responsive.hp(2)),
-                                Text(
-                                  'No segment history',
-                                  style: TextStyle(
-                                    fontFamily: 'Poppins',
-                                    fontSize: responsive.sp(16),
-                                    fontWeight: FontWeight.w500,
-                                    color: AppTheme.textGrey,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          )
-                        : RefreshIndicator(
-                            onRefresh: () => controller.loadSegmentHistory(),
-                            child: NotificationListener<ScrollNotification>(
-                              onNotification: (ScrollNotification scrollInfo) {
-                                if (!controller.isLoadingMore.value &&
-                                    controller.hasMoreSegments.value &&
-                                    scrollInfo.metrics.pixels >=
-                                        scrollInfo.metrics.maxScrollExtent -
-                                            200) {
-                                  controller.loadSegmentHistory(loadMore: true);
-                                }
-                                return false;
-                              },
-                              child: ListView.builder(
-                                padding: const EdgeInsets.all(16),
-                                itemCount:
-                                    controller.segments.length +
-                                    (controller.isLoadingMore.value ? 1 : 0),
-                                itemBuilder: (context, index) {
-                                  if (index == controller.segments.length) {
-                                    return const Center(
-                                      child: Padding(
-                                        padding: EdgeInsets.all(16.0),
-                                        child: CircularProgressIndicator(),
-                                      ),
-                                    );
-                                  }
-                                  final segment = controller.segments[index];
-                                  final paymentDate =
-                                      segment['createdAt'] != null
-                                      ? segment['createdAt'].toString().split(
-                                          ' ',
-                                        )[0]
-                                      : '';
-                                  final amount =
-                                      ((segment['amount'] ?? 0) +
-                                              (segment['gstAmount'] ?? 0))
-                                          .toString();
-                                  final validity =
-                                      segment['validity']?.toString() ?? '';
-
-                                  return SubscriptionCard(
-                                    paymentDate: paymentDate,
-                                    amountPaid: '₹$amount',
-                                    validityDays: validity,
-                                    expiryDate: '',
-                                    headerStatus: SubscriptionStatus.success,
-                                    footerStatus: SubscriptionStatus.success,
-                                    onTap: () {
-                                      _showReceiptDialog(
-                                        context,
-                                        segment: segment,
-                                      );
-                                    },
-                                  );
-                                },
-                              ),
-                            ),
-                          )),
-                  ],
-                ),
-              ),
-            ],
-          );
-        }),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

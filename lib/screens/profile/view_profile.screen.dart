@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../../controllers/view_profile.controller.dart';
+import '../../core/config/app.config.dart';
 import '../../core/theme/app_theme.dart';
 import '../../core/theme/app_styles.dart';
 import '../../core/routes/app_routes.dart';
 import 'widgets/profile.image.dart';
 import '../../widgets/state_selector.dart';
 import '../../widgets/title_field.dart';
+import '../../widgets/button.dart';
 
 class ViewProfileScreen extends StatelessWidget {
   const ViewProfileScreen({super.key});
@@ -174,15 +177,22 @@ class ViewProfileScreen extends StatelessWidget {
                 readOnly: true,
               ),
               const SizedBox(height: 15),
-              GestureDetector(
+              InkWell(
                 onTap: () {
                   Get.toNamed(AppRoutes.setMpin);
                 },
-                child: const SizedBox(
+                child: Container(
                   height: 60,
-                  child: Row(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundWhite,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.borderGrey),
+                  ),
+                  child: const Row(
                     children: [
                       Icon(Icons.key, size: 20, color: AppTheme.iconGrey),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Change Password',
@@ -198,18 +208,32 @@ class ViewProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
-              const SizedBox(height: 5),
-              GestureDetector(
-                onTap: () {},
-                child: const SizedBox(
+              const SizedBox(height: 10),
+              InkWell(
+                onTap: () async {
+                  if (await canLaunchUrl(AppConfig.policyURL)) {
+                    await launchUrl(
+                      AppConfig.policyURL,
+                      mode: LaunchMode.inAppBrowserView,
+                    );
+                  }
+                },
+                child: Container(
                   height: 60,
-                  child: Row(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  decoration: BoxDecoration(
+                    color: AppTheme.backgroundWhite,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppTheme.borderGrey),
+                  ),
+                  child: const Row(
                     children: [
                       Icon(
                         Icons.shield_outlined,
                         size: 20,
                         color: AppTheme.iconGrey,
                       ),
+                      SizedBox(width: 12),
                       Expanded(
                         child: Text(
                           'Privacy Settings',
@@ -225,6 +249,20 @@ class ViewProfileScreen extends StatelessWidget {
                   ),
                 ),
               ),
+              const SizedBox(height: 20),
+              Button(
+                title: 'Delete Account',
+                buttonType: ButtonType.red,
+                onTap: () async {
+                  if (await canLaunchUrl(AppConfig.deleteURL)) {
+                    await launchUrl(
+                      AppConfig.deleteURL,
+                      mode: LaunchMode.inAppBrowserView,
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 30),
             ],
           ),
         ),
