@@ -3,7 +3,7 @@ description: "SP ResearchVia"
 
 publish_to: "none"
 
-version: 2.6.3+11
+version: 2.7.0+14
 
 environment:
   sdk: ^3.8.1

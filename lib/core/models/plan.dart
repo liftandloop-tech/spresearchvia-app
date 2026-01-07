@@ -15,6 +15,7 @@ class Plan {
   final bool isActive;
   final bool isExpired;
   final bool isFailed;
+  final bool isPending;
 
   Plan({
     required this.id,
@@ -33,6 +34,7 @@ class Plan {
     this.isActive = false,
     this.isExpired = false,
     this.isFailed = false,
+    this.isPending = false,
   });
 
   double get cgstAmount => (amount * cgstPercent) / 100;
@@ -54,6 +56,7 @@ class Plan {
     final isExpired =
         json['isExpired'] == true || normalizedStatus == 'expired';
     final isFailed = json['isFailed'] == true || normalizedStatus == 'failed';
+    final isPending = normalizedStatus == 'pending';
 
     final validityVal = json['validity'];
     String validityStr = '';
@@ -93,6 +96,7 @@ class Plan {
       isActive: isActive,
       isExpired: isExpired,
       isFailed: isFailed,
+      isPending: isPending,
     );
   }
 
